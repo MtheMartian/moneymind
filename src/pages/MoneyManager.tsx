@@ -1,92 +1,82 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import '../css/moneymanager/table.css';
+import { TypeCustomTable } from '../types/custom-table-types';
 
-function EditTableCategory(props: {tableCategoryKey: string, tableMap: Map<string, {title: string, amount: number}>}){
-  const tableCategoryMap = useRef<Map<string, {title: string, amount: number}[]>>(new Map());
-  function categoryDeleteButtonHandler(): void{
-    props.tableMap.delete(props.tableCategoryKey);
-  }
-
+function CustomTableSubCategories(){
   return(
     <div>
-      <div>
-        <div>
-          <input type="text" defaultValue={props.tableMap.get(props.tableCategoryKey)!.title} />
-          <input type="text" defaultValue={props.tableMap.get(props.tableCategoryKey)!.amount} />
-          <button>X</button>
-          <button>Edit</button>
-        </div>
-      </div>
+
     </div>
   )
 }
 
-function CustomTableTop(props: {tableMap: Map<string, {title: string, amount: number}>, setTableBody: Function}){
+
+function CustomTableBody(props: {tableCategoryMap: TypeCustomTable["categoryMap"], categoryEntries: TypeCustomTable["categoryEntries"],
+                          toggleEdit: boolean}){
+  const [showSubCategories, setShowSubCategories] = useState<JSX.Element | null>(null);
+
+  function deleteButtonHandler(){
+    
+  }
+
+  return(
+    <div>
+      {props.categoryEntries.map((category, index) =>
+        <div data-id={category[0]} key={`cell${index}`}>
+          <div id={category[0]}>
+            <input type="text" defaultValue={category[1].category} disabled />
+            <input type="text" defaultValue={category[1].totalAmount} disabled />
+            {props.toggleEdit ? 
+            <div>
+              <button>X</button>
+              <button>{">"}</button>
+            </div>: null}
+          </div>
+          {showSubCategories}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function CustomTable(){
+  const tableCategoryMap = useRef<TypeCustomTable["categoryMap"]>(new Map());
+  const subCategoryMap = useRef<TypeCustomTable["subCategoryMap"]>(new Map());
+
+  const [categories, setCategories] = useState<TypeCustomTable["categoryEntries"]>([]);
+  const [subCategories, setSubCategories] = useState<TypeCustomTable["subCategoryEntries"]>([]);
+  const [toggleEdit, setToggleEdit] = useState<boolean>(false);
+
   const categoryInput = useRef<HTMLInputElement>(null);
   const amountInput = useRef<HTMLInputElement>(null);
 
-  function addButtonHandler(): void{
-    props.tableMap.set(`cell${props.tableMap.size}`, {title: categoryInput.current!.value,
-                                                        amount: Number(amountInput.current!.value)});
-    props.setTableBody(setTableBody());
+  function addCategoryButtonHandler(){
+    tableCategoryMap.current.set(`category${tableCategoryMap.current.size}`, 
+                                      {category: categoryInput.current!.value, totalAmount: Number(amountInput.current!.value)});
+
+    categoryInput.current!.value = amountInput.current!.value = "";
+    setCategories(prev => prev = Array.from(tableCategoryMap.current.entries()));
   }
 
-  function setTableBody(): JSX.Element{
-    const entries: [string, {title: string, amount: number}][] = Array.from(props.tableMap.entries());
-    return(
-      <div>
-        {entries.map((cell, index) =>
-          <div id={cell[0]} key={`${index}cell`}>
-            <p>{cell[1].title}</p>
-            <p>{cell[1].amount}</p>
-          </div>
-        )}
-      </div>
-    )
+  function editButtonHandler(){
+    if(toggleEdit){
+      setToggleEdit(prev => prev = false);
+    }
+    else{
+      setToggleEdit(prev => prev = true);
+    }
   }
 
   return(
     <div>
       <div>
-        <button>Daily</button>
-        <button>Weekly</button>
-        <button>Monthly</button>
-        <button>Yearly</button>
-      </div>
-      <div>
-        <input type="text" placeholder="Title" ref={categoryInput}/>
+        <input type="text" placeholder="Category" ref={categoryInput}/>
         <input type="text" placeholder="Amount" ref={amountInput}/>
-        <button onClick={addButtonHandler}>Add</button>
+        <button onClick={addCategoryButtonHandler}>Add</button>
+        <button onClick={editButtonHandler}>Edit</button>
       </div>
-    </div>
-  )
-}
-
-function CustomTableBottom(){
-  return(
-    <div>
-      <label>Total:</label>
-      <span>Total</span>
-      <label>Budget:</label>
-      <input type="text" placeholder="Budget" />
-      <label>Left:</label>
-      <span>Left</span>
-    </div>
-  )
-}
-
-function CustomTable() {
-  const tableMap = useRef<Map<string, {title: string, amount: number}>>(new Map());
-  const [tableBody, setTableBody] = useState<JSX.Element | null>(null);
-
-  return (
-    <div>
-      <CustomTableTop tableMap={tableMap.current} setTableBody={setTableBody} />
-      <div>
-        <span>Category</span>
-        <span>Amount</span>
-      </div>
-      {tableBody ? tableBody : <div>loading...</div>}
+      <CustomTableBody tableCategoryMap={tableCategoryMap.current} categoryEntries={categories} 
+                            toggleEdit={toggleEdit} />
     </div>
   )
 }
