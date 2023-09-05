@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, MouseEventHandler } from 'react';
 import '../css/moneymanager/table.css';
 import { TypeCustomTable } from '../types/custom-table-types';
 
@@ -12,11 +12,18 @@ function CustomTableSubCategories(){
 
 
 function CustomTableBody(props: {tableCategoryMap: TypeCustomTable["categoryMap"], categoryEntries: TypeCustomTable["categoryEntries"],
-                          toggleEdit: boolean}){
+                          toggleEdit: boolean, setCategories: Function}){
   const [showSubCategories, setShowSubCategories] = useState<JSX.Element | null>(null);
 
-  function deleteButtonHandler(){
-    
+  function deleteButtonHandler(e: React.SyntheticEvent<HTMLButtonElement, MouseEvent>){
+    const element: HTMLButtonElement = e.currentTarget;
+    const key: string | null = element.getAttribute("data-id");
+
+    if(key){
+      props.tableCategoryMap.delete(key);
+      console.log(...props.tableCategoryMap.entries());
+      props.setCategories(Array.from(props.tableCategoryMap.entries()));
+    }
   }
 
   return(
@@ -28,7 +35,7 @@ function CustomTableBody(props: {tableCategoryMap: TypeCustomTable["categoryMap"
             <input type="text" defaultValue={category[1].totalAmount} disabled />
             {props.toggleEdit ? 
             <div>
-              <button>X</button>
+              <button data-id={category[0]} onClick={deleteButtonHandler}>X</button>
               <button>{">"}</button>
             </div>: null}
           </div>
@@ -40,16 +47,18 @@ function CustomTableBody(props: {tableCategoryMap: TypeCustomTable["categoryMap"
 }
 
 function CustomTable(){
+  // Ref Variables
   const tableCategoryMap = useRef<TypeCustomTable["categoryMap"]>(new Map());
   const subCategoryMap = useRef<TypeCustomTable["subCategoryMap"]>(new Map());
+  const categoryInput = useRef<HTMLInputElement>(null);
+  const amountInput = useRef<HTMLInputElement>(null);
 
+  // States
   const [categories, setCategories] = useState<TypeCustomTable["categoryEntries"]>([]);
   const [subCategories, setSubCategories] = useState<TypeCustomTable["subCategoryEntries"]>([]);
   const [toggleEdit, setToggleEdit] = useState<boolean>(false);
 
-  const categoryInput = useRef<HTMLInputElement>(null);
-  const amountInput = useRef<HTMLInputElement>(null);
-
+  // Button Functions
   function addCategoryButtonHandler(){
     tableCategoryMap.current.set(`category${tableCategoryMap.current.size}`, 
                                       {category: categoryInput.current!.value, totalAmount: Number(amountInput.current!.value)});
@@ -67,6 +76,12 @@ function CustomTable(){
     }
   }
 
+  useEffect(()=>{
+    return()=>{
+      setCategories(prev => prev = []);
+    }
+  }, [])
+
   return(
     <div>
       <div>
@@ -76,7 +91,7 @@ function CustomTable(){
         <button onClick={editButtonHandler}>Edit</button>
       </div>
       <CustomTableBody tableCategoryMap={tableCategoryMap.current} categoryEntries={categories} 
-                            toggleEdit={toggleEdit} />
+                            toggleEdit={toggleEdit} setCategories={setCategories}/>
     </div>
   )
 }
