@@ -1,7 +1,7 @@
 type CustomTableTypes = {
-  categoryMap: Map<string, {category: string, totalAmount: number}>,
+  categoryMap: Map<string, React.JSX.Element>,
   subCategoryMap: Map<string, {subCategory: string, amount: number}>,
-  categoryEntries: [string, {category: string, totalAmount: number}][],
+  categoryEntries: React.JSX.Element[],
   subCategoryEntries: [string, {subCategory: string, amount: number}][]
 }
 

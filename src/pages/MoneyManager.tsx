@@ -11,9 +11,10 @@ function CustomTableSubCategories(){
 }
 
 
-function CustomTableBody(props: {tableCategoryMap: TypeCustomTable["categoryMap"], categoryEntries: TypeCustomTable["categoryEntries"],
-                          toggleEdit: boolean, setCategories: Function}){
+function CustomTableBody(props: {tableCategoryMap: TypeCustomTable["categoryMap"], toggleEdit: boolean}){
   const [showSubCategories, setShowSubCategories] = useState<JSX.Element | null>(null);
+  const [categories, setCategories] = useState<TypeCustomTable["categoryEntries"]>([]);
+  const [showInsertInputs, setShowInsertInputs] = useState<boolean>(false);
 
   function deleteButtonHandler(e: React.SyntheticEvent<HTMLButtonElement, MouseEvent>){
     const element: HTMLButtonElement = e.currentTarget;
@@ -22,26 +23,94 @@ function CustomTableBody(props: {tableCategoryMap: TypeCustomTable["categoryMap"
     if(key){
       props.tableCategoryMap.delete(key);
       console.log(...props.tableCategoryMap.entries());
-      props.setCategories(Array.from(props.tableCategoryMap.entries()));
+      setCategories(prev => prev = Array.from(props.tableCategoryMap.values()));
     }
+  }
+
+  // Check if map size is > 0 plus sign underneath category, else show inputs.
+
+  function InsertCategory(){
+    const categoryInput = useRef<HTMLInputElement>(null);
+    const amountInput = useRef<HTMLInputElement>(null);
+    const uId: string = uniqueId();
+
+    function addCategoryButtonHandler(){
+      props.tableCategoryMap.set(uId, <CategoryCells category={categoryInput.current!.value}
+                                                amount={Number(amountInput.current!.value)} uId={uId} />);
+  
+      categoryInput.current!.value = amountInput.current!.value = "";
+      setShowInsertInputs(prev => prev = false);
+      setCategories(prev => prev = Array.from(props.tableCategoryMap.values()));
+    }
+
+    return(
+      <div>
+        <input type="text" placeholder="Category" ref={categoryInput}/>
+        <input type="text" placeholder="Amount" ref={amountInput}/>
+        <button onClick={addCategoryButtonHandler}>Add</button>
+      </div>
+    )
+  }
+
+  function uniqueId(): string{
+    return Date.now().toString(36) + Math.ceil(Math.random() * 1000000).toString(36);
+  }
+
+  useEffect(()=>{
+    setCategories(prev => prev = Array.from(props.tableCategoryMap.values()));
+
+    return()=>{
+      setCategories(prev => prev = []);
+      setShowInsertInputs(prev => prev = false);
+    }
+
+  }, [props.tableCategoryMap, props.toggleEdit])
+
+  function displayInsertInputs(){
+    if(!showInsertInputs){
+      setShowInsertInputs(prev => prev = true);
+    }
+    else{
+      setShowInsertInputs(prev => prev = false);
+    }
+  }
+
+  function CategoryCells(props: {category: string, amount: number, uId: string}){
+    const [toggleEdit, setToggleEdit] = useState<boolean>(false);
+
+    function editCell(): void{
+      if(!toggleEdit){
+        setToggleEdit(prev => prev = true);
+      }
+      else{
+        setToggleEdit(prev => prev = false);
+      }
+    }
+
+    return(
+      <div data-id={props.uId}>
+        <div id={props.uId}>
+          <div onClick={editCell}>
+            <input type="text" defaultValue={props.category} />
+            <input type="text" defaultValue={props.amount} />
+          </div>
+          {toggleEdit ? 
+          <div>
+            <button data-id={props.uId} onClick={deleteButtonHandler}>X</button>
+            <button>{">"}</button>
+          </div>: null}
+        </div>
+        {showSubCategories}
+      </div>
+    )
   }
 
   return(
     <div>
-      {props.categoryEntries.map((category, index) =>
-        <div data-id={category[0]} key={`cell${index}`}>
-          <div id={category[0]}>
-            <input type="text" defaultValue={category[1].category} disabled />
-            <input type="text" defaultValue={category[1].totalAmount} disabled />
-            {props.toggleEdit ? 
-            <div>
-              <button data-id={category[0]} onClick={deleteButtonHandler}>X</button>
-              <button>{">"}</button>
-            </div>: null}
-          </div>
-          {showSubCategories}
-        </div>
-      )}
+      {props.tableCategoryMap.size < 1 ?  <InsertCategory /> : null}
+      {categories}
+      {props.tableCategoryMap.size < 1 ? null : <button onClick={displayInsertInputs}>{"+"}</button>}
+      {showInsertInputs ? <InsertCategory /> : null}
     </div>
   )
 }
@@ -50,23 +119,12 @@ function CustomTable(){
   // Ref Variables
   const tableCategoryMap = useRef<TypeCustomTable["categoryMap"]>(new Map());
   const subCategoryMap = useRef<TypeCustomTable["subCategoryMap"]>(new Map());
-  const categoryInput = useRef<HTMLInputElement>(null);
-  const amountInput = useRef<HTMLInputElement>(null);
 
   // States
-  const [categories, setCategories] = useState<TypeCustomTable["categoryEntries"]>([]);
   const [subCategories, setSubCategories] = useState<TypeCustomTable["subCategoryEntries"]>([]);
   const [toggleEdit, setToggleEdit] = useState<boolean>(false);
 
   // Button Functions
-  function addCategoryButtonHandler(){
-    tableCategoryMap.current.set(`category${tableCategoryMap.current.size}`, 
-                                      {category: categoryInput.current!.value, totalAmount: Number(amountInput.current!.value)});
-
-    categoryInput.current!.value = amountInput.current!.value = "";
-    setCategories(prev => prev = Array.from(tableCategoryMap.current.entries()));
-  }
-
   function editButtonHandler(){
     if(toggleEdit){
       setToggleEdit(prev => prev = false);
@@ -76,22 +134,12 @@ function CustomTable(){
     }
   }
 
-  useEffect(()=>{
-    return()=>{
-      setCategories(prev => prev = []);
-    }
-  }, [])
-
   return(
     <div>
       <div>
-        <input type="text" placeholder="Category" ref={categoryInput}/>
-        <input type="text" placeholder="Amount" ref={amountInput}/>
-        <button onClick={addCategoryButtonHandler}>Add</button>
         <button onClick={editButtonHandler}>Edit</button>
       </div>
-      <CustomTableBody tableCategoryMap={tableCategoryMap.current} categoryEntries={categories} 
-                            toggleEdit={toggleEdit} setCategories={setCategories}/>
+      <CustomTableBody tableCategoryMap={tableCategoryMap.current} toggleEdit={toggleEdit} />
     </div>
   )
 }
