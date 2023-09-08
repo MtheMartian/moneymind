@@ -23,7 +23,7 @@ function CustomTableBody(props: {tableCategoryMap: TypeCustomTable["categoryMap"
     if(key){
       props.tableCategoryMap.delete(key);
       console.log(...props.tableCategoryMap.entries());
-      setCategories(prev => prev = Array.from(props.tableCategoryMap.values()));
+      setCategories(prev => prev = Array.from(props.tableCategoryMap.entries()));
     }
   }
 
@@ -35,12 +35,11 @@ function CustomTableBody(props: {tableCategoryMap: TypeCustomTable["categoryMap"
     const uId: string = uniqueId();
 
     function addCategoryButtonHandler(){
-      props.tableCategoryMap.set(uId, <CategoryCells category={categoryInput.current!.value}
-                                                amount={Number(amountInput.current!.value)} uId={uId} />);
+      props.tableCategoryMap.set(uId, {categoryInput.current!.value, Number(amountInput.current!.value)});
   
       categoryInput.current!.value = amountInput.current!.value = "";
       setShowInsertInputs(prev => prev = false);
-      setCategories(prev => prev = Array.from(props.tableCategoryMap.values()));
+      setCategories(prev => prev = Array.from(props.tableCategoryMap.entries()));
     }
 
     return(
@@ -57,7 +56,7 @@ function CustomTableBody(props: {tableCategoryMap: TypeCustomTable["categoryMap"
   }
 
   useEffect(()=>{
-    setCategories(prev => prev = Array.from(props.tableCategoryMap.values()));
+    setCategories(prev => prev = Array.from(props.tableCategoryMap.entries()));
 
     return()=>{
       setCategories(prev => prev = []);
@@ -75,10 +74,13 @@ function CustomTableBody(props: {tableCategoryMap: TypeCustomTable["categoryMap"
     }
   }
 
-  function CategoryCells(props: {category: string, amount: number, uId: string}){
+  function CategoryCells(props: {category: string, amount: number, uId: string, 
+                          tableCategoryMap: TypeCustomTable["categoryMap"]}){
     const [toggleEdit, setToggleEdit] = useState<boolean>(false);
+    const categoryInput = useRef<HTMLInputElement>(null);
+    const amountInput = useRef<HTMLInputElement>(null);
 
-    function editCell(): void{
+    function showCellOptions(): void{
       if(!toggleEdit){
         setToggleEdit(prev => prev = true);
       }
@@ -87,17 +89,33 @@ function CustomTableBody(props: {tableCategoryMap: TypeCustomTable["categoryMap"
       }
     }
 
+    function editCell(e: React.SyntheticEvent<HTMLButtonElement, MouseEvent>): void{
+      const key: string = e.currentTarget.getAttribute("data-id")!;
+      const updatedElement: {category: string, totalAmount: number} = {}
+
+      props.tableCategoryMap.set(key, updatedElement);
+      showCellOptions();
+    }
+
+    useEffect(()=>{
+      setToggleEdit(prev => prev = false);
+      
+      return()=>{
+        setToggleEdit(prev => prev = false);
+      }
+    }, []);
+
     return(
       <div data-id={props.uId}>
         <div id={props.uId}>
-          <div onClick={editCell}>
-            <input type="text" defaultValue={props.category} />
-            <input type="text" defaultValue={props.amount} />
+          <div onClick={showCellOptions}>
+            <input type="text" defaultValue={props.category} ref={categoryInput} />
+            <input type="text" defaultValue={props.amount} ref={amountInput} />
           </div>
           {toggleEdit ? 
           <div>
             <button data-id={props.uId} onClick={deleteButtonHandler}>X</button>
-            <button>{">"}</button>
+            <button data-id={props.uId} onClick={editCell}>{">"}</button>
           </div>: null}
         </div>
         {showSubCategories}
@@ -108,8 +126,23 @@ function CustomTableBody(props: {tableCategoryMap: TypeCustomTable["categoryMap"
   return(
     <div>
       {props.tableCategoryMap.size < 1 ?  <InsertCategory /> : null}
-      {categories}
-      {props.tableCategoryMap.size < 1 ? null : <button onClick={displayInsertInputs}>{"+"}</button>}
+      {categories.map((category, index) =>
+      <div data-id={category[0]}>
+        <div id={category[0]}>
+          <div onClick={showCellOptions}>
+            <input type="text" defaultValue={props.category} ref={categoryInput} />
+            <input type="text" defaultValue={props.amount} ref={amountInput} />
+          </div>
+          {toggleEdit ? 
+          <div>
+            <button data-id={category[0]} onClick={deleteButtonHandler}>X</button>
+            <button data-id={category[0]} onClick={editCell}>{">"}</button>
+          </div>: null}
+        </div>
+        {index + 1 === categories.length ? null : <button onClick={displayInsertInputs}>{"+"}</button>}
+        {showSubCategories}
+      </div>
+      )}
       {showInsertInputs ? <InsertCategory /> : null}
     </div>
   )
