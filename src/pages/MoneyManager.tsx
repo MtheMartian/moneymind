@@ -10,14 +10,45 @@ function CustomTableSubCategories(){
   )
 }
 
+function CustomTableHeader(){
+  const [toggleEntry, setToggleEntry] = useState<boolean>(false);
+  const categoryInput = useRef<HTMLInputElement>(null);
+  const amountInput = useRef<HTMLInputElement>(null);
+
+  function addEntryToggle(){
+    if(toggleEntry){
+      setToggleEntry(prev => prev = false);
+    }
+    else{
+      setToggleEntry(prev => prev = true);
+    }
+  }
+
+  return(
+    <div>
+      {!toggleEntry ? <button onClick={addEntryToggle}>Add Entry</button> : 
+        <div>
+          <input type="text" placeholder="Category" ref={categoryInput} />
+          <input type="number" placeholder="Amount" ref={amountInput} />
+          <button>{">"}</button>
+          <button onClick={addEntryToggle}>Cancel</button>
+        </div>
+      }
+    </div>
+  )
+}
+
 
 function CustomTableBody(props: {tableCategoryMap: TypeCustomTable["categoryMap"]}){
   const [categories, setCategories] = useState<TypeCustomTable["categoryEntries"]>([]);
+  const categoryInput = useRef<HTMLInputElement>(null);
+  const amountInput = useRef<HTMLInputElement>(null);
+
 
   return(
     <div>
       {categories.map((category, index) =>
-        <div data-id={category[0]}>
+        <div data-id={category[0]} key={`cell${index}`}>
           <div>
             <input type="text" ref={categoryInput} />
             <input type="text" ref={amountInput} />
