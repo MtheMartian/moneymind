@@ -1,59 +1,43 @@
-import { useRef, useState, useEffect, MouseEventHandler } from 'react';
+import { useRef, useState, useEffect} from 'react';
 import '../css/moneymanager/table.css';
 import { TypeCustomTable } from '../types/custom-table-types';
 
-function CustomTableSubCategories(){
-  return(
-    <div>
-
-    </div>
-  )
+function uniqueId(): string{
+  return Date.now().toString(36) + Math.ceil(Math.random() * 1000000).toString(36);
 }
 
-function CustomTableHeader(){
-  const [toggleEntry, setToggleEntry] = useState<boolean>(false);
+function CustomTableCell(props: {categoryKey: string, tableCategoryMap: TypeCustomTable["categoryMap"]}){
+  const category = useRef<{category: string, totalAmount: number}>(props.tableCategoryMap.get(props.categoryKey)!);
   const categoryInput = useRef<HTMLInputElement>(null);
   const amountInput = useRef<HTMLInputElement>(null);
 
-  function addEntryToggle(){
-    if(toggleEntry){
-      setToggleEntry(prev => prev = false);
-    }
-    else{
-      setToggleEntry(prev => prev = true);
-    }
-  }
-
   return(
-    <div>
-      {!toggleEntry ? <button onClick={addEntryToggle}>Add Entry</button> : 
-        <div>
-          <input type="text" placeholder="Category" ref={categoryInput} />
-          <input type="number" placeholder="Amount" ref={amountInput} />
-          <button>{">"}</button>
-          <button onClick={addEntryToggle}>Cancel</button>
-        </div>
-      }
+    <div data-id={props.categoryKey}>
+      <div>
+        <input type="text" defaultValue={category.current.category} ref={categoryInput} />
+        <input type="text" defaultValue={category.current.totalAmount} ref={amountInput} />
+      </div>
     </div>
   )
 }
-
 
 function CustomTableBody(props: {tableCategoryMap: TypeCustomTable["categoryMap"]}){
-  const [categories, setCategories] = useState<TypeCustomTable["categoryEntries"]>([]);
-  const categoryInput = useRef<HTMLInputElement>(null);
-  const amountInput = useRef<HTMLInputElement>(null);
+  const [categoryKeys, setCategoryKeys] = useState<string[]>([]);
 
+  useEffect(()=>{
+    setCategoryKeys(prev => prev = Array.from(props.tableCategoryMap.keys()));
+    console.log(...props.tableCategoryMap.keys());
+
+    return()=>{
+      setCategoryKeys(prev => prev = []);
+    }
+
+  }, [props.tableCategoryMap])
 
   return(
     <div>
-      {categories.map((category, index) =>
-        <div data-id={category[0]} key={`cell${index}`}>
-          <div>
-            <input type="text" ref={categoryInput} />
-            <input type="text" ref={amountInput} />
-          </div>
-        </div>
+      {categoryKeys.map((categoryKey , index) =>
+        <CustomTableCell categoryKey={categoryKey} tableCategoryMap={props.tableCategoryMap} />
       )}
     </div>
   )
@@ -61,12 +45,13 @@ function CustomTableBody(props: {tableCategoryMap: TypeCustomTable["categoryMap"
 
 function CustomTable(){
   // Ref Variables
-  const tableCategoryMap = useRef<TypeCustomTable["categoryMap"]>(new Map());
-  const subCategoryMap = useRef<TypeCustomTable["subCategoryMap"]>(new Map());
+  const categoryInput = useRef<HTMLInputElement>(null);
+  const amountInput = useRef<HTMLInputElement>(null);
 
   // States
-  const [subCategories, setSubCategories] = useState<TypeCustomTable["subCategoryEntries"]>([]);
+  const [tableCategoryMap, setTableCategoryMap] = useState<TypeCustomTable["categoryMap"]>(new Map());
   const [toggleEdit, setToggleEdit] = useState<boolean>(false);
+  const [toggleEntry, setToggleEntry] = useState<boolean>(false);
 
   // Button Functions
   function editButtonHandler(){
@@ -78,12 +63,36 @@ function CustomTable(){
     }
   }
 
+  function addEntryToggle(): void{
+    if(toggleEntry){
+      setToggleEntry(prev => prev = false);
+    }
+    else{
+      setToggleEntry(prev => prev = true);
+    }
+  }
+
+  function addEntryButtonHandler(): void{
+    const uId: string = uniqueId();
+    tableCategoryMap.set(uId, {category: categoryInput.current!.value, totalAmount: Number(amountInput.current!.value)});
+    addEntryToggle();
+    console.log(...tableCategoryMap.values());
+    setTableCategoryMap(prev => prev = tableCategoryMap);
+  }
+
   return(
     <div>
-      <div>
-        <button onClick={editButtonHandler}>Edit</button>
-      </div>
-      <CustomTableBody tableCategoryMap={tableCategoryMap.current} toggleEdit={toggleEdit} />
+      <div id="custom-table-header">
+      {!toggleEntry ? <button onClick={addEntryToggle}>Add Entry</button> : 
+        <div>
+          <input type="text" placeholder="Category" ref={categoryInput} />
+          <input type="number" placeholder="Amount" ref={amountInput} />
+          <button onClick={addEntryButtonHandler}>{">"}</button>
+          <button onClick={addEntryToggle}>Cancel</button>
+        </div>
+      }
+    </div>
+      <CustomTableBody tableCategoryMap={tableCategoryMap} />
     </div>
   )
 }
