@@ -1,9 +1,11 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import MoneyManager from './pages/MoneyManager.tsx'
+import App from './App'
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+
+
+ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <MoneyManager />
+    <App />
   </React.StrictMode>,
 )
