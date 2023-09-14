@@ -1,36 +1,70 @@
 import { useRef, useState, useEffect, useMemo} from 'react';
 import '../css/moneymanager/table.css';
 import { TypeCustomTable } from '../types/custom-table-types';
+import { user } from '../data/user';
 
 function uniqueId(): string{
-  return Date.now().toString(36) + Math.ceil(Math.random() * 1000000).toString(36);
+  const prefix: string = "uniqueId-";
+  const timeStamp: string = Date.now().toString(36);
+  let counter: number = 0;
+  return `${prefix}${timeStamp}-${counter++}-${crypto.getRandomValues(new Uint32Array(1))[0].toString(36)}`;
+}
+
+function CustomTableBottom(props: {tableMap: TypeCustomTable["categoryMap"] | null, currUser: typeof user | null}){
+  const budgetInput = useRef<HTMLInputElement>(null);
+  const [balance, setBalance] = useState<number>(0);
+  const grandTotal = useMemo<number>(()=>{
+    let addThemUp: number = 0;
+    if(props.tableMap){
+      Array.from(props.tableMap.values()).forEach(entry =>{
+        addThemUp += entry.totalAmount;
+      });
+    }
+    return addThemUp;
+  }, [props.tableMap]);
+
+  useEffect(()=>{
+    setBalance(Number(budgetInput.current!.value) - grandTotal);
+
+    return()=>{
+      setBalance(prev => prev = 0);
+    }
+  }, [props.tableMap])
+
+  function amountLeft(): void{
+    const remainingBalance: number = Number(budgetInput.current!.value) - grandTotal;
+    setBalance(prev => prev = remainingBalance);
+  }
+
+  return(
+    <div id="custom-table-bottom">
+      <p>Total: {grandTotal}</p>
+      <input type="number" placeholder='Budget' defaultValue={props.currUser ? props.currUser.budget : 0} ref={budgetInput} onChange={amountLeft}/>
+      <p>Balance: {balance}</p>
+    </div>
+  )
 }
 
 function CustomTableBody(props: {tableMap: TypeCustomTable["categoryMap"] | null, 
-                          toggleEdit: boolean}){
-  const [categories, setCategories] = useState<TypeCustomTable["categoryEntries"]>([]);
+                          toggleEdit: boolean, setTableMap: Function}){
 
-  useEffect(()=>{
-    setCategories(Array.from(props.tableMap?.entries() || []));
-
-    return()=>{
-      setCategories(prev => prev = []);
-    }
-  }, [props.tableMap])
+  const categories = useMemo<TypeCustomTable["categoryEntries"]>(()=>{
+    return props.tableMap ? Array.from(props.tableMap!.entries()) : [];
+  }, [props.tableMap]);
 
   function deleteButtonHandler(e: React.SyntheticEvent<HTMLButtonElement, MouseEvent>): void{
     const id: string = e.currentTarget.getAttribute("data-id")!
     props.tableMap!.delete(id);
-    console.log(...props.tableMap!.entries());
-    setCategories(prev => prev.filter(category => category[0] !== id));
+    const newTableMap = new Map(props.tableMap);
+    props.setTableMap(newTableMap);
   }
 
   return(
     <div id="custom-table-body">
-      {categories.map((category, index) =>
-        <div data-id={category[0]} key={index}>
-          <input type="text" defaultValue={category[1].category} disabled />
-          <input type="text" defaultValue={category[1].totalAmount} disabled />
+      {categories.map((category) =>
+        <div className="custom-table-body-cells" data-id={category[0]} key={category[0]}>
+          <input type="text" defaultValue={category[1].category} disabled={props.toggleEdit ? undefined : true} />
+          <input type="text" defaultValue={category[1].totalAmount} disabled={props.toggleEdit ? undefined : true} />
           {props.toggleEdit ? 
           <div>
             <button data-id={category[0]} onClick={deleteButtonHandler}>X</button>
@@ -46,6 +80,7 @@ function CustomTable(){
   const [tableMap, setTableMap] = useState<TypeCustomTable["categoryMap"] | null>(null);
   const [toggleInsert, setToggleInsert] = useState<boolean>(false);
   const [toggleEdit, setToggleEdit] = useState<boolean>(false);
+  const [currentUser, setCurrentUser] = useState<typeof user | null>(null);
 
   const categoryInput = useRef<HTMLInputElement>(null);
   const amountInput = useRef<HTMLInputElement>(null);
@@ -57,6 +92,14 @@ function CustomTable(){
       setTableMap(prev => prev = null);
     }
   }, [])
+
+  useEffect(()=>{
+    setCurrentUser(prev => prev = user);
+
+    return()=>{
+      setCurrentUser(prev => prev = null);
+    }
+  },[])
 
   function displayInsert(): void{
     if(toggleInsert){
@@ -99,7 +142,8 @@ function CustomTable(){
         </div> :
         <button onClick={displayInsert}>Insert</button>}
       </div>
-      <CustomTableBody tableMap={tableMap} toggleEdit={toggleEdit} />
+      <CustomTableBody tableMap={tableMap} toggleEdit={toggleEdit} setTableMap={setTableMap} />
+      <CustomTableBottom tableMap={tableMap} currUser={currentUser}/>
     </div>
   )
 }
