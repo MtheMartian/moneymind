@@ -39,14 +39,14 @@ function CustomTableBottom(props: {tableMap: TypeCustomTable["categoryMap"] | nu
   return(
     <div id="custom-table-bottom">
       <p>Total: {grandTotal}</p>
-      <input type="number" placeholder='Budget' defaultValue={props.currUser ? props.currUser.budget : 0} ref={budgetInput} onChange={amountLeft}/>
+      <input type="number" placeholder='Budget' defaultValue={props.currUser?.budget} ref={budgetInput} onChange={amountLeft}/>
       <p>Balance: {balance}</p>
     </div>
   )
 }
 
 function CustomTableBody(props: {tableMap: TypeCustomTable["categoryMap"] | null, 
-                          toggleEdit: boolean, setTableMap: Function}){
+                          toggleEdit: boolean, setTableMap: Function, currentUser: typeof user | null}){
 
   const categories = useMemo<TypeCustomTable["categoryEntries"]>(()=>{
     return props.tableMap ? Array.from(props.tableMap!.entries()) : [];
@@ -59,12 +59,26 @@ function CustomTableBody(props: {tableMap: TypeCustomTable["categoryMap"] | null
     props.setTableMap(newTableMap);
   }
 
+  function highlightCell(amount: number): string{
+    const budget: number = props.currentUser!.budget;
+    if(amount >= budget * 0.2 && amount < budget * 0.5){
+      return "inset 1px 1px 10px rgba(255, 255, 0, 0.77)";
+    }
+    else if(amount >= budget * 0.5){
+      return "inset 1px 1px 5px rgba(255, 0, 0, 0.77)";
+    }
+
+    return "";
+  }
+
   return(
     <div id="custom-table-body">
       {categories.map((category) =>
-        <div className="custom-table-body-cells" data-id={category[0]} key={category[0]}>
-          <input type="text" defaultValue={category[1].category} disabled={props.toggleEdit ? undefined : true} />
-          <input type="text" defaultValue={category[1].totalAmount} disabled={props.toggleEdit ? undefined : true} />
+        <div data-id={category[0]} key={category[0]}>
+          <div className="custom-table-body-cells" style={props.currentUser ? {boxShadow: highlightCell(category[1].totalAmount)} : undefined}>
+            <input type="text" defaultValue={category[1].category} disabled={props.toggleEdit ? undefined : true} />
+            <input type="text" defaultValue={category[1].totalAmount} disabled={props.toggleEdit ? undefined : true} />
+          </div>
           {props.toggleEdit ? 
           <div>
             <button data-id={category[0]} onClick={deleteButtonHandler}>X</button>
@@ -142,7 +156,7 @@ function CustomTable(){
         </div> :
         <button onClick={displayInsert}>Insert</button>}
       </div>
-      <CustomTableBody tableMap={tableMap} toggleEdit={toggleEdit} setTableMap={setTableMap} />
+      <CustomTableBody tableMap={tableMap} toggleEdit={toggleEdit} setTableMap={setTableMap} currentUser={currentUser}/>
       <CustomTableBottom tableMap={tableMap} currUser={currentUser}/>
     </div>
   )
