@@ -12,16 +12,27 @@ function Layout(){
   )
 }
 
+function ManagerLayout(){
+  return(
+    <>
+    <Header />
+    <Outlet />
+    </>
+  )
+}
+
 function App(){
   const router = createBrowserRouter([{
     path: "/",
     element: <Layout />,
-    children:[
-      {
-        path:"/manager",
-        element: <MoneyManager />
-      }
-    ]
+  },
+  {
+    path: "/manager",
+    element: <ManagerLayout />,
+    children: [{
+      path: "/table",
+      element: <MoneyManager />
+    }]
   },
   {
     path: "/login",
