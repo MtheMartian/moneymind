@@ -1,6 +1,9 @@
-import { RouterProvider, Outlet, Router, createBrowserRouter } from "react-router-dom";
+import { RouterProvider, Outlet, createBrowserRouter } from "react-router-dom";
 import MoneyManager from "./pages/MoneyManager";
 import Header from "./components/navbar/Header";
+import MainHeader from "./components/main-header/MainHeader";
+import ManagerSideMenu from "./components/manager-aside/ManagerAside";
+import Footer from "./components/footer/Footer";
 
 function Layout(){
   return(
@@ -15,8 +18,10 @@ function Layout(){
 function ManagerLayout(){
   return(
     <>
-    <Header />
+    <MainHeader />
+    <ManagerSideMenu />
     <Outlet />
+    <Footer />
     </>
   )
 }
@@ -30,7 +35,7 @@ function App(){
     path: "/manager",
     element: <ManagerLayout />,
     children: [{
-      path: "/table",
+      path: "/manager/table",
       element: <MoneyManager />
     }]
   },

@@ -1,0 +1,8 @@
+#manager-side-menu{
+  min-width: 21em;
+  position: fixed;
+  left: 0;
+  top: 70px;
+  bottom: 0;
+  border-right: 2px solid rgb(153, 153, 153);
+}
