@@ -1,10 +1,10 @@
-import CustomTable from "./manager/custom-table/CustomTable";
+import CustomTable from "./custom-table/CustomTable";
 
 function MoneyManager(){
   return(
-    <main>
+    <>
       <CustomTable />
-    </main>
+    </>
   )
 }
 

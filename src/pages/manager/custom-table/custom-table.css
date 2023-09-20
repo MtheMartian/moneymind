@@ -1,0 +1,50 @@
+input, button{
+}
+
+#custom-table{
+  background-color: white;
+  color: rgb(34, 34, 34);
+  border-radius: 10px;
+  width: 80%;
+  height: 80%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  border: 2px solid rgb(102, 102, 102);
+}
+
+#custom-table-body{
+  width: 100%;
+  border: 1px solid brown;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.custom-table-body-cells{
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  border: 1px solid black;
+}
+
+.custom-table-body-cells input{
+  padding: 3px;
+  width: 100%;
+}
+
+
+#custom-table-bottom{
+  border-top: 2px solid black;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px;
+  width: 100%;
+}
+
+#custom-table-bottom input[type=number]{
+  appearance: textfield;
+}
