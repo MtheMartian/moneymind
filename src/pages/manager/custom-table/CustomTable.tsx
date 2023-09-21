@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect, useMemo} from 'react';
 import './custom-table.css';
+import '../manager.css';
 import { TypeCustomTable } from '../../../types/custom-table-types';
 import { user } from '../../../data/user';
 
@@ -73,18 +74,36 @@ function CustomTableBody(props: {tableMap: TypeCustomTable["categoryMap"] | null
 
   return(
     <div id="custom-table-body">
+      <div id="custom-table-body-header">
+        <div id="custom-table-body-search-container">
+          <img src="./src/assets/manager-icons/search-48px.svg" alt="search" className="manager-icons" />
+          <input type="text" placeholder="Search..." />
+        </div>
+        <button id="custom-table-body-export-button">
+          <img src="./src/assets/manager-icons/export-48px.svg" alt="export" className="manager-icons" />
+          <p>Export</p>
+        </button>
+      </div>
+      <div id="custom-table-body-sections">
+        <p>Category</p>
+        <p>Amount</p>
+      </div>
+      <div id="custom-table-body-cells">
       {categories.map((category) =>
-        <div data-id={category[0]} key={category[0]}>
-          <div className="custom-table-body-cells" style={props.currentUser ? {boxShadow: highlightCell(category[1].totalAmount)} : undefined}>
+        <div className="custom-table-body-entry" data-id={category[0]} key={category[0]}>
+          <div className="custom-table-body-cell" style={props.currentUser ? {boxShadow: highlightCell(category[1].totalAmount)} : undefined}>
             <input type="text" defaultValue={category[1].category} disabled={props.toggleEdit ? undefined : true} />
             <input type="text" defaultValue={category[1].totalAmount} disabled={props.toggleEdit ? undefined : true} />
           </div>
           {props.toggleEdit ? 
           <div>
-            <button data-id={category[0]} onClick={deleteButtonHandler}>X</button>
+            <button data-id={category[0]} onClick={deleteButtonHandler} className="custom-table-body-delete-button">
+              <img src="./src/assets/manager-icons/delete-48px.svg" alt="delete" className="manager-icons" />
+            </button>
           </div> : null}
         </div>
       )}
+      </div>
     </div>
   );
 }
@@ -143,18 +162,21 @@ function CustomTable(){
 
   return(
     <div id="custom-table">
-      <div id="custom-table-menu">
-        <button onClick={displayEditOptions}>Edit</button>
-        {toggleInsert ? 
-        <div id="custom-table-insert">
-          <input type="text" placeholder="Category" ref={categoryInput} />
-          <input type="number" placeholder="Amount" ref={amountInput} />
-          <div id="custom-table-insert-options">
-            <button onClick={insertButtonHandler}>{">"}</button>
-            <button onClick={displayInsert}>Cancel</button>
-          </div>
-        </div> :
-        <button onClick={displayInsert}>Insert</button>}
+      <div id="custom-table-title">
+        <h2>Money Manager</h2>
+        <div id="custom-table-menu">
+          <button onClick={displayEditOptions} className="manager-buttons">Edit</button>
+          {toggleInsert ? 
+          <div id="custom-table-insert">
+            <input type="text" placeholder="Category" ref={categoryInput} />
+            <input type="number" placeholder="Amount" ref={amountInput} />
+            <div id="custom-table-insert-options">
+              <button onClick={insertButtonHandler} className="manager-buttons">Add</button>
+              <button onClick={displayInsert} className="manager-buttons">Cancel</button>
+            </div>
+          </div> :
+          <button onClick={displayInsert} className="manager-buttons">Insert</button>}
+        </div>
       </div>
       <CustomTableBody tableMap={tableMap} toggleEdit={toggleEdit} setTableMap={setTableMap} currentUser={currentUser}/>
       <CustomTableBottom tableMap={tableMap} currUser={currentUser}/>

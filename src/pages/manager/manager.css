@@ -1,0 +1,24 @@
+button{
+  cursor: pointer;
+}
+
+.manager-buttons{
+  padding: 7px;
+  border-radius: 5px;
+  background-color: rgb(34, 129, 34);
+  min-width: 48px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.manager-buttons:hover{
+  opacity: 0.8;
+}
+
+.manager-buttons:active{
+  transform: scale(0.9);
+}
+
+.manager-icons{
+  width: 24px;
+}

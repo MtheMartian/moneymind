@@ -2,16 +2,87 @@ input, button{
 }
 
 #custom-table{
-  background-color: white;
   color: rgb(34, 34, 34);
-  border-radius: 10px;
-  width: 80%;
-  height: 80%;
+  width: 95%;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  padding-left: 5em;
+  padding-top: 1em;
+  gap: 7px;
+}
+
+#custom-table-title{
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  color: rgb(255, 255, 255);
+  gap: 3em;
+}
+
+#custom-table-title > h2{
+  font-size: calc(1vw + 1em);
+  font-weight: 500;
+}
+
+#custom-table-menu{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+#custom-table-insert{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+#custom-table-insert input{
+  background-color: white;
+  border-radius: 5px;
+  padding: 7px;
+  color: rgb(34, 34, 34);
+}
+
+#custom-table-insert > input[type=number]{
+  appearance: textfield;
+}
+
+#custom-table-insert-options{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+#custom-table-body-header{
+  display: flex; 
+  align-items: center;
   justify-content: space-between;
-  border: 2px solid rgb(102, 102, 102);
+  width: 100%;
+}
+
+#custom-table-body-search-container{
+  border-bottom: 1px solid rgba(102, 102, 102, 0.7);
+  padding-bottom: 3px;
+}
+
+#custom-table-body-search-container > img{
+  filter: contrast(0.3);
+}
+
+#custom-table-body-header div, #custom-table-body-header button{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#custom-table-body-export-button{
+  filter: brightness(0.4) invert(.7) sepia(.8) hue-rotate(100deg) saturate(300%);
 }
 
 #custom-table-body{
@@ -21,28 +92,79 @@ input, button{
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
+  background-color: white;
+  border: 2px solid rgb(102, 102, 102);
+  border-radius: 10px;
+  padding: 1em;
+  gap: 1em;
 }
 
-.custom-table-body-cells{
-  width: 100%;
+#custom-table-body-sections{
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  border: 1px solid black;
+  width: 70%;
 }
 
-.custom-table-body-cells input{
-  padding: 3px;
+.custom-table-body-entry{
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 11px;
+}
+
+#custom-table-body-cells{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 70%;
+  gap: 7px;
+}
+
+.custom-table-body-cell{
+  width: 70%;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  border: 1px solid rgb(102, 102, 102);
+  border-radius: 5px;
+  padding: 7px;
+  cursor: pointer;
+}
+
+.custom-table-body-cell:hover{
+  border: 1px solid rgb(87, 147, 236);
+}
+
+.custom-table-body-delete-button{
+  filter: brightness(0.9) invert(0.5) sepia(0.9) hue-rotate(-50deg) saturate(300%);
+}
+
+.custom-table-body-cell input{
+  padding: 7px;
+}
+
+.custom-table-body-cell input:enabled{
+  border-bottom: 1px solid rgb(49, 49, 49);
+  cursor: text !important;
+}
+
+.custom-table-body-cell > input + input:enabled{
+  border-left: 1px solid rgb(49, 49, 49);
+}
+
+.custom-table-body-cell > input + input{
+  text-align: center;
 }
 
 
 #custom-table-bottom{
-  border-top: 2px solid black;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 7px;
   width: 100%;
+  color: rgb(255, 255, 255);
 }
 
 #custom-table-bottom input[type=number]{
