@@ -1,6 +1,7 @@
 body{
   background-color: rgb(37, 43, 58);
   color: aliceblue;
+  font-family: Roboto, Arial;
 }
 
 #root{
@@ -11,7 +12,7 @@ body{
   margin-top: 70px;
   margin-left: 21em;
   display: grid;
-  place-items: center;
+  place-items: start;
   height: calc(100vh - 70px);
   width: calc(100vw - 21em);
 }
