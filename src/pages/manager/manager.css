@@ -2,6 +2,10 @@ button{
   cursor: pointer;
 }
 
+input[type=number]{
+  appearance: textfield;
+}
+
 .manager-buttons{
   padding: 7px;
   border-radius: 5px;

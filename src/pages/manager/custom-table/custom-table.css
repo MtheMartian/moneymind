@@ -144,6 +144,10 @@ input, button{
   padding: 7px;
 }
 
+.custom-table-body-cell input:disabled{
+  pointer-events: none;
+}
+
 .custom-table-body-cell input:enabled{
   border-bottom: 1px solid rgb(49, 49, 49);
   cursor: text !important;
