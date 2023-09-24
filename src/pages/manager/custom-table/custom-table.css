@@ -1,6 +1,11 @@
 input, button{
 }
 
+:root{
+  --custom-table-grid: repeat(2, 1fr);
+}
+
+/* ------- Custom Table (Main) ------- */
 #custom-table{
   color: rgb(34, 34, 34);
   width: 95%;
@@ -59,6 +64,21 @@ input, button{
   gap: 7px;
 }
 
+/* ------- Custom Table Body ------- */
+#custom-table-body{
+  width: 100%;
+  border: 1px solid brown;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  background-color: white;
+  border: 2px solid rgb(102, 102, 102);
+  border-radius: 10px;
+  padding: 1em;
+  gap: 1em;
+}
+
 #custom-table-body-header{
   display: flex; 
   align-items: center;
@@ -85,55 +105,46 @@ input, button{
   filter: brightness(0.4) invert(.7) sepia(.8) hue-rotate(100deg) saturate(300%);
 }
 
-#custom-table-body{
-  width: 100%;
-  border: 1px solid brown;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  background-color: white;
-  border: 2px solid rgb(102, 102, 102);
-  border-radius: 10px;
-  padding: 1em;
-  gap: 1em;
-}
-
-#custom-table-body-sections{
+#custom-table-body-content{
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  width: 70%;
-}
-
-.custom-table-body-entry{
+  grid-template-columns: repeat(auto-fill, minmax(20em, 1fr));
   width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 11px;
+  border: 1px solid red;
 }
 
 #custom-table-body-cells{
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  width: 70%;
   gap: 7px;
+  min-width: 100px;
+}
+
+#custom-table-body-sections{
+  display: grid;
+  grid-template-columns: var(--custom-table-grid);
+  padding: 7px;
+  width: 100%;
+}
+
+#custom-table-body-sections > p + p{
+  text-align: center;
 }
 
 .custom-table-body-cell{
-  width: 70%;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  border: 1px solid rgb(102, 102, 102);
+  grid-template-columns: var(--custom-table-grid);
+  border: 2px solid rgb(129, 129, 129);
   border-radius: 5px;
-  padding: 7px;
   cursor: pointer;
+  padding: 7px;
+  width: 100%;
+  position: relative;
 }
 
-.custom-table-body-cell:hover{
-  border: 1px solid rgb(87, 147, 236);
+.custom-table-body-cell:not(.disable-hover):hover{
+  border: 2px solid rgb(87, 147, 236);
 }
 
 .custom-table-body-delete-button{
@@ -141,7 +152,11 @@ input, button{
 }
 
 .custom-table-body-cell input{
-  padding: 7px;
+  width: inherit;
+}
+
+.custom-table-body-cell > input + input{
+  text-align: center;
 }
 
 .custom-table-body-cell input:disabled{
@@ -157,11 +172,30 @@ input, button{
   border-left: 1px solid rgb(49, 49, 49);
 }
 
-.custom-table-body-cell > input + input{
-  text-align: center;
+.custom-table-body-cell-options{
+  position: absolute;
+  right: -2em;
+  top: 0;
+  bottom: 0;
+  display: grid;
+  place-items: center;
 }
 
+/* Custom Table Body SubCategory */
+#add-subcategory-form{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  border: 2px solid rgb(102, 102, 102);
+  background-color: white;
+  border-radius: 5px;
+  padding: 7px;
+  min-height: 10em;
+}
 
+/* ------- Custom Table Bottom ------- */
 #custom-table-bottom{
   display: flex;
   align-items: center;
