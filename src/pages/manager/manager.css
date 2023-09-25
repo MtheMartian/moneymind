@@ -2,6 +2,20 @@ button{
   cursor: pointer;
 }
 
+h1{
+  font-size: calc(1vw + 1em);
+  font-weight: 800;
+}
+
+h2{
+  font-size: calc(1vw + 0.5em);
+  font-weight: 800;
+}
+
+.clickable{
+  cursor: pointer;
+}
+
 input[type=number]{
   appearance: textfield;
 }
@@ -20,11 +34,10 @@ input[type=number]{
 .manager-buttons{
   padding: 7px;
   border-radius: 5px;
-  background-color: rgb(34, 129, 34);
+  background-color: rgb(111, 252, 195);
   min-width: 48px;
   text-align: center;
-  font-weight: 500;
-  color: white;
+  font-weight: 700;
 }
 
 .manager-buttons:hover{

@@ -1,18 +1,14 @@
-input, button{
-}
-
+/* ------- Variables ------- */
 :root{
-  --custom-table-grid: repeat(2, 1fr);
+  --custom-table-grid: repeat(4, 1fr);
+  --custom-table-border: 2px solid rgb(102, 102, 102);
+  --custom-table-radius: 10px;
 }
 
 /* ------- Custom Table (Main) ------- */
 #custom-table{
-  color: rgb(34, 34, 34);
   width: 95%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  display: block;
   padding-left: 5em;
   padding-top: 1em;
   gap: 7px;
@@ -23,13 +19,8 @@ input, button{
   align-items: center;
   justify-content: flex-start;
   width: 100%;
-  color: rgb(255, 255, 255);
   gap: 3em;
-}
-
-#custom-table-title > h2{
-  font-size: calc(1vw + 1em);
-  font-weight: 500;
+  margin-bottom: 7px;
 }
 
 #custom-table-menu{
@@ -48,9 +39,8 @@ input, button{
 
 #custom-table-insert input{
   background-color: white;
-  border-radius: 5px;
+  border-radius: var(--custom-table-radius);
   padding: 7px;
-  color: rgb(34, 34, 34);
 }
 
 #custom-table-insert > input[type=number]{
@@ -67,15 +57,17 @@ input, button{
 /* ------- Custom Table Body ------- */
 #custom-table-body{
   width: 100%;
-  border: 1px solid brown;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
   background-color: white;
-  border: 2px solid rgb(102, 102, 102);
-  border-radius: 10px;
-  padding: 1em;
+  border: var(--custom-table-border);
+  border-bottom: none;
+  border-radius: var(--custom-table-radius);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  padding: 2.3em;
   gap: 1em;
 }
 
@@ -103,13 +95,14 @@ input, button{
 
 #custom-table-body-export-button{
   filter: brightness(0.4) invert(.7) sepia(.8) hue-rotate(100deg) saturate(300%);
+  font-weight: 700;
 }
 
 #custom-table-body-content{
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(20em, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(30em, 1fr));
   width: 100%;
-  border: 1px solid red;
+  gap: 10em;
 }
 
 #custom-table-body-cells{
@@ -124,8 +117,11 @@ input, button{
 #custom-table-body-sections{
   display: grid;
   grid-template-columns: var(--custom-table-grid);
-  padding: 7px;
+  padding: 11px;
   width: 100%;
+  background-color: rgba(150, 150, 150, 0.2);
+  border-radius: var(--custom-table-radius);
+  font-weight: 700;
 }
 
 #custom-table-body-sections > p + p{
@@ -135,16 +131,18 @@ input, button{
 .custom-table-body-cell{
   display: grid;
   grid-template-columns: var(--custom-table-grid);
-  border: 2px solid rgb(129, 129, 129);
-  border-radius: 5px;
-  cursor: pointer;
-  padding: 7px;
+  border-radius: var(--custom-table-radius);
+  padding: 1em;
   width: 100%;
   position: relative;
 }
 
+.non-subcategory-cell{
+  border: 2px solid rgba(129, 129, 129, 0.3);
+}
+
 .custom-table-body-cell:not(.disable-hover):hover{
-  border: 2px solid rgb(87, 147, 236);
+  border: 2px solid rgb(111, 252, 195);
 }
 
 .custom-table-body-delete-button{
@@ -182,6 +180,36 @@ input, button{
 }
 
 /* Custom Table Body SubCategory */
+
+#custom-table-body-subcategory{
+  display: block;
+}
+
+#custom-table-body-subcategory-header{
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1em;
+  margin-bottom: 7px;
+}
+
+#custom-table-body-subcategory-content{
+  border-radius: var(--custom-table-radius);
+  padding: 2.3em;
+  box-shadow: 1px 3px 10px rgba(102, 102, 102, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+}
+
+.subcategory-cell{
+  box-shadow: 1px 3px 10px rgba(102, 102, 102, 0.7);
+  border: 2px solid transparent;
+}
+
 #add-subcategory-form{
   display: flex;
   flex-direction: column;
@@ -190,7 +218,7 @@ input, button{
   gap: 7px;
   border: 2px solid rgb(102, 102, 102);
   background-color: white;
-  border-radius: 5px;
+  border-radius: var(--custom-table-radius);
   padding: 7px;
   min-height: 10em;
 }
@@ -200,11 +228,11 @@ input, button{
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 7px;
+  padding: 1em;
   width: 100%;
-  color: rgb(255, 255, 255);
-}
-
-#custom-table-bottom input[type=number]{
-  appearance: textfield;
+  background-color: rgb(111, 252, 195);
+  border-bottom-left-radius: var(--custom-table-radius);
+  border-bottom-right-radius: var(--custom-table-radius);
+  border: var(--custom-table-border);
+  border-top: none;
 }

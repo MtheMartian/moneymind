@@ -1,7 +1,8 @@
 body{
-  background-color: rgb(37, 43, 58);
-  color: aliceblue;
-  font-family: Roboto, Arial;
+  background-color: white;
+  color: rgb(44, 44, 44);;
+  font-family: Nunito, Arial;
+  font-weight: 600;
 }
 
 #root{
