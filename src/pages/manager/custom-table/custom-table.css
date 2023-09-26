@@ -14,13 +14,14 @@
   gap: 7px;
 }
 
-#custom-table-title{
+#custom-table-header{
   display: flex;
   align-items: center;
   justify-content: flex-start;
   width: 100%;
   gap: 3em;
   margin-bottom: 7px;
+  position: relative;
 }
 
 #custom-table-menu{
@@ -52,6 +53,13 @@
   align-items: center;
   justify-content: center;
   gap: 7px;
+}
+
+#custom-table-save-button{
+  position: absolute;
+  right: 7px;
+  padding-left: 14px;
+  padding-right: 14px;
 }
 
 /* ------- Custom Table Body ------- */
