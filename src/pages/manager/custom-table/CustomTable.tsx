@@ -1,8 +1,10 @@
-import { useRef, useState, useEffect, useMemo, SyntheticEvent, ChangeEvent, MouseEventHandler} from 'react';
+import { useRef, useState, useEffect, useMemo, 
+        SyntheticEvent, ChangeEvent, MouseEventHandler, useCallback} from 'react';
 import './custom-table.css';
 import '../manager.css';
 import { TypeCustomTable } from '../../../types/custom-table-types';
 import { user } from '../../../data/user';
+import { editInputs } from '../manager';
 
 function uniqueId(): string{
   const prefix: string = "uniqueId-";
@@ -11,14 +13,24 @@ function uniqueId(): string{
   return `${prefix}${timeStamp}-${counter++}-${crypto.getRandomValues(new Uint32Array(1))[0].toString(36)}`;
 }
 
+let oldData: {oldTableMap: TypeCustomTable["categoryMap"], oldSubMap: TypeCustomTable["subCategoryMap"], 
+              oldUserData: typeof user} = {
+  oldTableMap: new Map(),
+  oldSubMap: new Map(),
+  oldUserData: {...user}
+}
+
 function CustomTableBottom(props: {tableMap: TypeCustomTable["categoryMap"] | null, currUser: typeof user | null,
-                            setTableMap: Function}){
+                            setTableMap: Function, setCurrentUser: Function}){
   // ******* States ******* //
   const [balance, setBalance] = useState<number>(0);
-  const [budgetInputEntered, setBudgetInputEntered] = useState<string>("0");
+  const [budgetInputValue, setBudgetInputValue] = useState<string>("0");
 
   // ******* References ******* //
   const budgetInput = useRef<HTMLInputElement>(null);
+
+  // ******* Callbacks ******* //
+  
 
   // ******* Memo ******* //
   const grandTotal = useMemo<number>(()=>{
@@ -31,52 +43,36 @@ function CustomTableBottom(props: {tableMap: TypeCustomTable["categoryMap"] | nu
     return addThemUp;
   }, [props.tableMap]);
 
-  // ******* Functions ******* //
-  function amountLeft(): void{
-    const remainingBalance: number = Number(budgetInput.current!.value) - grandTotal;
-    setBalance(prev => prev = remainingBalance);
-  }
+  // ******* Input Handlers ******* //
+  function updateInput(e: ChangeEvent<HTMLInputElement>): void{
+    const newMap = new Map(props.tableMap);
+    const inputs: string = editInputs(e, budgetInputValue, "number");
 
-  function editInputs(e: ChangeEvent<HTMLInputElement>): void{
-    let input: CompositionEvent = e.nativeEvent as CompositionEvent;
-    let budgetStr: string = budgetInputEntered;
-    const newMap = new Map(props.tableMap!);
-    if(input.data === null){
-      budgetStr = budgetStr.slice(0, -1);
-      setBudgetInputEntered(prev => prev = budgetStr);
-    }
-    else if(input.data === " " || input.data === ","){
-      budgetStr = budgetStr + ".";
-      setBudgetInputEntered(prev => prev = budgetStr);
-    }
-    else{
-      budgetStr = budgetStr + input.data;
-      setBudgetInputEntered(prev => prev = budgetStr);
-    }
-    
-    amountLeft();
-    props.setTableMap(newMap);
+    setBudgetInputValue(prev => prev = inputs);
   }
 
   // ******* UseEffects ******* //
   useEffect(()=>{
     if(props.currUser){
-      setBudgetInputEntered(prev => prev = props.currUser!.budget.toString());
+      setBudgetInputValue(prev => prev = String(props.currUser!.budget));
     }
 
     return()=>{
-      setBudgetInputEntered(prev => prev = "0");
+      setBudgetInputValue(prev => prev = "0");
     }
   }, [props.currUser])
 
   useEffect(()=>{
-    console.log(budgetInputEntered);
-    setBalance(Number(budgetInput.current!.value) - grandTotal);
+    const remaining: number = Number(budgetInputValue) - grandTotal;
+    setBalance(prev => prev = remaining);
+    if(props.currUser){
+      props.setCurrentUser({...props.currUser!, budget: Number(budgetInputValue)});
+    }
 
     return()=>{
       setBalance(prev => prev = 0);
     }
-  }, [props.tableMap])
+  }, [budgetInputValue])
 
   return(
     <div id="custom-table-bottom">
@@ -84,8 +80,8 @@ function CustomTableBottom(props: {tableMap: TypeCustomTable["categoryMap"] | nu
       <div>
         <label style={{fontWeight: 700}}>Budget:</label>
         <input type="text" inputMode="numeric" pattern='[0-9]*'
-                placeholder='Budget' value={budgetInputEntered} 
-                ref={budgetInput} onChange={editInputs} />
+                placeholder='Budget' value={budgetInputValue} 
+                ref={budgetInput} onChange={updateInput} />
       </div>
       <p><span style={{fontWeight: 700}}>Balance:</span> {balance}</p>
     </div>
@@ -221,6 +217,9 @@ function CustomTableBodyCell(props:{id: string, category: string, amount: number
                               setTableMap: Function, currentUser: typeof user | null, 
                               displaySubCategories: MouseEventHandler<HTMLDivElement>}){
 
+  const [amountValue, setAmountValue] = useState<string>(String(props.amount));
+  const [categoryValue, setCategoryValue] = useState<string>(props.category);                            
+
    // ******* Functions ******* //                              
   function highlightCell(amount: number): string{
     const budget: number = props.currentUser!.budget;
@@ -234,28 +233,35 @@ function CustomTableBodyCell(props:{id: string, category: string, amount: number
     return "";
   }
 
+  function updateTableMap(): void{
+    const newTableMap = new Map(props.tableMap);
+    props.setTableMap(newTableMap);
+  }
+
    // ******* Button Handlers ******* //
-  function editEntryHandler(e: ChangeEvent<HTMLInputElement>){
-    if(e.nativeEvent === null){
-      e.currentTarget.value = "poop";
-    }
-    console.log(e.nativeEvent);
+  function amountUpdate(e: ChangeEvent<HTMLInputElement>): void{
+    const inputs: string = editInputs(e, amountValue, "number");
+    const currCategory = props.tableMap!.get(props.id)!;
+    props.tableMap!.set(props.id, {...currCategory, totalAmount: Number(inputs)});
+    setAmountValue(prev => prev = inputs);
+  }
+
+  function categoryUpdate(e: ChangeEvent<HTMLInputElement>): void{
+
   }
 
   function deleteButtonHandler(e: React.SyntheticEvent<HTMLButtonElement, MouseEvent>): void{
     const id: string = e.currentTarget.getAttribute("data-id")!
     props.tableMap!.delete(id);
-    const newTableMap = new Map(props.tableMap);
-    props.setTableMap(newTableMap);
   }
 
   return(
     <div data-id={props.id} className="custom-table-body-cell non-subcategory-cell clickable " 
           style={props.currentUser ? {boxShadow: highlightCell(props.amount)} : undefined}
             onClick={props.toggleEdit ? undefined : props.displaySubCategories}>
-      <input type="text"value={props.category} disabled={props.toggleEdit ? undefined : true} />
-      <input type="number" value={props.amount} 
-              disabled={props.toggleEdit ? undefined : true} onChange={editEntryHandler} />
+      <input type="text" value={props.category} disabled={props.toggleEdit ? undefined : true} />
+      <input type="text" inputMode="numeric" pattern='[0-9]*' value={amountValue} 
+              disabled={props.toggleEdit ? undefined : true} onChange={amountUpdate} />
       {props.toggleEdit ? 
         <div className="custom-table-body-cell-options">
           <button data-id={props.id} onClick={deleteButtonHandler} className="custom-table-body-delete-button">
@@ -349,6 +355,7 @@ function CustomTable(){
       setToggleEdit(prev => prev = false);
     }
     else{
+      oldData = {...oldData, oldTableMap: tableMap!};
       setToggleEdit(prev => prev = true);
     }
   }
@@ -380,7 +387,7 @@ function CustomTable(){
 
   return(
     <div id="custom-table">
-      <div id="custom-table-title">
+      <div id="custom-table-header">
         <h1>Money Manager</h1>
         <div id="custom-table-menu">
           <button onClick={displayEditOptions} className="manager-buttons">Edit</button>
@@ -395,9 +402,11 @@ function CustomTable(){
           </div> :
           <button onClick={displayInsert} className="manager-buttons">Insert</button>}
         </div>
+        <button id="custom-table-save-button" className="manager-buttons">Save</button>
       </div>
       <CustomTableBody tableMap={tableMap} toggleEdit={toggleEdit} setTableMap={setTableMap} currentUser={currentUser}/>
-      <CustomTableBottom tableMap={tableMap} currUser={currentUser} setTableMap={setTableMap}/>
+      <CustomTableBottom tableMap={tableMap} currUser={currentUser} 
+                          setTableMap={setTableMap} setCurrentUser={setCurrentUser} />
     </div>
   )
 }
