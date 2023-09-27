@@ -20,11 +20,14 @@ let oldData: {oldTableMap: TypeCustomTable["categoryMap"], oldSubMap: TypeCustom
   oldUserData: {...user}
 }
 
-function CustomTableBottom(props: {tableMap: TypeCustomTable["categoryMap"] | null, currUser: typeof user | null,
-                            setTableMap: Function, setCurrentUser: Function}){
+let tempBudget: number = 0;
+
+function CustomTableBottom(props: {tableMap: TypeCustomTable["categoryMap"] | null, budget: number,
+                            toggleEdit: boolean}){
+
   // ******* States ******* //
   const [balance, setBalance] = useState<number>(0);
-  const [budgetInputValue, setBudgetInputValue] = useState<string>("0");
+  const [budgetInputValue, setBudgetInputValue] = useState<string>(String(props.budget));
 
   // ******* References ******* //
   const budgetInput = useRef<HTMLInputElement>(null);
@@ -45,34 +48,28 @@ function CustomTableBottom(props: {tableMap: TypeCustomTable["categoryMap"] | nu
 
   // ******* Input Handlers ******* //
   function updateInput(e: ChangeEvent<HTMLInputElement>): void{
-    const newMap = new Map(props.tableMap);
     const inputs: string = editInputs(e, budgetInputValue, "number");
-
+    tempBudget = Number(inputs);
     setBudgetInputValue(prev => prev = inputs);
   }
 
   // ******* UseEffects ******* //
   useEffect(()=>{
-    if(props.currUser){
-      setBudgetInputValue(prev => prev = String(props.currUser!.budget));
-    }
+    setBudgetInputValue(prev => prev = String(props.budget));
 
     return()=>{
       setBudgetInputValue(prev => prev = "0");
     }
-  }, [props.currUser])
+  },[props.budget])
 
   useEffect(()=>{
     const remaining: number = Number(budgetInputValue) - grandTotal;
     setBalance(prev => prev = remaining);
-    if(props.currUser){
-      props.setCurrentUser({...props.currUser!, budget: Number(budgetInputValue)});
-    }
 
     return()=>{
       setBalance(prev => prev = 0);
     }
-  }, [budgetInputValue])
+  }, [budgetInputValue, props.tableMap])
 
   return(
     <div id="custom-table-bottom">
@@ -81,7 +78,8 @@ function CustomTableBottom(props: {tableMap: TypeCustomTable["categoryMap"] | nu
         <label style={{fontWeight: 700}}>Budget:</label>
         <input type="text" inputMode="numeric" pattern='[0-9]*'
                 placeholder='Budget' value={budgetInputValue} 
-                ref={budgetInput} onChange={updateInput} />
+                  ref={budgetInput} onChange={updateInput} 
+                    disabled={props.toggleEdit ? undefined : true}/>
       </div>
       <p><span style={{fontWeight: 700}}>Balance:</span> {balance}</p>
     </div>
@@ -93,19 +91,45 @@ function SubCategoryCell(props:{id: string, subCategory: string, amount: number,
                           tableMap: TypeCustomTable["categoryMap"] | null, setTableMap: Function,
                           toggleEdit: boolean}){
 
+  // ******* States ******* //
+  const [subcategoryValue, setSubcategoryValue] = useState<string>(props.subCategory);
+  const [amountValue, setAmountValue] = useState<string>(String(props.amount));
+
+  // ******* Functions ******* //
+  function updateSubcategoryMap(){
+    const newMap = new Map(props.subCategoryMap);
+    props.setSubCategoryMap(newMap);
+  }
+
+  // ******* Input Handlers ******* //
+  function amountUpdate(e: ChangeEvent<HTMLInputElement>): void{
+    const inputs: string = editInputs(e, amountValue, "number");
+    const currSubcategory = props.subCategoryMap!.get(props.id)!;
+    props.subCategoryMap!.set(props.id, {...currSubcategory, amount: Number(inputs)});
+    setAmountValue(prev => prev = inputs);
+  }
+
+  function subcategoryUpdate(e: ChangeEvent<HTMLInputElement>): void{
+    const inputs: string = editInputs(e, subcategoryValue, "string");
+    const currSubcategory = props.subCategoryMap!.get(props.id)!;
+    props.subCategoryMap!.set(props.id, {...currSubcategory, subCategory: inputs});
+    setSubcategoryValue(prev => prev = inputs);
+  }
+
   // ******* Button Handlers ******* //
   function deleteButtonHandler(e: SyntheticEvent<HTMLButtonElement, MouseEvent>){
     const id: string = e.currentTarget.getAttribute("data-id")!;
 
     props.subCategoryMap!.delete(id);
-    const newMap = new Map(props.subCategoryMap);
-    props.setSubCategoryMap(newMap);
+    updateSubcategoryMap();
   }
                             
   return(
     <div className={`custom-table-body-cell subcategory-cell ${props.toggleEdit ? null : "disable-hover"}`}>
-      <input type="text" value={props.subCategory} disabled={props.toggleEdit ? undefined : true} />
-      <input type="number" value={props.amount} disabled={props.toggleEdit ? undefined : true} />
+      <input type="text" value={subcategoryValue} 
+              disabled={props.toggleEdit ? undefined : true} onChange={subcategoryUpdate} />
+      <input type="text" inputMode="numeric" pattern='[0-9]*' value={amountValue}
+              disabled={props.toggleEdit ? undefined : true} onChange={amountUpdate} />
       {props.toggleEdit ? 
       <div className="custom-table-body-cell-options">
         <button data-id={props.id} onClick={deleteButtonHandler} className="custom-table-body-delete-button">
@@ -214,15 +238,16 @@ function SubCategory(props: {tableMap: TypeCustomTable["categoryMap"] | null,
 
 function CustomTableBodyCell(props:{id: string, category: string, amount: number,
                               toggleEdit: boolean, tableMap: TypeCustomTable["categoryMap"] | null,
-                              setTableMap: Function, currentUser: typeof user | null, 
+                              setTableMap: Function, budget: number, 
                               displaySubCategories: MouseEventHandler<HTMLDivElement>}){
-
-  const [amountValue, setAmountValue] = useState<string>(String(props.amount));
-  const [categoryValue, setCategoryValue] = useState<string>(props.category);                            
+ 
+  // ******* States ******* //                             
+  const [amountValue, setAmountValue] = useState<string>("0");
+  const [categoryValue, setCategoryValue] = useState<string>("");                            
 
    // ******* Functions ******* //                              
   function highlightCell(amount: number): string{
-    const budget: number = props.currentUser!.budget;
+    const budget: number = props.budget;
     if(amount >= budget * 0.2 && amount < budget * 0.5){
       return "inset 1px 1px 10px rgba(255, 255, 0, 0.77)";
     }
@@ -238,28 +263,47 @@ function CustomTableBodyCell(props:{id: string, category: string, amount: number
     props.setTableMap(newTableMap);
   }
 
-   // ******* Button Handlers ******* //
+  // ******* Input Handlers ******* //
   function amountUpdate(e: ChangeEvent<HTMLInputElement>): void{
     const inputs: string = editInputs(e, amountValue, "number");
     const currCategory = props.tableMap!.get(props.id)!;
     props.tableMap!.set(props.id, {...currCategory, totalAmount: Number(inputs)});
     setAmountValue(prev => prev = inputs);
+    console.log(...props.tableMap!.values());
+    console.log(...oldData.oldTableMap.values());
   }
 
   function categoryUpdate(e: ChangeEvent<HTMLInputElement>): void{
-
+    const inputs: string = editInputs(e, categoryValue, "string");
+    const currCategory = props.tableMap!.get(props.id)!;
+    props.tableMap!.set(props.id, {...currCategory, category: inputs});
+    setCategoryValue(prev => prev = inputs);
   }
 
+   // ******* Button Handlers ******* //
   function deleteButtonHandler(e: React.SyntheticEvent<HTMLButtonElement, MouseEvent>): void{
     const id: string = e.currentTarget.getAttribute("data-id")!
     props.tableMap!.delete(id);
+    updateTableMap();
   }
+
+  // ******* UseEffects ******* //
+  useEffect(()=>{
+    setAmountValue(prev => prev = String(props.amount));
+    setCategoryValue(prev => prev = props.category);
+
+    return()=>{
+      setAmountValue(prev => prev = "0");
+      setCategoryValue(prev => prev = "");
+    }
+  }, [props.amount, props.budget])
 
   return(
     <div data-id={props.id} className="custom-table-body-cell non-subcategory-cell clickable " 
-          style={props.currentUser ? {boxShadow: highlightCell(props.amount)} : undefined}
+          style={{boxShadow: highlightCell(props.amount)}}
             onClick={props.toggleEdit ? undefined : props.displaySubCategories}>
-      <input type="text" value={props.category} disabled={props.toggleEdit ? undefined : true} />
+      <input type="text" value={categoryValue} 
+              disabled={props.toggleEdit ? undefined : true} onChange={categoryUpdate} />
       <input type="text" inputMode="numeric" pattern='[0-9]*' value={amountValue} 
               disabled={props.toggleEdit ? undefined : true} onChange={amountUpdate} />
       {props.toggleEdit ? 
@@ -273,7 +317,7 @@ function CustomTableBodyCell(props:{id: string, category: string, amount: number
 }
 
 function CustomTableBody(props: {tableMap: TypeCustomTable["categoryMap"] | null, 
-                          toggleEdit: boolean, setTableMap: Function, currentUser: typeof user | null}){
+                          toggleEdit: boolean, setTableMap: Function, budget: number}){
 
    // ******* States ******* //
   const [subCategoryMap, setSubCategoryMap] = useState<TypeCustomTable["subCategoryMap"] | null>(null);
@@ -290,7 +334,6 @@ function CustomTableBody(props: {tableMap: TypeCustomTable["categoryMap"] | null
   function displaySubcategories(e: SyntheticEvent<HTMLDivElement, MouseEvent>){
     categoryId.current = e.currentTarget.getAttribute("data-id")!;
     const newMap: TypeCustomTable["subCategoryMap"] = new Map();
-    console.log("I ran!");
     setSubCategoryMap(prev => prev = newMap);
   }
 
@@ -316,7 +359,7 @@ function CustomTableBody(props: {tableMap: TypeCustomTable["categoryMap"] | null
           </div>
           {categories.map((category) =>
             <CustomTableBodyCell id={category[0]} category={category[1].category} amount={category[1].totalAmount}
-            currentUser={props.currentUser} tableMap={props.tableMap} setTableMap={props.setTableMap}
+            budget={props.budget} tableMap={props.tableMap} setTableMap={props.setTableMap}
             displaySubCategories={displaySubcategories} toggleEdit={props.toggleEdit} key={category[0]} />
           )}
         </div>
@@ -334,7 +377,8 @@ function CustomTable(){
   const [tableMap, setTableMap] = useState<TypeCustomTable["categoryMap"] | null>(null);
   const [toggleInsert, setToggleInsert] = useState<boolean>(false);
   const [toggleEdit, setToggleEdit] = useState<boolean>(false);
-  const [currentUser, setCurrentUser] = useState<typeof user | null>(null);
+  const [budget, setBudget] = useState<number>(0);
+  const [change, setChange] = useState<boolean>(false);
 
   // ******* References ******* //
   const categoryInput = useRef<HTMLInputElement>(null);
@@ -352,10 +396,13 @@ function CustomTable(){
 
   function displayEditOptions(){
     if(toggleEdit){
+      const newMap = new Map(tableMap!);
+      setBudget(prev => prev = tempBudget);
       setToggleEdit(prev => prev = false);
+      setTableMap(prev => prev = newMap);
     }
     else{
-      oldData = {...oldData, oldTableMap: tableMap!};
+      oldData = {...oldData, oldTableMap: new Map(tableMap!)};
       setToggleEdit(prev => prev = true);
     }
   }
@@ -378,10 +425,10 @@ function CustomTable(){
   }, [])
 
   useEffect(()=>{
-    setCurrentUser(prev => prev = user);
+    setBudget(prev => prev = user.budget);
 
     return()=>{
-      setCurrentUser(prev => prev = null);
+      setBudget(prev => prev = 0);
     }
   },[])
 
@@ -402,11 +449,15 @@ function CustomTable(){
           </div> :
           <button onClick={displayInsert} className="manager-buttons">Insert</button>}
         </div>
-        <button id="custom-table-save-button" className="manager-buttons">Save</button>
+        <div id="custom-table-saving-options">
+          <button>
+            <img src="./src/assets/manager-icons/undo-48px.svg" alt="Undo" title="Revert" className="manager-icons" />
+          </button>
+          <button id="custom-table-save-button" className="manager-buttons">Save</button>
+        </div>
       </div>
-      <CustomTableBody tableMap={tableMap} toggleEdit={toggleEdit} setTableMap={setTableMap} currentUser={currentUser}/>
-      <CustomTableBottom tableMap={tableMap} currUser={currentUser} 
-                          setTableMap={setTableMap} setCurrentUser={setCurrentUser} />
+      <CustomTableBody tableMap={tableMap} toggleEdit={toggleEdit} setTableMap={setTableMap} budget={budget}/>
+      <CustomTableBottom tableMap={tableMap} toggleEdit={toggleEdit} budget={budget} />
     </div>
   )
 }
