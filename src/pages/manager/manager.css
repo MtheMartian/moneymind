@@ -50,4 +50,5 @@ input[type=number]{
 
 .manager-icons{
   width: 24px;
+  filter: contrast(0.5);
 }

@@ -56,10 +56,17 @@
 }
 
 #custom-table-save-button{
-  position: absolute;
-  right: 7px;
   padding-left: 14px;
   padding-right: 14px;
+}
+
+#custom-table-saving-options{
+  position: absolute;
+  right: 7px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
 }
 
 /* ------- Custom Table Body ------- */
@@ -89,10 +96,6 @@
 #custom-table-body-search-container{
   border-bottom: 1px solid rgba(102, 102, 102, 0.7);
   padding-bottom: 3px;
-}
-
-#custom-table-body-search-container > img{
-  filter: contrast(0.3);
 }
 
 #custom-table-body-header div, #custom-table-body-header button{
