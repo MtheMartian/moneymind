@@ -23,7 +23,7 @@ let oldData: {oldTableMap: TypeCustomTable["categoryMap"], oldSubMap: TypeCustom
 let tempBudget: number = 0;
 
 function CustomTableBottom(props: {tableMap: TypeCustomTable["categoryMap"] | null, budget: number,
-                            toggleEdit: boolean}){
+                            toggleEdit: boolean, subcategoryMap: TypeCustomTable["subCategoryMap"] | null}){
 
   // ******* States ******* //
   const [balance, setBalance] = useState<number>(0);
@@ -38,13 +38,17 @@ function CustomTableBottom(props: {tableMap: TypeCustomTable["categoryMap"] | nu
   // ******* Memo ******* //
   const grandTotal = useMemo<number>(()=>{
     let addThemUp: number = 0;
-    if(props.tableMap){
+    if(props.tableMap && props.subcategoryMap){
       Array.from(props.tableMap.values()).forEach(entry =>{
         addThemUp += entry.totalAmount;
       });
+
+      Array.from(props.subcategoryMap.values()).forEach(entry =>{
+        addThemUp += entry.amount;
+      });
     }
     return addThemUp;
-  }, [props.tableMap]);
+  }, [props.tableMap, props.subcategoryMap]);
 
   // ******* Input Handlers ******* //
   function updateInput(e: ChangeEvent<HTMLInputElement>): void{
@@ -69,7 +73,7 @@ function CustomTableBottom(props: {tableMap: TypeCustomTable["categoryMap"] | nu
     return()=>{
       setBalance(prev => prev = 0);
     }
-  }, [budgetInputValue, props.tableMap])
+  }, [budgetInputValue, props.tableMap, props.subcategoryMap])
 
   return(
     <div id="custom-table-bottom">
@@ -86,33 +90,34 @@ function CustomTableBottom(props: {tableMap: TypeCustomTable["categoryMap"] | nu
   )
 }
 
-function SubCategoryCell(props:{id: string, subCategory: string, amount: number,
-                          subCategoryMap: TypeCustomTable["subCategoryMap"] | null, setSubCategoryMap: Function,
+function SubCategoryCell(props:{id: string, subcategory: string, amount: number,
+                          subcategoryMap: TypeCustomTable["subCategoryMap"] | null, setSubcategoryMap: Function,
                           tableMap: TypeCustomTable["categoryMap"] | null, setTableMap: Function,
                           toggleEdit: boolean}){
 
   // ******* States ******* //
-  const [subcategoryValue, setSubcategoryValue] = useState<string>(props.subCategory);
+  const [subcategoryValue, setSubcategoryValue] = useState<string>(props.subcategory);
   const [amountValue, setAmountValue] = useState<string>(String(props.amount));
 
   // ******* Functions ******* //
   function updateSubcategoryMap(){
-    const newMap = new Map(props.subCategoryMap);
-    props.setSubCategoryMap(newMap);
+    const newMap = new Map(props.subcategoryMap);
+    props.setSubcategoryMap(newMap);
   }
 
   // ******* Input Handlers ******* //
   function amountUpdate(e: ChangeEvent<HTMLInputElement>): void{
     const inputs: string = editInputs(e, amountValue, "number");
-    const currSubcategory = props.subCategoryMap!.get(props.id)!;
-    props.subCategoryMap!.set(props.id, {...currSubcategory, amount: Number(inputs)});
+    const currSubcategory = props.subcategoryMap!.get(props.id)!;
+    props.subcategoryMap!.set(props.id, {...currSubcategory, amount: Number(inputs)});
     setAmountValue(prev => prev = inputs);
+    console.log(...props.subcategoryMap?.values()!);
   }
 
   function subcategoryUpdate(e: ChangeEvent<HTMLInputElement>): void{
     const inputs: string = editInputs(e, subcategoryValue, "string");
-    const currSubcategory = props.subCategoryMap!.get(props.id)!;
-    props.subCategoryMap!.set(props.id, {...currSubcategory, subCategory: inputs});
+    const currSubcategory = props.subcategoryMap!.get(props.id)!;
+    props.subcategoryMap!.set(props.id, {...currSubcategory, subCategory: inputs});
     setSubcategoryValue(prev => prev = inputs);
   }
 
@@ -120,7 +125,7 @@ function SubCategoryCell(props:{id: string, subCategory: string, amount: number,
   function deleteButtonHandler(e: SyntheticEvent<HTMLButtonElement, MouseEvent>){
     const id: string = e.currentTarget.getAttribute("data-id")!;
 
-    props.subCategoryMap!.delete(id);
+    props.subcategoryMap!.delete(id);
     updateSubcategoryMap();
   }
                             
@@ -141,13 +146,12 @@ function SubCategoryCell(props:{id: string, subCategory: string, amount: number,
 }
 
 function SubCategory(props: {tableMap: TypeCustomTable["categoryMap"] | null, 
-                      subCategoryMap: TypeCustomTable["subCategoryMap"] | null, 
-                      setSubCategoryMap: Function, toggleEdit: boolean, categoryId: string | null,
+                      subcategoryMap: TypeCustomTable["subCategoryMap"] | null, 
+                      setSubcategoryMap: Function, toggleEdit: boolean, categoryId: string | null,
                       setTableMap: Function}){
                         
  // ******* States ******* //
-  const [categorySelected, setCategorySelected] = useState<string | null>(null);
-  const [addSubCategoryForm, setAddSubCategoryForm] = useState<boolean>(false);
+  const [addSubcategoryForm, setAddSubCategoryForm] = useState<boolean>(false);
 
   // ******* References ******* //
   const subCategoryInput = useRef<HTMLInputElement>(null);
@@ -155,45 +159,33 @@ function SubCategory(props: {tableMap: TypeCustomTable["categoryMap"] | null,
 
    // ******* Memo ******* //
    const subCategories = useMemo<TypeCustomTable["subCategoryEntries"]>(()=>{
-    return props.subCategoryMap ? Array.from(props.subCategoryMap.entries()) : [];
-  }, [props.subCategoryMap]);
+    return props.subcategoryMap ? Array.from(props.subcategoryMap.entries()) : [];
+  }, [props.subcategoryMap]);
+
+  const categorySelected = useMemo<string | null>(()=>{
+    return props.categoryId ? props.tableMap!.get(props.categoryId)!.category : null;
+  }, [props.categoryId]);
   
   // ******* Button Handlers ******* //
   function addButtonHandler(){
     const uId: string = uniqueId();
-    props.subCategoryMap!.set(uId, {subCategory: subCategoryInput.current!.value,
+    props.subcategoryMap!.set(uId, {subCategory: subCategoryInput.current!.value,
                                     amount: Number(amountInput.current!.value), 
-                                    categoryId: props.categoryId!});
-    const currentCategory = props.tableMap!.get(props.categoryId!)!;                               
+                                    categoryId: props.categoryId!});                              
 
-    const newMap = new Map(props.subCategoryMap);
-    props.setSubCategoryMap(newMap);
-    props.tableMap!.set(props.categoryId!, {...currentCategory, totalAmount: currentCategory.totalAmount += Number(amountInput.current!.value)});
-    const updatedCategoryMap = new Map(props.tableMap);
-    props.setTableMap(updatedCategoryMap);
+    const newMap = new Map(props.subcategoryMap);
+    props.setSubcategoryMap(newMap);
     setAddSubCategoryForm(prev => prev = false);
   }
 
   function displayAddSubCategoryForm(): void{
-    if(addSubCategoryForm){
+    if(addSubcategoryForm){
       setAddSubCategoryForm(prev => prev = false);
     }
     else{
       setAddSubCategoryForm(prev => prev = true);
     }
   }
-
-  // ******* UseEffects ******* //
-  useEffect(()=>{
-    if(props.categoryId){
-      const currentCategory: string = props.tableMap!.get(props.categoryId)!.category;
-      setCategorySelected(prev => prev = currentCategory);
-    }
-
-    return()=>{
-      setCategorySelected(prev => prev = null);
-    }
-  }, [props.categoryId]);
 
   return(
     <div id="custom-table-body-subcategory">
@@ -203,7 +195,7 @@ function SubCategory(props: {tableMap: TypeCustomTable["categoryMap"] | null,
         <button className="manager-buttons" onClick={displayAddSubCategoryForm}>Add Entry</button> 
         : null}
       </div>
-      {addSubCategoryForm ? 
+      {addSubcategoryForm ? 
       <div className="overlay">
         <div id="add-subcategory-form">
           <p>Add Entry</p>
@@ -222,12 +214,12 @@ function SubCategory(props: {tableMap: TypeCustomTable["categoryMap"] | null,
         </div>
       </div> : null}
       <div id="custom-table-body-subcategory-content">
-        {categorySelected ? null : <p>Select a category to view/add subcategories...</p>}
-        {subCategories.length === 0 && categorySelected ? <p>Empty</p> : null}
+        {props.categoryId ? null : <p>Select a category to view/add subcategories...</p>}
+        {subCategories.length === 0 && props.categoryId ? <p>Empty</p> : null}
         {subCategories.map(subCategory =>
           subCategory[1].categoryId === props.categoryId ? 
-          <SubCategoryCell id={subCategory[0]} subCategory={subCategory[1].subCategory} amount={subCategory[1].amount}
-                          subCategoryMap={props.subCategoryMap} setSubCategoryMap={props.setSubCategoryMap}
+          <SubCategoryCell id={subCategory[0]} subcategory={subCategory[1].subCategory} amount={subCategory[1].amount}
+                          subcategoryMap={props.subcategoryMap} setSubcategoryMap={props.setSubcategoryMap}
                           toggleEdit={props.toggleEdit} tableMap={props.tableMap} setTableMap={props.setTableMap}
                           key={subCategory[0]}/> : null
         )}
@@ -317,13 +309,12 @@ function CustomTableBodyCell(props:{id: string, category: string, amount: number
 }
 
 function CustomTableBody(props: {tableMap: TypeCustomTable["categoryMap"] | null, 
-                          toggleEdit: boolean, setTableMap: Function, budget: number}){
+                          toggleEdit: boolean, setTableMap: Function, budget: number,
+                            subcategoryMap: TypeCustomTable["subCategoryMap"] | null,
+                              setSubcategoryMap: Function}){
 
    // ******* States ******* //
-  const [subCategoryMap, setSubCategoryMap] = useState<TypeCustomTable["subCategoryMap"] | null>(null);
-
-   // ******* References ******* //
-  const categoryId = useRef<string | null>(null);
+  const [categoryId, setCategoryId] = useState<string | null>(null);
 
    // ******* Memo ******* //
   const categories = useMemo<TypeCustomTable["categoryEntries"]>(()=>{
@@ -332,9 +323,22 @@ function CustomTableBody(props: {tableMap: TypeCustomTable["categoryMap"] | null
 
    // ******* Button Handlers ******* //
   function displaySubcategories(e: SyntheticEvent<HTMLDivElement, MouseEvent>){
-    categoryId.current = e.currentTarget.getAttribute("data-id")!;
-    const newMap: TypeCustomTable["subCategoryMap"] = new Map();
-    setSubCategoryMap(prev => prev = newMap);
+    const selectedCategory: string = e.currentTarget.getAttribute("data-id")!;
+    setCategoryId(prev => prev = selectedCategory);
+  }
+
+  // ******* Functions ******* //
+  function totalAmount(categoryId: string, initalAmount: number): number{
+    const subcategories = Array.from(props.subcategoryMap!.values());
+    let summedAmounts: number = initalAmount;
+
+    subcategories.forEach(subcategory =>{
+      if(categoryId === subcategory.categoryId){
+        summedAmounts += subcategory.amount;
+      }
+    });
+
+    return summedAmounts;
   }
 
   return(
@@ -358,14 +362,14 @@ function CustomTableBody(props: {tableMap: TypeCustomTable["categoryMap"] | null
             <p>Last Updated</p>
           </div>
           {categories.map((category) =>
-            <CustomTableBodyCell id={category[0]} category={category[1].category} amount={category[1].totalAmount}
+            <CustomTableBodyCell id={category[0]} category={category[1].category} amount={totalAmount(category[0], category[1].totalAmount)}
             budget={props.budget} tableMap={props.tableMap} setTableMap={props.setTableMap}
             displaySubCategories={displaySubcategories} toggleEdit={props.toggleEdit} key={category[0]} />
           )}
         </div>
         <SubCategory tableMap={props.tableMap} toggleEdit={props.toggleEdit} 
-                      categoryId={categoryId.current} setSubCategoryMap={setSubCategoryMap}
-                      subCategoryMap={subCategoryMap} setTableMap={props.setTableMap}/>
+                      categoryId={categoryId} setSubcategoryMap={props.setSubcategoryMap}
+                      subcategoryMap={props.subcategoryMap} setTableMap={props.setTableMap}/>
       </div>
     </div>
   );
@@ -375,6 +379,7 @@ function CustomTableBody(props: {tableMap: TypeCustomTable["categoryMap"] | null
 function CustomTable(){
   // ******* States ******* //
   const [tableMap, setTableMap] = useState<TypeCustomTable["categoryMap"] | null>(null);
+  const [subcategoryMap, setSubcategoryMap] = useState<TypeCustomTable["subCategoryMap"] | null>(null);
   const [toggleInsert, setToggleInsert] = useState<boolean>(false);
   const [toggleEdit, setToggleEdit] = useState<boolean>(false);
   const [budget, setBudget] = useState<number>(0);
@@ -397,8 +402,10 @@ function CustomTable(){
   function displayEditOptions(){
     if(toggleEdit){
       const newMap = new Map(tableMap!);
+      const newSubMap = new Map(subcategoryMap!);
       setBudget(prev => prev = tempBudget);
       setToggleEdit(prev => prev = false);
+      setSubcategoryMap(prev => prev = newSubMap);
       setTableMap(prev => prev = newMap);
     }
     else{
@@ -425,7 +432,16 @@ function CustomTable(){
   }, [])
 
   useEffect(()=>{
+    setSubcategoryMap(prev => prev = new Map());
+
+    return()=>{
+      setSubcategoryMap(prev => prev = null);
+    }
+  }, [])
+
+  useEffect(()=>{
     setBudget(prev => prev = user.budget);
+    tempBudget = user.budget;
 
     return()=>{
       setBudget(prev => prev = 0);
@@ -456,8 +472,9 @@ function CustomTable(){
           <button id="custom-table-save-button" className="manager-buttons">Save</button>
         </div>
       </div>
-      <CustomTableBody tableMap={tableMap} toggleEdit={toggleEdit} setTableMap={setTableMap} budget={budget}/>
-      <CustomTableBottom tableMap={tableMap} toggleEdit={toggleEdit} budget={budget} />
+      <CustomTableBody tableMap={tableMap} toggleEdit={toggleEdit} setTableMap={setTableMap} budget={budget}
+                        subcategoryMap={subcategoryMap} setSubcategoryMap={setSubcategoryMap} />
+      <CustomTableBottom tableMap={tableMap} toggleEdit={toggleEdit} budget={budget} subcategoryMap={subcategoryMap} />
     </div>
   )
 }
