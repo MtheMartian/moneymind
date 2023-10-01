@@ -1,4 +1,4 @@
-import CustomTable from "./custom-table/CustomTable";
+import CustomTable from "./components/custom-table/CustomTable";
 
 function MoneyManager(){
   return(
