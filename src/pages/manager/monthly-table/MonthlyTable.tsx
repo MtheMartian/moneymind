@@ -4,12 +4,12 @@ import '../manager.css';
 import CustomTable from '../components/custom-table/CustomTable';
 import { oldData } from '../components/custom-table/custom-table';
 
-const dailyStack: Stack<typeof oldData> = new Stack<typeof oldData>();
+const monthlyStack: Stack<typeof oldData> = new Stack<typeof oldData>();
 
-function DailyTable(){
+function MonthlyTable(){
   return(
-    <CustomTable title="Daily Manager" tableUse="daily" stack={dailyStack} />
+    <CustomTable title="Monthly Manager" tableUse="monthly" stack={monthlyStack} />
   )
 }
 
-export default DailyTable;
+export default MonthlyTable;

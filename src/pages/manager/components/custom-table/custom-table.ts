@@ -9,5 +9,6 @@ export let oldData: {oldTableMap: TypeCustomTable["categoryMap"], oldSubMap: Typ
 
 export function todaysDate(): string{
   const currentDate: Date = new Date(Date.now());
-  return `${currentDate.getFullYear()}/${currentDate.getMonth()}/${currentDate.getDate()}`;
+  const month: number = currentDate.getMonth() + 1;
+  return `${currentDate.getFullYear()}/${month}/${currentDate.getDate()}`;
 }

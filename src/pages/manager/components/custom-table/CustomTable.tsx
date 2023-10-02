@@ -1,12 +1,16 @@
 import { useRef, useState, useEffect, useMemo, 
         SyntheticEvent, ChangeEvent, MouseEventHandler, useCallback} from 'react';
 import './custom-table.css';
-import '../manager.css';
+import '../../manager.css';
 import { TypeCustomTable } from './custom-table-types';
 import { user } from '../../../../data/user';
 import { editInputs, uniqueId } from '../../manager';
 import { Stack } from '../../../../ts/dsa';
 import { oldData, todaysDate } from './custom-table';
+import exportIcon from '../../../../assets/manager-icons/export-48px.svg';
+import searchIcon from '../../../../assets/manager-icons/search-48px.svg';
+import undoIcon from '../../../../assets/manager-icons/undo-48px.svg';
+import deleteIcon from '../../../../assets/manager-icons/delete-48px.svg';
 
 const stack = new Stack<typeof oldData>();
 
@@ -131,7 +135,7 @@ function SubCategoryCell(props:{id: string, subcategory: string, amount: number,
       {props.toggleEdit ? 
       <div className="custom-table-body-cell-options">
         <button data-id={props.id} onClick={deleteButtonHandler} className="custom-table-body-delete-button">
-          <img src="./src/assets/manager-icons/delete-48px.svg" alt="delete" className="manager-icons" />
+          <img src={deleteIcon} alt="delete" className="manager-icons" />
         </button>
       </div> : null}
     </div>
@@ -326,7 +330,7 @@ function CustomTableBodyCell(props:{id: string, category: string, amount: number
       {props.toggleEdit ? 
         <div className="custom-table-body-cell-options">
           <button data-id={props.id} onClick={deleteButtonHandler} className="custom-table-body-delete-button">
-            <img src="./src/assets/manager-icons/delete-48px.svg" alt="delete" className="manager-icons" />
+            <img src={deleteIcon} alt="delete" className="manager-icons" />
           </button>
         </div> : null}
     </div>
@@ -382,11 +386,11 @@ function CustomTableBody(props: {tableMap: TypeCustomTable["categoryMap"] | null
     <div id="custom-table-body">
       <div id="custom-table-body-header">
         <div id="custom-table-body-search-container">
-          <img src="./src/assets/manager-icons/search-48px.svg" alt="search" className="manager-icons" />
+          <img src={searchIcon} alt="search" className="manager-icons" />
           <input type="text" placeholder="Search..." />
         </div>
         <button id="custom-table-body-export-button">
-          <img src="./src/assets/manager-icons/export-48px.svg" alt="export" className="manager-icons" />
+          <img src={exportIcon} alt="export" className="manager-icons" />
           <p>Export</p>
         </button>
       </div>
@@ -470,7 +474,7 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<any>}
     let categoryString: string = categoryInput.current!.value;
 
     if(props.tableUse === "daily"){
-      if(categoryString === "" || " "){
+      if(categoryString === "" || categoryString === " "){
         categoryString = todaysDate();
       }
     }
@@ -488,14 +492,14 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<any>}
   }
 
   function undoButtonHandler(): void{
-    const previousData = stack.pop();
+    const previousData = props.stack.pop();
 
     if(!previousData){
       setChange(prev => prev = false);
       return;
     }
 
-    if(stack.length === 0){
+    if(props.stack.length === 0){
       setChange(prev => prev = false);
     }
 
@@ -550,9 +554,9 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<any>}
           <button onClick={displayInsert} className="manager-buttons">Insert</button>}
         </div>
         <div id="custom-table-saving-options">
-          {stack.length > 0 ? 
+          {props.stack.length > 0 ? 
           <button onClick={undoButtonHandler}>
-            <img src="./src/assets/manager-icons/undo-48px.svg" alt="Undo" title="Undo" className="manager-icons" />
+            <img src={undoIcon} alt="Undo" title="Undo" className="manager-icons" />
           </button> : null}
           <button id="custom-table-save-button" className="manager-buttons" 
                   onClick={saveButtonHandler}

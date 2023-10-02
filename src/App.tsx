@@ -4,6 +4,8 @@ import Header from "./components/navbar/Header";
 import MainHeader from "./components/main-header/MainHeader";
 import ManagerSideMenu from "./components/manager-aside/ManagerAside";
 import Footer from "./components/footer/Footer";
+import DailyTable from "./pages/manager/daily-table/DailyTable";
+import MonthlyTable from "./pages/manager/monthly-table/MonthlyTable";
 
 function Layout(){
   return(
@@ -38,8 +40,13 @@ function App(){
     element: <ManagerLayout />,
     children: [{
       path: "/manager",
-      element: <MoneyManager />
-    }]
+      element: <MonthlyTable />
+    },
+    {
+      path: "/manager/daily",
+      element: <DailyTable />
+    }
+  ]
   },
   {
     path: "/login",
