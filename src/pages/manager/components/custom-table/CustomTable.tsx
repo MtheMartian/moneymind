@@ -1,25 +1,16 @@
 import { useRef, useState, useEffect, useMemo, 
         SyntheticEvent, ChangeEvent, MouseEventHandler, useCallback} from 'react';
 import './custom-table.css';
-import '../manager.css';
-import { TypeCustomTable } from '../../../types/custom-table-types';
-import { user } from '../../../data/user';
-import { editInputs } from '../manager';
-import { Stack } from '../../../ts/dsa';
-
-function uniqueId(): string{
-  const prefix: string = "uniqueId-";
-  const timeStamp: string = Date.now().toString(36);
-  let counter: number = 0;
-  return `${prefix}${timeStamp}-${counter++}-${crypto.getRandomValues(new Uint32Array(1))[0].toString(36)}`;
-}
-
-let oldData: {oldTableMap: TypeCustomTable["categoryMap"], oldSubMap: TypeCustomTable["subCategoryMap"], 
-              oldBudget: number} = {
-  oldTableMap: new Map(),
-  oldSubMap: new Map(),
-  oldBudget: 0
-}
+import '../../manager.css';
+import { TypeCustomTable } from './custom-table-types';
+import { user } from '../../../../data/user';
+import { editInputs, uniqueId } from '../../manager';
+import { Stack } from '../../../../ts/dsa';
+import { oldData, todaysDate } from './custom-table';
+import exportIcon from '../../../../assets/manager-icons/export-48px.svg';
+import searchIcon from '../../../../assets/manager-icons/search-48px.svg';
+import undoIcon from '../../../../assets/manager-icons/undo-48px.svg';
+import deleteIcon from '../../../../assets/manager-icons/delete-48px.svg';
 
 const stack = new Stack<typeof oldData>();
 
@@ -144,7 +135,7 @@ function SubCategoryCell(props:{id: string, subcategory: string, amount: number,
       {props.toggleEdit ? 
       <div className="custom-table-body-cell-options">
         <button data-id={props.id} onClick={deleteButtonHandler} className="custom-table-body-delete-button">
-          <img src="./src/assets/manager-icons/delete-48px.svg" alt="delete" className="manager-icons" />
+          <img src={deleteIcon} alt="delete" className="manager-icons" />
         </button>
       </div> : null}
     </div>
@@ -154,7 +145,8 @@ function SubCategoryCell(props:{id: string, subcategory: string, amount: number,
 function SubCategory(props: {tableMap: TypeCustomTable["categoryMap"] | null, 
                       subcategoryMap: TypeCustomTable["subCategoryMap"] | null, 
                       setSubcategoryMap: Function, toggleEdit: boolean, categoryId: string | null,
-                      setTableMap: Function, setChange: Function, addToStack: Function}){
+                      setTableMap: Function, setChange: Function, addToStack: Function, 
+                      tableUse: string}){
                         
  // ******* States ******* //
   const [addSubcategoryForm, setAddSubCategoryForm] = useState<boolean>(false);
@@ -183,7 +175,14 @@ function SubCategory(props: {tableMap: TypeCustomTable["categoryMap"] | null,
     props.addToStack();
     props.setChange(true);
     const uId: string = uniqueId();
-    props.subcategoryMap!.set(uId, {subCategory: subCategoryInput.current!.value,
+    let subcategoryString: string = subCategoryInput.current!.value;
+
+    if(props.tableUse === "daily"){
+      if(subcategoryString === "" || subcategoryString === " "){
+        subcategoryString = todaysDate();
+      }
+    }
+    props.subcategoryMap!.set(uId, {subCategory: subcategoryString,
                                     amount: Number(amountInput.current!.value), 
                                     categoryId: props.categoryId!});                              
 
@@ -331,7 +330,7 @@ function CustomTableBodyCell(props:{id: string, category: string, amount: number
       {props.toggleEdit ? 
         <div className="custom-table-body-cell-options">
           <button data-id={props.id} onClick={deleteButtonHandler} className="custom-table-body-delete-button">
-            <img src="./src/assets/manager-icons/delete-48px.svg" alt="delete" className="manager-icons" />
+            <img src={deleteIcon} alt="delete" className="manager-icons" />
           </button>
         </div> : null}
     </div>
@@ -342,7 +341,7 @@ function CustomTableBody(props: {tableMap: TypeCustomTable["categoryMap"] | null
                           toggleEdit: boolean, setTableMap: Function, budget: number,
                             subcategoryMap: TypeCustomTable["subCategoryMap"] | null,
                               setSubcategoryMap: Function, setChange: Function,
-                                addToStack: Function}){
+                                addToStack: Function, tableUse: string}){
 
    // ******* States ******* //
   const [categoryId, setCategoryId] = useState<string | null>(null);
@@ -387,11 +386,11 @@ function CustomTableBody(props: {tableMap: TypeCustomTable["categoryMap"] | null
     <div id="custom-table-body">
       <div id="custom-table-body-header">
         <div id="custom-table-body-search-container">
-          <img src="./src/assets/manager-icons/search-48px.svg" alt="search" className="manager-icons" />
+          <img src={searchIcon} alt="search" className="manager-icons" />
           <input type="text" placeholder="Search..." />
         </div>
         <button id="custom-table-body-export-button">
-          <img src="./src/assets/manager-icons/export-48px.svg" alt="export" className="manager-icons" />
+          <img src={exportIcon} alt="export" className="manager-icons" />
           <p>Export</p>
         </button>
       </div>
@@ -413,14 +412,14 @@ function CustomTableBody(props: {tableMap: TypeCustomTable["categoryMap"] | null
         <SubCategory tableMap={props.tableMap} toggleEdit={props.toggleEdit} 
                       categoryId={categoryId} setSubcategoryMap={props.setSubcategoryMap}
                       subcategoryMap={props.subcategoryMap} setTableMap={props.setTableMap} setChange={props.setChange}
-                      addToStack={props.addToStack}/>
+                      addToStack={props.addToStack} tableUse={props.tableUse} />
       </div>
     </div>
   );
 }
 
 
-function CustomTable(){
+function CustomTable(props: {title: string, tableUse: string, stack: Stack<any>}){
   // ******* States ******* //
   const [tableMap, setTableMap] = useState<TypeCustomTable["categoryMap"] | null>(null);
   const [subcategoryMap, setSubcategoryMap] = useState<TypeCustomTable["subCategoryMap"] | null>(null);
@@ -443,9 +442,9 @@ function CustomTable(){
   }
 
   function addToStack(): void{
-    stack.insert({...oldData, oldTableMap: new Map(tableMap!), oldSubMap: new Map(subcategoryMap!),
+    props.stack.insert({...oldData, oldTableMap: new Map(tableMap!), oldSubMap: new Map(subcategoryMap!),
       oldBudget: budget});
-      console.log(stack.head?.value);
+      console.log(props.stack.head?.value);
   }
 
   // ******* Button Handlers ******* //
@@ -472,7 +471,15 @@ function CustomTable(){
   function insertButtonHandler(): void{
     const uId: string = uniqueId();
     const newTableMap: TypeCustomTable["categoryMap"] = new Map(tableMap);
-    newTableMap.set(uId, {category: categoryInput.current!.value, totalAmount: Number(amountInput.current!.value)});
+    let categoryString: string = categoryInput.current!.value;
+
+    if(props.tableUse === "daily"){
+      if(categoryString === "" || categoryString === " "){
+        categoryString = todaysDate();
+      }
+    }
+
+    newTableMap.set(uId, {category: categoryString, totalAmount: Number(amountInput.current!.value)});
     setTableMap(newTableMap);
     setChange(prev => prev = true);
     addToStack();
@@ -485,14 +492,14 @@ function CustomTable(){
   }
 
   function undoButtonHandler(): void{
-    const previousData = stack.pop();
+    const previousData = props.stack.pop();
 
     if(!previousData){
       setChange(prev => prev = false);
       return;
     }
 
-    if(stack.length === 0){
+    if(props.stack.length === 0){
       setChange(prev => prev = false);
     }
 
@@ -532,7 +539,7 @@ function CustomTable(){
   return(
     <div id="custom-table">
       <div id="custom-table-header">
-        <h1>Money Manager</h1>
+        <h1>{props.title}</h1>
         <div id="custom-table-menu">
           <button onClick={displayEditOptions} className="manager-buttons">Edit</button>
           {toggleInsert ? 
@@ -547,9 +554,9 @@ function CustomTable(){
           <button onClick={displayInsert} className="manager-buttons">Insert</button>}
         </div>
         <div id="custom-table-saving-options">
-          {stack.length > 0 ? 
+          {props.stack.length > 0 ? 
           <button onClick={undoButtonHandler}>
-            <img src="./src/assets/manager-icons/undo-48px.svg" alt="Undo" title="Undo" className="manager-icons" />
+            <img src={undoIcon} alt="Undo" title="Undo" className="manager-icons" />
           </button> : null}
           <button id="custom-table-save-button" className="manager-buttons" 
                   onClick={saveButtonHandler}
@@ -560,7 +567,7 @@ function CustomTable(){
       </div>
       <CustomTableBody tableMap={tableMap} toggleEdit={toggleEdit} setTableMap={setTableMap} budget={budget}
                         subcategoryMap={subcategoryMap} setSubcategoryMap={setSubcategoryMap} setChange={setChange} 
-                          addToStack={addToStack}/>
+                          addToStack={addToStack} tableUse={props.tableUse} />
       <CustomTableBottom tableMap={tableMap} toggleEdit={toggleEdit} budget={budget} subcategoryMap={subcategoryMap}
                           setChange={setChange} />
     </div>

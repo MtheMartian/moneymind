@@ -7,7 +7,8 @@ export default function ManagerSideMenu(){
       <ul id="manager-side-menu-table-section">
         Budget Tables
         <li>
-          <Link to={"/manager/table"}>Monthly Table</Link>
+          <Link to={"/manager"}>Monthly Table</Link>
+          <Link to={"/manager/daily"}>Daily Table</Link>
         </li>
       </ul>
     </nav>

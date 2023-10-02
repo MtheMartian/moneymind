@@ -29,3 +29,10 @@ export function editInputs(e: ChangeEvent<HTMLInputElement>, currentValue: strin
 
   return inputValue;
 }
+
+export function uniqueId(): string{
+  const prefix: string = "uniqueId-";
+  const timeStamp: string = Date.now().toString(36);
+  let counter: number = 0;
+  return `${prefix}${timeStamp}-${counter++}-${crypto.getRandomValues(new Uint32Array(1))[0].toString(36)}`;
+}
