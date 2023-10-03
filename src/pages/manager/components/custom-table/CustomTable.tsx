@@ -6,7 +6,7 @@ import { TypeCustomTable } from './custom-table-types';
 import { user } from '../../../../data/user';
 import { editInputs, uniqueId } from '../../manager';
 import { Stack } from '../../../../ts/dsa';
-import { oldData, todaysDate } from './custom-table';
+import { oldData, todaysDate, linkMap } from './custom-table';
 import exportIcon from '../../../../assets/manager-icons/export-48px.svg';
 import searchIcon from '../../../../assets/manager-icons/search-48px.svg';
 import undoIcon from '../../../../assets/manager-icons/undo-48px.svg';
@@ -358,6 +358,19 @@ function CustomTableBody(props: {tableMap: TypeCustomTable["categoryMap"] | null
   }
 
   // ******* Functions ******* //
+  function storeDailyEntries(categoryId: string, summedAmount: number): void{
+    if(summedAmount <= 0){
+      return;
+    }
+
+    const convertToMonthly: number = summedAmount / 28;
+    const currentCategory = props.tableMap!.get(categoryId);
+    linkMap.set(categoryId, {...currentCategory, totalAmount: Number(convertToMonthly.toFixed(2))});
+    const myJSON: string = JSON.stringify(Array.from(linkMap.entries()));
+    console.log(myJSON);
+    sessionStorage.setItem("linkMap", myJSON);
+  }
+
   function totalAmount(categoryId: string, initalAmount: number): number{
     const subcategories = Array.from(props.subcategoryMap!.values());
     let summedAmounts: number = initalAmount;
@@ -367,6 +380,10 @@ function CustomTableBody(props: {tableMap: TypeCustomTable["categoryMap"] | null
         summedAmounts += subcategory.amount;
       }
     });
+
+    if(props.tableUse === "daily"){
+      storeDailyEntries(categoryId, summedAmounts);
+    }
 
     return summedAmounts;
   }
@@ -419,10 +436,13 @@ function CustomTableBody(props: {tableMap: TypeCustomTable["categoryMap"] | null
 }
 
 
-function CustomTable(props: {title: string, tableUse: string, stack: Stack<any>}){
+function CustomTable(props: {title: string, tableUse: string, stack: Stack<any>,
+                              currentTable: TypeCustomTable["categoryMap"] | null, 
+                              currentSubcategories: TypeCustomTable["subCategoryMap"] | null}){
+
   // ******* States ******* //
-  const [tableMap, setTableMap] = useState<TypeCustomTable["categoryMap"] | null>(null);
-  const [subcategoryMap, setSubcategoryMap] = useState<TypeCustomTable["subCategoryMap"] | null>(null);
+  const [tableMap, setTableMap] = useState<TypeCustomTable["categoryMap"] | null>(props.currentTable);
+  const [subcategoryMap, setSubcategoryMap] = useState<TypeCustomTable["subCategoryMap"] | null>(props.currentSubcategories);
   const [toggleInsert, setToggleInsert] = useState<boolean>(false);
   const [toggleEdit, setToggleEdit] = useState<boolean>(false);
   const [budget, setBudget] = useState<number>(0);
@@ -512,20 +532,20 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<any>}
 
   // ******* UseEffects ******* //
   useEffect(()=>{
-    setTableMap(prev => prev = new Map<string, {category: string, totalAmount: number}>());
+    setTableMap(prev => prev = props.currentTable);
 
     return()=>{
       setTableMap(prev => prev = null);
     }
-  }, [])
+  }, [props.currentTable])
 
   useEffect(()=>{
-    setSubcategoryMap(prev => prev = new Map());
+    setSubcategoryMap(prev => prev = props.currentSubcategories);
 
     return()=>{
       setSubcategoryMap(prev => prev = null);
     }
-  }, [])
+  }, [props.currentSubcategories])
 
   useEffect(()=>{
     setBudget(prev => prev = user.budget);

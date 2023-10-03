@@ -12,3 +12,5 @@ export function todaysDate(): string{
   const month: number = currentDate.getMonth() + 1;
   return `${currentDate.getFullYear()}/${month}/${currentDate.getDate()}`;
 }
+
+export const linkMap = new Map(); // Used to link daily table to the monthly one
