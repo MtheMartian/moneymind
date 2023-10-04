@@ -1,8 +1,46 @@
+:root{
+  --primary-color: rgb(111, 252, 195);
+}
+
 #manager-side-menu{
-  min-width: 21em;
   position: fixed;
-  left: 0;
-  top: 70px;
-  bottom: 80px;
-  border-right: 2px solid rgb(153, 153, 153);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1rem;
+  left: 21px;
+  top: 90px;
+  bottom: 100px;
+  border-radius: 10px;
+  box-shadow: 1px 3px 10px rgba(111, 252, 195, 1);
+  padding: 2rem;
+  z-index: 100;
+}
+
+.manager-side-menu-sections{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.manager-side-menu-sections li{
+  text-align: center;
+  border-bottom: 2px solid rgb(102, 102, 102, 0.1);
+  width: 100%;
+  padding: 1rem;
+  transition: 150ms border-bottom;
+}
+
+.manager-side-menu-sections li:hover{
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.manager-side-menu-header{
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 3px;
 }
