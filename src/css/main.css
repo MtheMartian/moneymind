@@ -6,14 +6,17 @@ body{
 }
 
 #root{
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-items: center;
 }
 
 #money-manager{
   margin-top: 70px;
-  margin-left: 21em;
+  margin-left: 11em;
   display: grid;
   place-items: start;
-  height: calc(100vh - 70px);
+  height: calc(100vh - 80px);
   width: calc(100vw - 21em);
 }

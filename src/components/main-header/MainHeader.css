@@ -4,5 +4,6 @@
   top: 0;
   left: 0;
   right: 0;
-  border-bottom: 2px solid rgb(153, 153, 153);
+  background-color: rgb(111, 252, 195);
+  z-index: 100;
 }
