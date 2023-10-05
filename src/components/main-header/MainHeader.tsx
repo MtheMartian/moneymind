@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import './MainHeader.css';
+import logo from '../../assets/mmlogo.webp';
 
 export default function MainHeader(){
   return(
@@ -7,7 +8,9 @@ export default function MainHeader(){
       <nav>
         <ul>
           <li>
-            <Link to={"/manager"}>Manager</Link>
+            <Link to={"/manager"}>
+              <img className="logo" src={logo} alt="MoneyMind" />
+            </Link>
           </li>
         </ul>
       </nav>

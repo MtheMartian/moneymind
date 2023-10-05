@@ -10,12 +10,13 @@
   justify-content: flex-start;
   gap: 1rem;
   left: 21px;
-  top: 90px;
+  top: 100px;
   bottom: 100px;
   border-radius: 10px;
   box-shadow: 1px 3px 10px rgba(111, 252, 195, 1);
   padding: 2rem;
   z-index: 100;
+  background-color: white;
 }
 
 .manager-side-menu-sections{

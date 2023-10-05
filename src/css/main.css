@@ -13,10 +13,11 @@ body{
 }
 
 #money-manager{
-  margin-top: 70px;
-  margin-left: 11em;
+  margin-top: 80px;
+  margin-left: 21em;
   display: grid;
   place-items: start;
   height: calc(100vh - 80px);
   width: calc(100vw - 21em);
+  border: 1px solid red;
 }
