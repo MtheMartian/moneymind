@@ -3,11 +3,13 @@
   --custom-table-grid: repeat(4, 1fr);
   --custom-table-border: 2px solid rgb(102, 102, 102);
   --custom-table-radius: 10px;
+  --primary-color: rgb(111, 252, 195);
+  --secondary-color: rgb(151, 247, 209);
 }
 
 /* ------- Custom Table (Main) ------- */
 #custom-table{
-  width: 95%;
+  width: 90%;
   display: block;
   padding-left: 5em;
   padding-top: 1em;
@@ -83,7 +85,7 @@
   align-items: flex-start;
   justify-content: flex-start;
   background-color: white;
-  border: var(--custom-table-border);
+  box-shadow: 1px 3px 10px rgb(150, 150, 150);
   border-bottom: none;
   border-radius: var(--custom-table-radius);
   border-bottom-left-radius: 0;
@@ -247,9 +249,9 @@
   justify-content: space-between;
   padding: 1em;
   width: 100%;
-  background-color: rgb(111, 252, 195);
+  background-color: var(--primary-color);
   border-bottom-left-radius: var(--custom-table-radius);
   border-bottom-right-radius: var(--custom-table-radius);
-  border: var(--custom-table-border);
+  box-shadow: 1px 5px 10px -1px rgb(150, 150, 150);
   border-top: none;
 }
