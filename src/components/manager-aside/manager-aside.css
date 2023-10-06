@@ -13,10 +13,11 @@
   top: 100px;
   bottom: 100px;
   border-radius: 10px;
-  box-shadow: 1px 3px 10px rgba(111, 252, 195, 1);
+  box-shadow: 1px 3px 10px rgb(150, 150, 150);;
   padding: 2rem;
   z-index: 100;
   background-color: white;
+  width: 14rem;
 }
 
 .manager-side-menu-sections{
