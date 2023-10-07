@@ -25,6 +25,16 @@ input[type=number]{
   appearance: textfield;
 }
 
+input:not(.cell-inputs, #budget-input){
+  border-radius: var(--custom-table-radius);
+  padding: 7px;
+  border: 2px solid transparent;
+}
+
+input:focus:not(.cell-inputs, #budget-input){
+  border: 2px solid rgb(111, 252, 195);
+}
+
 .overlay{
   position: fixed;
   top: 0;
@@ -34,6 +44,7 @@ input[type=number]{
   display: grid;
   place-items: center;
   background-color: rgba(0, 0, 0, 0.7);
+  z-index: 101;
 }
 
 .manager-buttons{

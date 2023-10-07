@@ -72,9 +72,9 @@ function CustomTableBottom(props: {tableMap: TypeCustomTable["categoryMap"] | nu
   return(
     <div id="custom-table-bottom">
       <p><span style={{fontWeight: 700}}>Total:</span> {grandTotal}</p>
-      <div>
+      <div className="custom-table-bottom-budget-wrapper">
         <label style={{fontWeight: 700}}>Budget:</label>
-        <input type="text" inputMode="numeric" pattern='[0-9]*'
+        <input id="budget-input" type="text" inputMode="numeric" pattern='[0-9]*'
                 placeholder='Budget' value={budgetInputValue} 
                   ref={budgetInput} onChange={updateInput} 
                     disabled={props.toggleEdit ? undefined : true}/>
@@ -128,9 +128,9 @@ function SubCategoryCell(props:{id: string, subcategory: string, amount: number,
                             
   return(
     <div className={`custom-table-body-cell subcategory-cell ${props.toggleEdit ? null : "disable-hover"}`}>
-      <input type="text" value={subcategoryValue} 
+      <input type="text" className="cell-inputs" value={subcategoryValue} 
               disabled={props.toggleEdit ? undefined : true} onChange={subcategoryUpdate} />
-      <input type="text" inputMode="numeric" pattern='[0-9]*' value={amountValue}
+      <input type="text" className="cell-inputs" inputMode="numeric" pattern='[0-9]*' value={amountValue}
               disabled={props.toggleEdit ? undefined : true} onChange={amountUpdate} />
       {props.toggleEdit ? 
       <div className="custom-table-body-cell-options">
@@ -211,18 +211,18 @@ function SubCategory(props: {tableMap: TypeCustomTable["categoryMap"] | null,
       {addSubcategoryForm ? 
       <div className="overlay">
         <div id="add-subcategory-form">
-          <p>Add Entry</p>
+          <h3>Add Entry</h3>
           <div>
-            <label>Entry</label>
-            <input type="text" placeholder="SubCategory" ref={subCategoryInput}/>
+            <label>Entry:</label>
+            <input type="text" placeholder="SubCategory" autoFocus ref={subCategoryInput} />
           </div>
           <div>
-            <label>Amount</label>
+            <label>Amount:</label>
             <input type="number" placeholder="Amount" ref={amountInput}/>
           </div>
-          <div>
-            <button onClick={addButtonHandler}>Add</button>
-            <button onClick={displayAddSubCategoryForm}>Cancel</button>
+          <div id="add-subcategory-form-options">
+            <button className="manager-buttons" onClick={addButtonHandler}>Add</button>
+            <button className="manager-buttons" onClick={displayAddSubCategoryForm}>Cancel</button>
           </div>
         </div>
       </div> : null}
@@ -323,9 +323,9 @@ function CustomTableBodyCell(props:{id: string, category: string, amount: number
     <div data-id={props.id} className="custom-table-body-cell non-subcategory-cell clickable " 
           style={{boxShadow: highlightCell(props.amount)}}
             onClick={props.toggleEdit ? undefined : props.displaySubCategories}>
-      <input type="text" value={categoryValue} 
+      <input type="text" className="cell-inputs" value={categoryValue} 
               disabled={props.toggleEdit ? undefined : true} onChange={categoryUpdate} />
-      <input type="text" inputMode="numeric" pattern='[0-9]*' value={amountValue} 
+      <input type="text" className="cell-inputs" inputMode="numeric" pattern='[0-9]*' value={amountValue} 
               disabled={props.toggleEdit ? undefined : true} onChange={amountUpdate} />
       {props.toggleEdit ? 
         <div className="custom-table-body-cell-options">
@@ -412,19 +412,21 @@ function CustomTableBody(props: {tableMap: TypeCustomTable["categoryMap"] | null
         </button>
       </div>
       <div id="custom-table-body-content">
-        <div id="custom-table-body-cells">
+        <div id="custom-table-body-cells-wrapper">
           <div id="custom-table-body-sections">
             <p>Category</p>
             <p>Amount</p>
             <p>Initial Amount</p>
             <p>Last Updated</p>
           </div>
-          {categories.map((category) =>
-            <CustomTableBodyCell id={category[0]} category={category[1].category} amount={totalAmount(category[0], category[1].totalAmount)}
-            budget={props.budget} tableMap={props.tableMap} setTableMap={props.setTableMap}
-            displaySubCategories={displaySubcategories} toggleEdit={props.toggleEdit} key={category[0]} setChange={props.setChange}
-            addToStack={props.addToStack} subCategoryMap={props.subcategoryMap} setCategoryId={setCategoryId} />
-          )}
+          <div id="custom-table-body-cells">
+            {categories.map((category) =>
+              <CustomTableBodyCell id={category[0]} category={category[1].category} amount={totalAmount(category[0], category[1].totalAmount)}
+              budget={props.budget} tableMap={props.tableMap} setTableMap={props.setTableMap}
+              displaySubCategories={displaySubcategories} toggleEdit={props.toggleEdit} key={category[0]} setChange={props.setChange}
+              addToStack={props.addToStack} subCategoryMap={props.subcategoryMap} setCategoryId={setCategoryId} />
+            )}
+          </div>
         </div>
         <SubCategory tableMap={props.tableMap} toggleEdit={props.toggleEdit} 
                       categoryId={categoryId} setSubcategoryMap={props.setSubcategoryMap}
@@ -564,7 +566,7 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<any>,
           <button onClick={displayEditOptions} className="manager-buttons">Edit</button>
           {toggleInsert ? 
           <div id="custom-table-insert">
-            <input type="text" placeholder="Category" ref={categoryInput} />
+            <input type="text" placeholder="Category" autoFocus ref={categoryInput} />
             <input type="number" placeholder="Amount" ref={amountInput} />
             <div id="custom-table-insert-options">
               <button onClick={insertButtonHandler} className="manager-buttons">Add</button>
