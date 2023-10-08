@@ -4,7 +4,7 @@ import './custom-table.css';
 import '../../manager.css';
 import { TypeCustomTable } from './custom-table-types';
 import { user } from '../../../../data/user';
-import { editInputs, uniqueId } from '../../manager';
+import { editInputs, uniqueId, checkIfInputEmpty, checkIfInputEmptyCell } from '../../manager';
 import { Stack } from '../../../../ts/dsa';
 import { oldData, todaysDate, linkMap } from './custom-table';
 import exportIcon from '../../../../assets/manager-icons/export-48px.svg';
@@ -46,7 +46,8 @@ function CustomTableBottom(props: {tableMap: TypeCustomTable["categoryMap"] | nu
   // ******* Input Handlers ******* //
   function updateInput(e: ChangeEvent<HTMLInputElement>): void{
     props.setChange(true);
-    const inputs: string = editInputs(e, budgetInputValue, "number");
+    const inputs: string = editInputs(e, budgetInputValue, "number", budgetInput.current!.selectionStart!);
+    console.log(budgetInput.current!.selectionStart!);
     oldData.oldBudget = Number(inputs);
     setBudgetInputValue(prev => prev = inputs);
   }
@@ -69,6 +70,17 @@ function CustomTableBottom(props: {tableMap: TypeCustomTable["categoryMap"] | nu
     }
   }, [budgetInputValue, props.tableMap, props.subcategoryMap])
 
+  useEffect(()=>{
+    if(budgetInput.current){
+      const currentCaretPosition = budgetInput.current!.selectionStart;
+
+      budgetInput.current!.selectionStart = currentCaretPosition;
+
+      budgetInput.current!.selectionStart = currentCaretPosition;
+      budgetInput.current!.selectionEnd = currentCaretPosition;
+    }
+  }, [budgetInputValue]);
+
   return(
     <div id="custom-table-bottom">
       <p><span style={{fontWeight: 700}}>Total:</span> {grandTotal}</p>
@@ -89,6 +101,10 @@ function SubCategoryCell(props:{id: string, subcategory: string, amount: number,
                           tableMap: TypeCustomTable["categoryMap"] | null, setTableMap: Function,
                           toggleEdit: boolean, setChange: Function, addToStack: Function}){
 
+  // ******* References ******* //
+  const amountInputRef = useRef<HTMLInputElement>(null);
+  const subcategoryInputRef = useRef<HTMLInputElement>(null);
+
   // ******* States ******* //
   const [subcategoryValue, setSubcategoryValue] = useState<string>(props.subcategory);
   const [amountValue, setAmountValue] = useState<string>(String(props.amount));
@@ -102,18 +118,32 @@ function SubCategoryCell(props:{id: string, subcategory: string, amount: number,
   // ******* Input Handlers ******* //
   function amountUpdate(e: ChangeEvent<HTMLInputElement>): void{
     props.setChange(true);
-    const inputs: string = editInputs(e, amountValue, "number");
+    const currentElement: HTMLInputElement = e.currentTarget;
+
+    const inputs: string = editInputs(e, amountValue, "number", amountInputRef.current!.selectionStart!);
     const currSubcategory = props.subcategoryMap!.get(props.id)!;
-    props.subcategoryMap!.set(props.id, {...currSubcategory, amount: Number(inputs)});
     setAmountValue(prev => prev = inputs);
+
+    if(checkIfInputEmpty(currentElement) || Number(currentElement.value) <= 0){
+      return;
+    }
+
+    props.subcategoryMap!.set(props.id, {...currSubcategory, amount: Number(inputs)});
   }
 
   function subcategoryUpdate(e: ChangeEvent<HTMLInputElement>): void{
+
     props.setChange(true);
-    const inputs: string = editInputs(e, subcategoryValue, "string");
+
+    const inputs: string = editInputs(e, subcategoryValue, "string", subcategoryInputRef.current!.selectionStart!);
     const currSubcategory = props.subcategoryMap!.get(props.id)!;
-    props.subcategoryMap!.set(props.id, {...currSubcategory, subCategory: inputs});
     setSubcategoryValue(prev => prev = inputs);
+
+    if(checkIfInputEmptyCell(e)){
+      return;
+    }
+
+    props.subcategoryMap!.set(props.id, {...currSubcategory, subCategory: inputs});
   }
 
   // ******* Button Handlers ******* //
@@ -125,6 +155,25 @@ function SubCategoryCell(props:{id: string, subcategory: string, amount: number,
     props.subcategoryMap!.delete(id);
     updateSubcategoryMap();
   }
+
+  // ******* UseEffects ******* //
+  useEffect(()=>{
+    if(amountInputRef.current){
+      const caretPosition = amountInputRef.current.selectionStart!;
+
+      amountInputRef.current.selectionStart = caretPosition;
+      amountInputRef.current.selectionStart = caretPosition;
+    }
+  }, [amountValue]);
+
+  useEffect(()=>{
+    if(subcategoryInputRef.current){
+      const caretPosition = subcategoryInputRef.current.selectionStart!;
+
+      subcategoryInputRef.current.selectionStart = caretPosition;
+      subcategoryInputRef.current.selectionStart = caretPosition;
+    }
+  }, [subcategoryValue]);
                             
   return(
     <div className={`custom-table-body-cell subcategory-cell ${props.toggleEdit ? null : "disable-hover"}`}>
@@ -171,7 +220,15 @@ function SubCategory(props: {tableMap: TypeCustomTable["categoryMap"] | null,
   }, [props.subcategoryMap, props.tableMap]);
   
   // ******* Button Handlers ******* //
-  function addButtonHandler(){
+  function addButtonHandler(): void{
+    if(checkIfInputEmpty(subCategoryInput.current!) && props.tableUse !== "daily"){
+      return;
+    }
+
+    if(checkIfInputEmpty(amountInput.current!) || Number(amountInput.current!.value) <= 0){
+      return;
+    }
+
     props.addToStack();
     props.setChange(true);
     const uId: string = uniqueId();
@@ -247,7 +304,11 @@ function CustomTableBodyCell(props:{id: string, category: string, amount: number
                               displaySubCategories: MouseEventHandler<HTMLDivElement>, setChange: Function,
                               addToStack: Function, subCategoryMap: TypeCustomTable["subCategoryMap"] | null,
                               setCategoryId: Function}){
- 
+  // ******* References ******* //
+  const categoryInput = useRef<HTMLInputElement>(null);
+  const amountInput = useRef<HTMLInputElement>(null);
+
+
   // ******* States ******* //                             
   const [amountValue, setAmountValue] = useState<string>("0");
   const [categoryValue, setCategoryValue] = useState<string>("");                            
@@ -283,7 +344,7 @@ function CustomTableBodyCell(props:{id: string, category: string, amount: number
   // ******* Input Handlers ******* //
   function amountUpdate(e: ChangeEvent<HTMLInputElement>): void{
     props.setChange(true);
-    const inputs: string = editInputs(e, amountValue, "number");
+    const inputs: string = editInputs(e, amountValue, "number", amountInput.current!.selectionStart!);
     const currCategory = props.tableMap!.get(props.id)!;
     props.tableMap!.set(props.id, {...currCategory, totalAmount: Number(inputs)});
     setAmountValue(prev => prev = inputs);
@@ -291,10 +352,17 @@ function CustomTableBodyCell(props:{id: string, category: string, amount: number
 
   function categoryUpdate(e: ChangeEvent<HTMLInputElement>): void{
     props.setChange(true);
-    const inputs: string = editInputs(e, categoryValue, "string");
+    const currentElement: HTMLInputElement = e.currentTarget;
+
+    const inputs: string = editInputs(e, categoryValue, "string", categoryInput.current!.selectionStart!);
     const currCategory = props.tableMap!.get(props.id)!;
-    props.tableMap!.set(props.id, {...currCategory, category: inputs});
     setCategoryValue(prev => prev = inputs);
+
+    if(checkIfInputEmpty(currentElement)){
+      return;
+    }
+
+    props.tableMap!.set(props.id, {...currCategory, category: inputs});
   }
 
    // ******* Button Handlers ******* //
@@ -318,6 +386,24 @@ function CustomTableBodyCell(props:{id: string, category: string, amount: number
       setCategoryValue(prev => prev = "");
     }
   }, [props.amount, props.budget])
+
+  useEffect(()=>{
+    if(amountInput.current){
+      const caretPosition = amountInput.current.selectionStart!;
+
+      amountInput.current.selectionStart = caretPosition;
+      amountInput.current.selectionStart = caretPosition;
+    }
+  }, [amountValue]);
+
+  useEffect(()=>{
+    if(categoryInput.current){
+      const caretPosition = categoryInput.current.selectionStart!;
+
+      categoryInput.current.selectionStart = caretPosition;
+      categoryInput.current.selectionStart = caretPosition;
+    }
+  }, [categoryValue]);
 
   return(
     <div data-id={props.id} className="custom-table-body-cell non-subcategory-cell clickable " 
@@ -494,6 +580,10 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<any>,
     const uId: string = uniqueId();
     const newTableMap: TypeCustomTable["categoryMap"] = new Map(tableMap);
     let categoryString: string = categoryInput.current!.value;
+
+    if(checkIfInputEmpty(categoryInput.current!) && props.tableUse !== "daily"){
+      return;
+    }
 
     if(props.tableUse === "daily"){
       if(categoryString === "" || categoryString === " "){
