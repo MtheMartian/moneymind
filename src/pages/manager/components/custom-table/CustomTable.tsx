@@ -4,7 +4,8 @@ import './custom-table.css';
 import '../../manager.css';
 import { TypeCustomTable } from './custom-table-types';
 import { user } from '../../../../data/user';
-import { editInputs, uniqueId, checkIfInputEmpty, checkIfInputEmptyCell } from '../../manager';
+import { editInputs, uniqueId, checkIfInputEmpty, checkIfInputEmptyCell,
+          getCaretPosition, caretPosition } from '../../manager';
 import { Stack } from '../../../../ts/dsa';
 import { oldData, todaysDate, linkMap } from './custom-table';
 import exportIcon from '../../../../assets/manager-icons/export-48px.svg';
@@ -25,9 +26,6 @@ function CustomTableBottom(props: {tableMap: TypeCustomTable["categoryMap"] | nu
   // ******* References ******* //
   const budgetInput = useRef<HTMLInputElement>(null);
 
-  // ******* Callbacks ******* //
-  
-
   // ******* Memo ******* //
   const grandTotal = useMemo<number>(()=>{
     let addThemUp: number = 0;
@@ -46,8 +44,7 @@ function CustomTableBottom(props: {tableMap: TypeCustomTable["categoryMap"] | nu
   // ******* Input Handlers ******* //
   function updateInput(e: ChangeEvent<HTMLInputElement>): void{
     props.setChange(true);
-    const inputs: string = editInputs(e, budgetInputValue, "number", budgetInput.current!.selectionStart!);
-    console.log(budgetInput.current!.selectionStart!);
+    const inputs: string = editInputs(e, budgetInputValue, "number", caretPosition);
     oldData.oldBudget = Number(inputs);
     setBudgetInputValue(prev => prev = inputs);
   }
@@ -72,12 +69,9 @@ function CustomTableBottom(props: {tableMap: TypeCustomTable["categoryMap"] | nu
 
   useEffect(()=>{
     if(budgetInput.current){
-      const currentCaretPosition = budgetInput.current!.selectionStart;
-
-      budgetInput.current!.selectionStart = currentCaretPosition;
-
-      budgetInput.current!.selectionStart = currentCaretPosition;
-      budgetInput.current!.selectionEnd = currentCaretPosition;
+      budgetInput.current!.selectionStart = caretPosition;
+      budgetInput.current!.selectionEnd = caretPosition;
+      console.log(`useEffect: ${caretPosition}`);
     }
   }, [budgetInputValue]);
 
@@ -89,7 +83,8 @@ function CustomTableBottom(props: {tableMap: TypeCustomTable["categoryMap"] | nu
         <input id="budget-input" type="text" inputMode="numeric" pattern='[0-9]*'
                 placeholder='Budget' value={budgetInputValue} 
                   ref={budgetInput} onChange={updateInput} 
-                    disabled={props.toggleEdit ? undefined : true}/>
+                    disabled={props.toggleEdit ? undefined : true} 
+                      onClick={getCaretPosition} />
       </div>
       <p><span style={{fontWeight: 700}}>Balance:</span> {balance}</p>
     </div>
