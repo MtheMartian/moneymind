@@ -44,7 +44,7 @@ function CustomTableBottom(props: {tableMap: TypeCustomTable["categoryMap"] | nu
   // ******* Input Handlers ******* //
   function updateInput(e: ChangeEvent<HTMLInputElement>): void{
     props.setChange(true);
-    const inputs: string = editInputs(e, budgetInputValue, "number", caretPosition);
+    const inputs: string = editInputs(e, budgetInputValue, "number");
     oldData.oldBudget = Number(inputs);
     setBudgetInputValue(prev => prev = inputs);
   }
@@ -84,7 +84,7 @@ function CustomTableBottom(props: {tableMap: TypeCustomTable["categoryMap"] | nu
                 placeholder='Budget' value={budgetInputValue} 
                   ref={budgetInput} onChange={updateInput} 
                     disabled={props.toggleEdit ? undefined : true} 
-                      onClick={getCaretPosition} />
+                      onSelect={getCaretPosition} />
       </div>
       <p><span style={{fontWeight: 700}}>Balance:</span> {balance}</p>
     </div>
@@ -115,7 +115,7 @@ function SubCategoryCell(props:{id: string, subcategory: string, amount: number,
     props.setChange(true);
     const currentElement: HTMLInputElement = e.currentTarget;
 
-    const inputs: string = editInputs(e, amountValue, "number", amountInputRef.current!.selectionStart!);
+    const inputs: string = editInputs(e, amountValue, "number");
     const currSubcategory = props.subcategoryMap!.get(props.id)!;
     setAmountValue(prev => prev = inputs);
 
@@ -130,7 +130,7 @@ function SubCategoryCell(props:{id: string, subcategory: string, amount: number,
 
     props.setChange(true);
 
-    const inputs: string = editInputs(e, subcategoryValue, "string", subcategoryInputRef.current!.selectionStart!);
+    const inputs: string = editInputs(e, subcategoryValue, "string");
     const currSubcategory = props.subcategoryMap!.get(props.id)!;
     setSubcategoryValue(prev => prev = inputs);
 
@@ -157,25 +157,25 @@ function SubCategoryCell(props:{id: string, subcategory: string, amount: number,
       const caretPosition = amountInputRef.current.selectionStart!;
 
       amountInputRef.current.selectionStart = caretPosition;
-      amountInputRef.current.selectionStart = caretPosition;
+      amountInputRef.current.selectionEnd = caretPosition;
     }
   }, [amountValue]);
 
   useEffect(()=>{
     if(subcategoryInputRef.current){
-      const caretPosition = subcategoryInputRef.current.selectionStart!;
-
       subcategoryInputRef.current.selectionStart = caretPosition;
-      subcategoryInputRef.current.selectionStart = caretPosition;
+      subcategoryInputRef.current.selectionEnd = caretPosition;
     }
   }, [subcategoryValue]);
                             
   return(
     <div className={`custom-table-body-cell subcategory-cell ${props.toggleEdit ? null : "disable-hover"}`}>
       <input type="text" className="cell-inputs" value={subcategoryValue} 
-              disabled={props.toggleEdit ? undefined : true} onChange={subcategoryUpdate} />
+              disabled={props.toggleEdit ? undefined : true} onChange={subcategoryUpdate}
+              onSelect={getCaretPosition} />
       <input type="text" className="cell-inputs" inputMode="numeric" pattern='[0-9]*' value={amountValue}
-              disabled={props.toggleEdit ? undefined : true} onChange={amountUpdate} />
+              disabled={props.toggleEdit ? undefined : true} onChange={amountUpdate} 
+              onSelect={getCaretPosition} />
       {props.toggleEdit ? 
       <div className="custom-table-body-cell-options">
         <button data-id={props.id} onClick={deleteButtonHandler} className="custom-table-body-delete-button">
@@ -339,7 +339,7 @@ function CustomTableBodyCell(props:{id: string, category: string, amount: number
   // ******* Input Handlers ******* //
   function amountUpdate(e: ChangeEvent<HTMLInputElement>): void{
     props.setChange(true);
-    const inputs: string = editInputs(e, amountValue, "number", amountInput.current!.selectionStart!);
+    const inputs: string = editInputs(e, amountValue, "number");
     const currCategory = props.tableMap!.get(props.id)!;
     props.tableMap!.set(props.id, {...currCategory, totalAmount: Number(inputs)});
     setAmountValue(prev => prev = inputs);
@@ -349,7 +349,7 @@ function CustomTableBodyCell(props:{id: string, category: string, amount: number
     props.setChange(true);
     const currentElement: HTMLInputElement = e.currentTarget;
 
-    const inputs: string = editInputs(e, categoryValue, "string", categoryInput.current!.selectionStart!);
+    const inputs: string = editInputs(e, categoryValue, "string");
     const currCategory = props.tableMap!.get(props.id)!;
     setCategoryValue(prev => prev = inputs);
 
@@ -387,16 +387,14 @@ function CustomTableBodyCell(props:{id: string, category: string, amount: number
       const caretPosition = amountInput.current.selectionStart!;
 
       amountInput.current.selectionStart = caretPosition;
-      amountInput.current.selectionStart = caretPosition;
+      amountInput.current.selectionEnd = caretPosition;
     }
   }, [amountValue]);
 
   useEffect(()=>{
     if(categoryInput.current){
-      const caretPosition = categoryInput.current.selectionStart!;
-
       categoryInput.current.selectionStart = caretPosition;
-      categoryInput.current.selectionStart = caretPosition;
+      categoryInput.current.selectionEnd = caretPosition;
     }
   }, [categoryValue]);
 
@@ -405,9 +403,11 @@ function CustomTableBodyCell(props:{id: string, category: string, amount: number
           style={{boxShadow: highlightCell(props.amount)}}
             onClick={props.toggleEdit ? undefined : props.displaySubCategories}>
       <input type="text" className="cell-inputs" value={categoryValue} 
-              disabled={props.toggleEdit ? undefined : true} onChange={categoryUpdate} />
+              disabled={props.toggleEdit ? undefined : true} onChange={categoryUpdate} 
+              onSelect={getCaretPosition} />
       <input type="text" className="cell-inputs" inputMode="numeric" pattern='[0-9]*' value={amountValue} 
-              disabled={props.toggleEdit ? undefined : true} onChange={amountUpdate} />
+              disabled={props.toggleEdit ? undefined : true} onChange={amountUpdate} 
+              onSelect={getCaretPosition} />
       {props.toggleEdit ? 
         <div className="custom-table-body-cell-options">
           <button data-id={props.id} onClick={deleteButtonHandler} className="custom-table-body-delete-button">

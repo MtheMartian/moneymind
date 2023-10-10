@@ -1,37 +1,49 @@
-import { ChangeEvent, MutableRefObject, useRef, SyntheticEvent } from "react";
+import { ChangeEvent, SyntheticEvent } from "react";
 
 export let caretPosition: number = 0;
+let caretPositionEnd: number | null = null;
 
 function validateInput(input: string): boolean{
   return Number.isInteger(Number(input));
 }
 
-function editInputsHelper(caretPosition: number, str: string, toAdd: string | null): string{
+function editInputsHelper(str: string, toAdd: string | null): string{
   let newString: string = str.slice(0, caretPosition) + toAdd;
+  const ending: string = str.slice(caretPosition);
 
-  if(toAdd === null){
+  if(toAdd === null && caretPositionEnd === null){
     newString = str.slice(0, caretPosition - 1);
+    caretPosition = caretPosition - 1;
+
+    return newString + ending;
   }
 
-  return newString + str.slice(caretPosition); 
+  if(caretPositionEnd && toAdd){
+    newString = str.replace(str.substring(caretPosition, caretPositionEnd), toAdd);
+    caretPosition = newString.length;
+    caretPositionEnd = null;
+    return newString;
+  }
+  else if(caretPositionEnd && !toAdd){
+    newString = str.replace(str.substring(caretPosition, caretPositionEnd), "");
+    caretPositionEnd = null;
+    return newString;
+  }
+
+  caretPosition = caretPosition + 1;
+  return newString + ending; 
 }
 
 export function editInputs(e: ChangeEvent<HTMLInputElement>, currentValue: string, 
-                            expectation: string, caretPosition: number): string{
+                            expectation: string): string{
   let inputValue: string = currentValue;
   const input: CompositionEvent = e.nativeEvent as CompositionEvent;
 
-  if(input.data === null){
-    inputValue = editInputsHelper(caretPosition, inputValue, null);
-    caretPosition--;
-  }
-  else if((input.data === " " || input.data === ",") && expectation === "number"){
-    inputValue = editInputsHelper(caretPosition, inputValue, ".");
-    caretPosition++;
+  if((input.data === " " || input.data === ",") && expectation === "number"){
+    inputValue = editInputsHelper(inputValue, ".");
   }
   else{
-    inputValue = editInputsHelper(caretPosition, inputValue, input.data);
-    caretPosition++;
+    inputValue = editInputsHelper(inputValue, input.data);
   }
 
   // if(!validateInput(inputValue) && expectation === "number"){
@@ -42,7 +54,6 @@ export function editInputs(e: ChangeEvent<HTMLInputElement>, currentValue: strin
   //   e.currentTarget.style.cssText = "";
   // }
 
-  console.log(`editInputs: ${caretPosition}`);
   return inputValue;
 }
 
@@ -82,6 +93,11 @@ export function checkIfInputEmptyCell(e: ChangeEvent<HTMLInputElement>): boolean
 
 export function getCaretPosition(e: SyntheticEvent<HTMLInputElement, MouseEvent>): void{
   const currentElement: HTMLInputElement = e.currentTarget;
+  const selection = currentElement.value.substring(currentElement.selectionStart!, currentElement.selectionEnd!);
   caretPosition = currentElement.selectionStart!;
-  console.log(caretPosition);
+  caretPositionEnd = null;
+
+  if(selection !== ""){
+    caretPositionEnd = currentElement.selectionEnd!;
+  }
 }
