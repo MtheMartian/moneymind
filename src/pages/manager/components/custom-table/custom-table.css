@@ -121,10 +121,10 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(30em, 1fr));
   width: 100%;
-  gap: 10em;
+  gap: 5em;
 }
 
-#custom-table-body-cells{
+#custom-table-body-cells-wrapper{
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -133,11 +133,24 @@
   min-width: 100px;
 }
 
+#custom-table-body-cells{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 7px;
+  width: 100%;
+  max-height: 50vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 3.5em;
+}
+
 #custom-table-body-sections{
   display: grid;
   grid-template-columns: var(--custom-table-grid);
   padding: 11px;
-  width: 100%;
+  width: calc(100% - 3.5em);
   background-color: rgba(150, 150, 150, 0.2);
   border-radius: var(--custom-table-radius);
   font-weight: 700;
@@ -196,6 +209,7 @@
   bottom: 0;
   display: grid;
   place-items: center;
+  z-index: 2;
 }
 
 /* Custom Table Body SubCategory */
@@ -214,14 +228,17 @@
 
 #custom-table-body-subcategory-content{
   border-radius: var(--custom-table-radius);
-  padding: 2.3em;
+  padding: 2.3em 3.5em 2.3em 2.3em;
   box-shadow: 1px 3px 10px rgba(102, 102, 102, 0.3);
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 7px;
   width: 100%;
+  max-height: 50vh;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .subcategory-cell{
@@ -238,8 +255,15 @@
   border: 2px solid rgb(102, 102, 102);
   background-color: white;
   border-radius: var(--custom-table-radius);
-  padding: 7px;
+  padding: 1em;
   min-height: 10em;
+}
+
+#add-subcategory-form-options{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
 }
 
 /* ------- Custom Table Bottom ------- */
@@ -254,4 +278,15 @@
   border-bottom-right-radius: var(--custom-table-radius);
   box-shadow: 1px 5px 10px -1px rgb(150, 150, 150);
   border-top: none;
+}
+
+.custom-table-bottom-budget-wrapper{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+
+#budget-input:enabled{
+  border-bottom: 1px solid black;
 }
