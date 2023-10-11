@@ -80,7 +80,7 @@ function CustomTableBottom(props: {tableMap: TypeCustomTable["categoryMap"] | nu
       <p><span style={{fontWeight: 700}}>Total:</span> {grandTotal}</p>
       <div className="custom-table-bottom-budget-wrapper">
         <label style={{fontWeight: 700}}>Budget:</label>
-        <input id="budget-input" type="text" inputMode="numeric" pattern='[0-9]*'
+        <input id="budget-input" type="text" inputMode="numeric"
                 placeholder='Budget' value={budgetInputValue} 
                   ref={budgetInput} onChange={updateInput} 
                     disabled={props.toggleEdit ? undefined : true} 
@@ -194,6 +194,7 @@ function SubCategory(props: {tableMap: TypeCustomTable["categoryMap"] | null,
                         
  // ******* States ******* //
   const [addSubcategoryForm, setAddSubCategoryForm] = useState<boolean>(false);
+  const [amountInputValue, setAmountInputValue] = useState<string>("");
 
   // ******* References ******* //
   const subCategoryInput = useRef<HTMLInputElement>(null);
@@ -213,6 +214,12 @@ function SubCategory(props: {tableMap: TypeCustomTable["categoryMap"] | null,
    const subCategories = useMemo<TypeCustomTable["subCategoryEntries"]>(()=>{
     return props.subcategoryMap ? Array.from(props.subcategoryMap.entries()) : [];
   }, [props.subcategoryMap, props.tableMap]);
+
+  // ******* Input Handlers ******* //
+  function updateInput(e: ChangeEvent<HTMLInputElement>): void{
+    const inputs: string = editInputs(e, amountInputValue, "number");
+    setAmountInputValue(prev => prev = inputs);
+  }
   
   // ******* Button Handlers ******* //
   function addButtonHandler(): void{
@@ -270,7 +277,8 @@ function SubCategory(props: {tableMap: TypeCustomTable["categoryMap"] | null,
           </div>
           <div>
             <label>Amount:</label>
-            <input type="number" placeholder="Amount" ref={amountInput}/>
+            <input type="text"  inputMode="numeric" placeholder="Amount" ref={amountInput} 
+                    onChange={updateInput} onSelect={getCaretPosition} value={amountInputValue} />
           </div>
           <div id="add-subcategory-form-options">
             <button className="manager-buttons" onClick={addButtonHandler}>Add</button>
@@ -530,6 +538,7 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<any>,
   const [toggleEdit, setToggleEdit] = useState<boolean>(false);
   const [budget, setBudget] = useState<number>(0);
   const [change, setChange] = useState<boolean>(false);
+  const [amountInputValue, setAmountInputValue] = useState<string>("");
 
   // ******* References ******* //
   const categoryInput = useRef<HTMLInputElement>(null);
@@ -548,6 +557,12 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<any>,
     props.stack.insert({...oldData, oldTableMap: new Map(tableMap!), oldSubMap: new Map(subcategoryMap!),
       oldBudget: budget});
       console.log(props.stack.head?.value);
+  }
+
+  // ******* Input Handlers ******* //
+  function updateInput(e: ChangeEvent<HTMLInputElement>): void{
+    const inputs: string = editInputs(e, amountInputValue, "number");
+    setAmountInputValue(prev => prev = inputs);
   }
 
   // ******* Button Handlers ******* //
@@ -652,7 +667,8 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<any>,
           {toggleInsert ? 
           <div id="custom-table-insert">
             <input type="text" placeholder="Category" autoFocus ref={categoryInput} />
-            <input type="number" placeholder="Amount" ref={amountInput} />
+            <input type="text"  inputMode="numeric" placeholder="Amount" ref={amountInput} 
+                    onChange={updateInput} onSelect={getCaretPosition} value={amountInputValue} />
             <div id="custom-table-insert-options">
               <button onClick={insertButtonHandler} className="manager-buttons">Add</button>
               <button onClick={displayInsert} className="manager-buttons">Cancel</button>
