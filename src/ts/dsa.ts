@@ -1,3 +1,4 @@
+// ******* Stack ******* //
 class MyNode<T>{
   value: T;
   prev: MyNode<T> | null;
@@ -61,5 +62,80 @@ export class Stack<T>{
   clear(): void{
     this.length = 0;
     this.head = this.tail = null;
+  }
+}
+
+// ******* Binary Search Tree (BST) ******* //
+class BSTNode<T>{
+  value: T;
+  item: [];
+  left: BSTNode<T> | null;
+  right: BSTNode<T> | null;
+
+  constructor(value: T, item: []){
+    this.value = value;
+    this.item = item;
+    this.left = null;
+    this.right = null;
+  }
+}
+
+class BST{
+  length: number;
+  root: BSTNode<number> | null;
+
+  constructor(){
+    this.length = 0;
+    this.root = null;
+  }
+
+  private traverse(): BSTNode<number>[]{
+    const stack: Stack<BSTNode<number>> = new Stack();
+
+    if(this.root){
+      stack.insert(this.root);
+    }
+    else{
+      console.log("BST is empty!");
+      return [];
+    }
+
+    let currentNode: BSTNode<number> | null = this.root;
+    while(stack.length > 0){
+      currentNode = stack.pop();
+
+      while(currentNode){
+        stack.insert(currentNode);
+        currentNode = currentNode.left;
+      }
+
+    }
+    return [];
+  }
+
+  private organizer(node: BSTNode<number>): void{
+    let currentNode = this.root;
+    const stack: Stack<BSTNode<number>> = new Stack();
+
+    while(currentNode){
+      stack.insert(currentNode);
+      if(node.value <= currentNode.value){
+        currentNode = currentNode.left;
+      }
+      else{
+        currentNode = currentNode.right;
+      }
+    }
+
+    const parentNode = stack.pop();
+
+    if(parentNode){
+      if(node.value <= parentNode.value){
+        parentNode.left = node;
+      }
+      else{
+        parentNode.right = node;
+      }
+    }
   }
 }
