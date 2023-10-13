@@ -66,13 +66,13 @@ export class Stack<T>{
 }
 
 // ******* Binary Search Tree (BST) ******* //
-class BSTNode<T>{
+class BSTNode<T, V>{
   value: T;
-  item: [];
-  left: BSTNode<T> | null;
-  right: BSTNode<T> | null;
+  item: V;
+  left: BSTNode<T, V> | null;
+  right: BSTNode<T, V> | null;
 
-  constructor(value: T, item: []){
+  constructor(value: T, item: V){
     this.value = value;
     this.item = item;
     this.left = null;
@@ -80,42 +80,52 @@ class BSTNode<T>{
   }
 }
 
-class BST{
+class BST<V>{
   length: number;
-  root: BSTNode<number> | null;
+  root: BSTNode<number, V> | null;
 
   constructor(){
     this.length = 0;
     this.root = null;
   }
 
-  private traverse(): BSTNode<number>[]{
-    const stack: Stack<BSTNode<number>> = new Stack();
+   traverse(sortType: string): BSTNode<number, V>[]{
+    const stack: Stack<BSTNode<number, V>> = new Stack();
+    const nodes: BSTNode<number, V>[] = [];
 
-    if(this.root){
-      stack.insert(this.root);
-    }
-    else{
+    if(!this.root){
       console.log("BST is empty!");
       return [];
     }
 
-    let currentNode: BSTNode<number> | null = this.root;
-    while(stack.length > 0){
-      currentNode = stack.pop();
+    let currentNode: BSTNode<number, V> | null = this.root;
+    while(stack.length > 0 || currentNode){
 
       while(currentNode){
         stack.insert(currentNode);
-        currentNode = currentNode.left;
+        if(sortType === "desc"){
+          currentNode = currentNode.right;
+        }
+        else{
+          currentNode = currentNode.left;
+        }
       }
 
+      currentNode = stack.pop()!;
+      nodes.push(currentNode);
+      if(sortType === "desc"){
+        currentNode = currentNode.left;
+      }
+      else{
+        currentNode = currentNode.right;
+      }
     }
-    return [];
+    return nodes;
   }
 
-  private organizer(node: BSTNode<number>): void{
+  private organize(node: BSTNode<number, V>): void{
     let currentNode = this.root;
-    const stack: Stack<BSTNode<number>> = new Stack();
+    const stack: Stack<BSTNode<number, V>> = new Stack();
 
     while(currentNode){
       stack.insert(currentNode);
@@ -137,5 +147,21 @@ class BST{
         parentNode.right = node;
       }
     }
+  }
+
+  insert(value: number, item: V): void{
+    const newNode: BSTNode<number, V> = new BSTNode(value, item);
+    this.length++;
+
+    if(!this.root){
+      this.root = newNode;
+      return;
+    }
+
+    this.organize(newNode);
+  }
+
+  remove(item: V){
+    
   }
 }
