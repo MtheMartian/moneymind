@@ -161,7 +161,56 @@ class BST<V>{
     this.organize(newNode);
   }
 
-  remove(item: V){
+  private returnNodeAndparent(item: V): BSTNode<number, V>[]{
+    const stack: Stack<BSTNode<number, V>> = new Stack();
+    const nodes: BSTNode<number, V>[] = Array(2).fill(null);
+
+    let currentNode: BSTNode<number, V> | null = this.root;
+    while(stack.length > 0 || currentNode){
+
+      while(currentNode){
+        stack.insert(currentNode);
+        currentNode = currentNode.left;
+      }
+
+      currentNode = stack.pop()!;
+      if(currentNode.item === item){
+        nodes[1] = currentNode;
+
+        const parentNode = stack.pop();
+        
+        if(parentNode){
+          nodes[0] = parentNode;
+        }
+
+        break;
+      }
+      currentNode = currentNode.right;
+    }
+
+    return nodes;
+  }
+
+  
+  findOne(item: V): BSTNode<number, V>{
+    const nodes: BSTNode<number, V>[] = this.traverse("asc");
+    return nodes[0];
+  }
+
+  remove(item: V): void{
+    if(!this.root){
+      console.log("BST is empty!");
+      return;
+    }
+
+    const retrievedNodes = this.returnNodeAndparent(item);
+
+    if(!retrievedNodes[0] && !retrievedNodes[1]){
+      console.log("Could not find the item.");
+      return;
+    }
+
     
+
   }
 }
