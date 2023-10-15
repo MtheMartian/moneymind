@@ -143,3 +143,52 @@ export function checkIfInputEmpty(element: HTMLInputElement): boolean{
   return false;
 }
 
+// ******* String to weight ******* //
+function findLongestString(strArr: string[]): number{
+  let longest: number = strArr[0].length;
+
+  for(let i: number = 1; i < strArr.length; i++){
+    if(strArr[i].length > longest){
+      longest = strArr[i].length;
+    }
+  }
+
+  return longest;
+}
+
+function returnWeight(char: string): string{
+  const letters = new Map([['a', '1'], ['b', '2'], ['c', '3'], ['d', '4'],
+                          ['e', '5'], ['f', '6'], ['g', '7'], ['h', '8'],
+                          ['i', '9'], ['j', '10'], ['k', '11'], ['l', '12'],
+                          ['m', '13'], ['n', '14'], ['o', '15'], ['p', '16'],
+                          ['q', '17'], ['r', '18'], ['s', '19'], ['t', '20'],
+                          ['u', '21'], ['v', '22'], ['w', '23'], ['x', '24'],
+                          ['y', '25'], ['z', '26']]);
+  
+    if(letters.get(char) === undefined){
+      return "0";
+    }
+  
+  return letters.get(char)!;
+}
+
+function assignWeightToString(str: string, strArr: string[]): number{
+  const longestString: number = findLongestString(strArr);
+  str = str.toLowerCase();
+  let weight: string = "";
+
+  if(Number.isInteger(Number(str[0]))){
+    return 0;
+  }
+
+  for(let i: number = 0; i < str.length; i++){
+    weight += returnWeight(str[i]);
+  }
+
+  for(let i: number = 0; i < (longestString - str.length); i++){
+    weight += "0";
+  }
+
+  return Number(weight);
+}
+
