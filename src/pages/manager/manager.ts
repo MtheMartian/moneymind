@@ -172,23 +172,30 @@ function returnWeight(char: string): string{
   return letters.get(char)!;
 }
 
-function assignWeightToString(str: string, strArr: string[]): number{
+function convertStringsToWeights(strArr: string[]): number[]{
   const longestString: number = findLongestString(strArr);
-  str = str.toLowerCase();
-  let weight: string = "";
+  const weightedStrings: number[] = Array(strArr.length); 
 
-  if(Number.isInteger(Number(str[0]))){
-    return 0;
-  }
+  strArr.forEach((currStr, index) =>{
+    currStr = currStr.toLowerCase();
+    let weight: string = "";
 
-  for(let i: number = 0; i < str.length; i++){
-    weight += returnWeight(str[i]);
-  }
+    if(Number.isInteger(Number(currStr[0]))){
+      weightedStrings[index] = 0;
+    }
+    else{
+      for(let i: number = 0; i < currStr.length; i++){
+        weight += returnWeight(currStr[i]);
+      }
+    
+      for(let i: number = 0; i < (longestString - currStr.length); i++){
+        weight += "0";
+      }
 
-  for(let i: number = 0; i < (longestString - str.length); i++){
-    weight += "0";
-  }
+      weightedStrings[index] = Number(weight);
+    }
+  })
 
-  return Number(weight);
+  return weightedStrings;
 }
 
