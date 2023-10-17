@@ -157,31 +157,39 @@ function findLongestString(strArr: string[]): number{
 }
 
 function returnWeight(char: string): string{
-  const letters = new Map([['a', '1'], ['b', '2'], ['c', '3'], ['d', '4'],
-                          ['e', '5'], ['f', '6'], ['g', '7'], ['h', '8'],
-                          ['i', '9'], ['j', '10'], ['k', '11'], ['l', '12'],
+  const letters = new Map([['a', '01'], ['b', '02'], ['c', '03'], ['d', '04'],
+                          ['e', '05'], ['f', '06'], ['g', '07'], ['h', '08'],
+                          ['i', '09'], ['j', '10'], ['k', '11'], ['l', '12'],
                           ['m', '13'], ['n', '14'], ['o', '15'], ['p', '16'],
                           ['q', '17'], ['r', '18'], ['s', '19'], ['t', '20'],
                           ['u', '21'], ['v', '22'], ['w', '23'], ['x', '24'],
                           ['y', '25'], ['z', '26']]);
   
     if(letters.get(char) === undefined){
-      return "0";
+      return "00";
     }
   
   return letters.get(char)!;
 }
 
-function convertStringsToWeights(strArr: string[]): number[]{
+function convertStringsToWeights(strArr: string[]): Map<number, string[]>{
   const longestString: number = findLongestString(strArr);
-  const weightedStrings: number[] = Array(strArr.length); 
+  const weightedStringsMap: Map<number, string[]> = new Map(); 
 
   strArr.forEach((currStr, index) =>{
     currStr = currStr.toLowerCase();
     let weight: string = "";
 
     if(Number.isInteger(Number(currStr[0]))){
-      weightedStrings[index] = 0;
+      if(weightedStringsMap.get(0) !== undefined){
+        const currItem: string[] = weightedStringsMap.get(0)!;
+        currItem.unshift(currStr);
+
+        weightedStringsMap.set(0, currItem);
+      }
+      else{
+        weightedStringsMap.set(0, [currStr]);
+      }
     }
     else{
       for(let i: number = 0; i < currStr.length; i++){
@@ -189,13 +197,21 @@ function convertStringsToWeights(strArr: string[]): number[]{
       }
     
       for(let i: number = 0; i < (longestString - currStr.length); i++){
-        weight += "0";
+        weight += "00";
       }
 
-      weightedStrings[index] = Number(weight);
+      if(weightedStringsMap.get(Number(weight)) !== undefined){
+        const currItem: string[] = weightedStringsMap.get(Number(weight))!;
+        currItem.unshift(currStr);
+
+        weightedStringsMap.set(Number(weight), currItem);
+      }
+      else{
+        weightedStringsMap.set(Number(weight), [currStr]);
+      }
     }
   })
 
-  return weightedStrings;
+  return weightedStringsMap;
 }
 
