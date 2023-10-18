@@ -1,4 +1,5 @@
 import { ChangeEvent, SyntheticEvent } from "react";
+import { quickSort } from "../../ts/dsa";
 
 // ******* General ******* //
 export function uniqueId(): string{
@@ -172,9 +173,9 @@ function returnWeight(char: string): string{
   return letters.get(char)!;
 }
 
-function convertStringsToWeights(strArr: string[]): Map<number, string[]>{
+export function convertStringsToWeights(strArr: string[], sort: string | null): Map<number, string[]>{
   const longestString: number = findLongestString(strArr);
-  const weightedStringsMap: Map<number, string[]> = new Map(); 
+  let weightedStringsMap: Map<number, string[]> = new Map(); 
 
   strArr.forEach((currStr, index) =>{
     currStr = currStr.toLowerCase();
@@ -211,6 +212,16 @@ function convertStringsToWeights(strArr: string[]): Map<number, string[]>{
       }
     }
   })
+
+  if(sort){
+    const sortedWeights = quickSort(Array.from(weightedStringsMap.keys()), sort);
+    const newMap: Map<number, string[]> = new Map();
+    sortedWeights.forEach(weight =>{
+      newMap.set(weight, weightedStringsMap.get(weight)!);
+    });
+
+    weightedStringsMap = newMap;
+  }
 
   return weightedStringsMap;
 }

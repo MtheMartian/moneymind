@@ -66,18 +66,30 @@ export class Stack<T>{
 }
 
 // ******* QuickSort ******* //
-function partition(low: number, high: number, arr: number[]): number{
+function partition(low: number, high: number, arr: number[], sort: string): number{
   let idx: number = -1;
   const pivot: number = arr[high];
 
   for(let i: number = low; i < high; i++){
-    if(arr[i] <= pivot){
-      idx++;
+    if(sort !== "desc"){
+      if(arr[i] <= pivot){
+        idx++;
+      }
+      else{
+        const temp: number = arr[i];
+        arr[i] = arr[high];
+        arr[high] = temp;
+      }
     }
     else{
-      const temp: number = arr[i];
-      arr[i] = arr[high];
-      arr[high] = temp;
+      if(arr[i] >= pivot){
+        idx++;
+      }
+      else{
+        const temp: number = arr[i];
+        arr[i] = arr[high];
+        arr[high] = temp;
+      }
     }
   }
 
@@ -89,21 +101,21 @@ function partition(low: number, high: number, arr: number[]): number{
   return idx;
 }
 
-function quickSortHelper(low: number, high: number, arr: number[]): number[]{
+function quickSortHelper(low: number, high: number, arr: number[], sort: string): number[]{
   const numArr: number[] = arr;
 
   if(low >= high){
     return numArr;
   }
 
-  const pivot: number = partition(low, high, arr);
+  const pivot: number = partition(low, high, arr, sort);
 
-  quickSortHelper(low, pivot - 1, numArr);
-  quickSortHelper(pivot + 1, high, numArr);
+  quickSortHelper(low, pivot - 1, numArr, sort);
+  quickSortHelper(pivot + 1, high, numArr, sort);
 
   return numArr;
 }
 
-function quickSort(arr: number[]): number[]{
-  return quickSortHelper(0, arr.length - 1, arr);
+export function quickSort(arr: number[], sort: string): number[]{
+  return quickSortHelper(0, arr.length - 1, arr, sort);
 }
