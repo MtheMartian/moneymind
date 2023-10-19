@@ -31,7 +31,7 @@ function CustomTableBottom(props: {tableMap: TypeCustomTable["categoryMap"] | nu
     let addThemUp: number = 0;
     if(props.tableMap && props.subcategoryMap){
       Array.from(props.tableMap.values()).forEach(entry =>{
-        addThemUp += entry.totalAmount;
+        addThemUp += entry.amount;
       });
 
       Array.from(props.subcategoryMap.values()).forEach(entry =>{
@@ -349,7 +349,7 @@ function CustomTableBodyCell(props:{id: string, category: string, amount: number
     props.setChange(true);
     const inputs: string = editInputs(e, amountValue, "number");
     const currCategory = props.tableMap!.get(props.id)!;
-    props.tableMap!.set(props.id, {...currCategory, totalAmount: Number(inputs)});
+    props.tableMap!.set(props.id, {...currCategory, amount: Number(inputs)});
     setAmountValue(prev => prev = inputs);
   }
 
@@ -510,7 +510,7 @@ function CustomTableBody(props: {tableMap: TypeCustomTable["categoryMap"] | null
           </div>
           <div id="custom-table-body-cells">
             {categories.map((category) =>
-              <CustomTableBodyCell id={category[0]} category={category[1].category} amount={totalAmount(category[0], category[1].totalAmount)}
+              <CustomTableBodyCell id={category[0]} category={category[1].category} amount={totalAmount(category[0], category[1].amount)}
               budget={props.budget} tableMap={props.tableMap} setTableMap={props.setTableMap}
               displaySubCategories={displaySubcategories} toggleEdit={props.toggleEdit} key={category[0]} setChange={props.setChange}
               addToStack={props.addToStack} subCategoryMap={props.subcategoryMap} setCategoryId={setCategoryId} />
@@ -601,7 +601,7 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<any>,
       }
     }
 
-    newTableMap.set(uId, {category: categoryString, totalAmount: Number(amountInput.current!.value)});
+    newTableMap.set(uId, {category: categoryString, amount: Number(amountInput.current!.value)});
     setTableMap(newTableMap);
     setChange(prev => prev = true);
     addToStack();
