@@ -119,3 +119,94 @@ function quickSortHelper(low: number, high: number, arr: number[], sort: string)
 export function quickSort(arr: number[], sort: string): number[]{
   return quickSortHelper(0, arr.length - 1, arr, sort);
 }
+
+// ******* Binary Search Tree ******* //
+class BSTNode<T>{
+  value: number;
+  left: BSTNode<T> | null;
+  right: BSTNode<T> | null;
+  item: T;
+
+  constructor(item: T, value: number){
+    this.value = value;
+    this.item = item;
+    this.right = null;
+    this.left = null;
+  }
+}
+
+class CustomBST<T>{
+  length: number;
+  root: BSTNode<T> | null;
+
+  constructor(){
+    this.length = 0;
+    this.root = null;
+  }
+
+  organize(node: BSTNode<T>): void{
+    if(!this.root){
+      return;
+    }
+
+    let currentNode: BSTNode<T> | null = this.root;
+    const stack = new Stack<BSTNode<T>>();
+
+    while(currentNode){
+      stack.insert(currentNode);
+
+      if(node.value > currentNode.value){
+        currentNode = currentNode.right;
+      }
+      else{
+        currentNode = currentNode.left;
+      }
+    }
+
+    currentNode = stack.pop()!;
+
+    if(node.value > currentNode.value){
+      currentNode.right = node;
+    }
+    else{
+      currentNode.left = node;
+    }
+  }
+
+  insert(value: number, item: T): void{
+    const newNode: BSTNode<T> = new BSTNode(item, value);
+    this.length++;
+
+    if(!this.root){
+      this.root = newNode;
+      return;
+    }
+
+    this.organize(newNode);
+  }
+
+  traverse(): BSTNode<T>[]{
+    if(!this.root){
+      console.log("There's nothing to traverse!");
+      return [];
+    }
+
+    const stack = new Stack<BSTNode<T>>();
+    let currentNode: BSTNode<T> | null = this.root;
+    const nodes: BSTNode<T>[] = [];
+
+    while(stack.length > 0 || currentNode){
+
+      while(currentNode){
+        stack.insert(currentNode);
+        currentNode = currentNode.left;
+      }
+
+      currentNode = stack.pop()!;
+      nodes.push(currentNode);
+      currentNode = currentNode.right
+    }
+
+    return nodes;
+  }
+}
