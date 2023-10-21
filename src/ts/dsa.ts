@@ -144,7 +144,7 @@ class CustomBST<T>{
     this.root = null;
   }
 
-  organize(node: BSTNode<T>): void{
+  private organize(node: BSTNode<T>): void{
     if(!this.root){
       return;
     }
@@ -208,5 +208,74 @@ class CustomBST<T>{
     }
 
     return nodes;
+  }
+
+  private returnParentChildNodes(item: T): BSTNode<T>[] | null{
+    const stack = new Stack<BSTNode<T>>();
+    let currentNode: BSTNode<T> | null = this.root;
+    const parentChildNodes: BSTNode<T>[] = Array(2).fill(null);
+
+    while(stack.length > 0 || currentNode){
+
+      while(currentNode){
+        stack.insert(currentNode);
+        currentNode = currentNode.left;
+      }
+
+      currentNode = stack.pop()!;
+      
+      if(Object.is(currentNode.item, item) && stack.length > 0){
+        const parentNode: BSTNode<T> = stack.pop()!;
+        parentChildNodes[0] = parentNode;
+        parentChildNodes[1] = currentNode;
+        return parentChildNodes;
+      }
+      else if(Object.is(currentNode.item, item) && stack.length === 0){
+        parentChildNodes[0] = currentNode;
+        return parentChildNodes;
+      }
+
+      currentNode = currentNode.right
+    }
+
+    return null;
+  }
+
+  remove(item: T): void{
+    if(!this.root){
+      console.log("Nothing to remove!");
+      return;
+    }
+
+    const parentChildNodes = this.returnParentChildNodes(item);
+
+    if(parentChildNodes){
+      this.length--;
+      const [parent, child] = parentChildNodes;
+      
+      if(!child){
+        if(parent.left && !parent.right){
+          this.root = parent.left;
+          return;
+        }
+        else if(!parent.left && parent.right){
+          this.root = parent.right;
+          return;
+        }
+        else if(parent.left && parent.right){
+          this.root = parent.left;
+          this.organize(parent.right);
+          return;
+        }
+        else{
+          this.root = null;
+          return;
+        }
+      }
+      else{
+
+      }
+    }
+    
   }
 }
