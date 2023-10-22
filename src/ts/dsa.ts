@@ -213,7 +213,7 @@ class CustomBST<T>{
   private returnParentChildNodes(item: T): BSTNode<T>[] | null{
     const stack = new Stack<BSTNode<T>>();
     let currentNode: BSTNode<T> | null = this.root;
-    const parentChildNodes: BSTNode<T>[] = Array(2).fill(null);
+    const parentChildNodes: any[] = [null, null];
 
     while(stack.length > 0 || currentNode){
 
@@ -224,15 +224,17 @@ class CustomBST<T>{
 
       currentNode = stack.pop()!;
       
-      if(Object.is(currentNode.item, item) && stack.length > 0){
-        const parentNode: BSTNode<T> = stack.pop()!;
-        parentChildNodes[0] = parentNode;
-        parentChildNodes[1] = currentNode;
-        return parentChildNodes;
-      }
-      else if(Object.is(currentNode.item, item) && stack.length === 0){
-        parentChildNodes[0] = currentNode;
-        return parentChildNodes;
+      if(currentNode){
+        if(currentNode.item === item && stack.length > 0){
+          const parentNode: BSTNode<T> = stack.pop()!;
+          parentChildNodes[0] = parentNode;
+          parentChildNodes[1] = currentNode;
+          return parentChildNodes;
+        }
+        else if(currentNode.item === item && stack.length === 0){
+          parentChildNodes[0] = currentNode;
+          return parentChildNodes;
+        }
       }
 
       currentNode = currentNode.right
@@ -253,7 +255,8 @@ class CustomBST<T>{
       this.length--;
       const [parent, child] = parentChildNodes;
       
-      if(!child){
+      if(!child && parent){
+
         if(parent.left && !parent.right){
           this.root = parent.left;
           return;
@@ -272,10 +275,51 @@ class CustomBST<T>{
           return;
         }
       }
-      else{
+      else if(child && parent){
 
+        if(child.value <= parent.value){
+          if(child.left && !child.right){
+            parent.left = child.left;
+            return;
+          }
+          else if(!child.left && child.right){
+            parent.left = null;
+            this.organize(child.right);
+            return;
+          }
+          else if(child.left && child.right){
+            parent.left = child.left;
+            this.organize(child.right);
+            return;
+          }
+          else{
+            parent.left = null;
+            return;
+          }
+        }
+        else{
+          if(child.left && !child.right){
+            parent.right = null;
+            this.organize(child.left);
+            return;
+          }
+          else if(!child.left && child.right){
+            parent.right = child.right;
+            return;
+          }
+          else if(child.left && child.right){
+            parent.right = child.right;
+            this.organize(child.left);
+            return;
+          }
+          else{
+            parent.right = null;
+            return;
+          }
+        }
       }
     }
-    
+
+    console.log("Unable to find the item.");
   }
 }
