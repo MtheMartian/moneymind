@@ -126,12 +126,14 @@ class BSTNode<T>{
   left: BSTNode<T> | null;
   right: BSTNode<T> | null;
   item: T;
+  id: string;
 
-  constructor(item: T, value: number){
+  constructor(item: T, value: number, id: string){
     this.value = value;
     this.item = item;
     this.right = null;
     this.left = null;
+    this.id = id;
   }
 }
 
@@ -173,8 +175,8 @@ class CustomBST<T>{
     }
   }
 
-  insert(value: number, item: T): void{
-    const newNode: BSTNode<T> = new BSTNode(item, value);
+  insert(value: number, item: T, id: string): void{
+    const newNode: BSTNode<T> = new BSTNode(item, value, id);
     this.length++;
 
     if(!this.root){
@@ -185,7 +187,7 @@ class CustomBST<T>{
     this.organize(newNode);
   }
 
-  traverse(): BSTNode<T>[]{
+  traverse(order: string): BSTNode<T>[]{
     if(!this.root){
       console.log("There's nothing to traverse!");
       return [];
@@ -199,18 +201,28 @@ class CustomBST<T>{
 
       while(currentNode){
         stack.insert(currentNode);
-        currentNode = currentNode.left;
+        if(order === "desc"){
+          currentNode = currentNode.right;
+        }
+        else{
+          currentNode = currentNode.left;
+        }  
       }
 
       currentNode = stack.pop()!;
       nodes.push(currentNode);
-      currentNode = currentNode.right
+      if(order === "desc"){
+        currentNode = currentNode.left;
+      }
+      else{
+        currentNode = currentNode.right
+      }
     }
 
     return nodes;
   }
 
-  private returnParentChildNodes(item: T): BSTNode<T>[] | null{
+  private returnParentChildNodes(id: string): BSTNode<T>[] | null{
     const stack = new Stack<BSTNode<T>>();
     let currentNode: BSTNode<T> | null = this.root;
     const parentChildNodes: any[] = [null, null];
@@ -225,13 +237,13 @@ class CustomBST<T>{
       currentNode = stack.pop()!;
       
       if(currentNode){
-        if(currentNode.item === item && stack.length > 0){
+        if(currentNode.id === id && stack.length > 0){
           const parentNode: BSTNode<T> = stack.pop()!;
           parentChildNodes[0] = parentNode;
           parentChildNodes[1] = currentNode;
           return parentChildNodes;
         }
-        else if(currentNode.item === item && stack.length === 0){
+        else if(currentNode.id === id && stack.length === 0){
           parentChildNodes[0] = currentNode;
           return parentChildNodes;
         }
@@ -243,13 +255,13 @@ class CustomBST<T>{
     return null;
   }
 
-  remove(item: T): void{
+  remove(id: string): void{
     if(!this.root){
       console.log("Nothing to remove!");
       return;
     }
 
-    const parentChildNodes = this.returnParentChildNodes(item);
+    const parentChildNodes = this.returnParentChildNodes(id);
 
     if(parentChildNodes){
       this.length--;
