@@ -1,11 +1,12 @@
 import { TypeCustomTable } from './custom-table-types';
 import { convertStringsToWeights } from '../../manager';
-import { quickSort } from '../../../../ts/dsa';
+import { quickSort, BSTNode } from '../../../../ts/dsa';
 
-export let oldData: {oldTableMap: TypeCustomTable["categoryMap"], oldSubMap: TypeCustomTable["subCategoryMap"], 
-              oldBudget: number} = {
-  oldTableMap: new Map(),
-  oldSubMap: new Map(),
+export let oldData: {oldEntries: BSTNode<TypeCustomTable["customTableEntry"]>[], 
+                    oldSubEntries: BSTNode<TypeCustomTable["customTableEntry"]>[], 
+                    oldBudget: number} = {
+  oldEntries: [],
+  oldSubEntries: [],
   oldBudget: 0
 }
 

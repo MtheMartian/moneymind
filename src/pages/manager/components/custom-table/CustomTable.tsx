@@ -1,12 +1,12 @@
 import { useRef, useState, useEffect, useMemo, 
-        SyntheticEvent, ChangeEvent, MouseEventHandler, useCallback} from 'react';
+        SyntheticEvent, ChangeEvent, MouseEventHandler} from 'react';
 import './custom-table.css';
 import '../../manager.css';
 import { TypeCustomTable } from './custom-table-types';
 import { user } from '../../../../data/user';
 import { editInputs, uniqueId, checkIfInputEmpty, checkIfInputEmptyCell,
           getCaretPosition, caretPosition } from '../../manager';
-import { Stack } from '../../../../ts/dsa';
+import { Stack, CustomBST, BSTNode } from '../../../../ts/dsa';
 import { oldData, todaysDate, linkMap } from './custom-table';
 import exportIcon from '../../../../assets/manager-icons/export-48px.svg';
 import searchIcon from '../../../../assets/manager-icons/search-48px.svg';
@@ -528,12 +528,12 @@ function CustomTableBody(props: {tableMap: TypeCustomTable["categoryMap"] | null
 
 
 function CustomTable(props: {title: string, tableUse: string, stack: Stack<any>,
-                              currentTable: TypeCustomTable["categoryMap"] | null, 
-                              currentSubcategories: TypeCustomTable["subCategoryMap"] | null}){
+                              entries: CustomBST<TypeCustomTable["customTableEntry"]>, 
+                              subEntries: CustomBST<TypeCustomTable["customTableEntry"]>}){
 
   // ******* States ******* //
-  const [tableMap, setTableMap] = useState<TypeCustomTable["categoryMap"] | null>(props.currentTable);
-  const [subcategoryMap, setSubcategoryMap] = useState<TypeCustomTable["subCategoryMap"] | null>(props.currentSubcategories);
+  const [entries, setEntries] = useState<BSTNode<TypeCustomTable["customTableEntry"]>[]>([]);
+  const [subEntries, setSubEntries] = useState<BSTNode<TypeCustomTable["customTableEntry"]>[]>([]);
   const [toggleInsert, setToggleInsert] = useState<boolean>(false);
   const [toggleEdit, setToggleEdit] = useState<boolean>(false);
   const [budget, setBudget] = useState<number>(0);
@@ -554,7 +554,7 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<any>,
   }
 
   function addToStack(): void{
-    props.stack.insert({...oldData, oldTableMap: new Map(tableMap!), oldSubMap: new Map(subcategoryMap!),
+    props.stack.insert({...oldData, oldEntries: entries, oldSubEntries: subEntries,
       oldBudget: budget});
       console.log(props.stack.head?.value);
   }
@@ -588,23 +588,26 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<any>,
 
   function insertButtonHandler(): void{
     const uId: string = uniqueId();
-    const newTableMap: TypeCustomTable["categoryMap"] = new Map(tableMap);
-    let categoryString: string = categoryInput.current!.value;
+    let newEntryName: string = categoryInput.current!.value;
+    const currentTime: number = Date.now();
 
     if(checkIfInputEmpty(categoryInput.current!) && props.tableUse !== "daily"){
       return;
     }
 
     if(props.tableUse === "daily"){
-      if(categoryString === "" || categoryString === " "){
-        categoryString = todaysDate();
+      if(newEntryName === "" || newEntryName === " "){
+        newEntryName = todaysDate();
       }
     }
 
-    newTableMap.set(uId, {category: categoryString, amount: Number(amountInput.current!.value)});
-    setTableMap(newTableMap);
-    setChange(prev => prev = true);
+    props.entries.insert(currentTime, {entryName: newEntryName, entryAmount: Number(amountInputValue),
+                                      entryId: null, lastUpdated: currentTime, 
+                                      initalAmount: Number(amountInputValue)}, uId);
+
     addToStack();
+    setEntries(props.entries.traverse("desc"));
+    setChange(prev => prev = true);
     displayInsert();
   }
 
@@ -634,20 +637,15 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<any>,
 
   // ******* UseEffects ******* //
   useEffect(()=>{
-    setTableMap(prev => prev = props.currentTable);
+    setEntries(prev => prev = props.entries.traverse("desc"));
+    setSubEntries(prev => prev = props.subEntries.traverse("desc"));
 
     return()=>{
-      setTableMap(prev => prev = null);
+      setEntries(prev => prev = []);
+      setSubEntries(prev => prev = []);
     }
-  }, [props.currentTable])
 
-  useEffect(()=>{
-    setSubcategoryMap(prev => prev = props.currentSubcategories);
-
-    return()=>{
-      setSubcategoryMap(prev => prev = null);
-    }
-  }, [props.currentSubcategories])
+  }, [props.entries, props.subEntries]);
 
   useEffect(()=>{
     setBudget(prev => prev = user.budget);

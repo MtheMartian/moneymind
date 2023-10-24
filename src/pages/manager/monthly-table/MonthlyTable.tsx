@@ -1,5 +1,5 @@
 import '../components/custom-table/custom-table.css';
-import { Stack } from '../../../ts/dsa';
+import { Stack, CustomBST } from '../../../ts/dsa';
 import '../manager.css';
 import CustomTable from '../components/custom-table/CustomTable';
 import { oldData } from '../components/custom-table/custom-table';

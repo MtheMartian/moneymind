@@ -121,7 +121,7 @@ export function quickSort(arr: number[], sort: string): number[]{
 }
 
 // ******* Binary Search Tree ******* //
-class BSTNode<T>{
+export class BSTNode<T>{
   value: number;
   left: BSTNode<T> | null;
   right: BSTNode<T> | null;
@@ -137,7 +137,7 @@ class BSTNode<T>{
   }
 }
 
-class CustomBST<T>{
+export class CustomBST<T>{
   length: number;
   root: BSTNode<T> | null;
 
@@ -187,6 +187,11 @@ class CustomBST<T>{
     this.organize(newNode);
   }
 
+  /**
+   * Traverses the binary search tree and returns an array of nodes.
+   * @param order - The traversal order ("asc" for ascending, "desc" for descending).
+   * @returns An array of nodes in the specified order.
+  */
   traverse(order: string): BSTNode<T>[]{
     if(!this.root){
       console.log("There's nothing to traverse!");
@@ -253,6 +258,67 @@ class CustomBST<T>{
     }
 
     return null;
+  }
+
+  /**
+   * Returns requested item.
+   * @param id - The ID of the node.
+   * @returns Item or null (if not found).
+   */
+  retrieve(id: string): BSTNode<T> | null{
+    const stack = new Stack<BSTNode<T>>();
+    let currentNode: BSTNode<T> | null = this.root;
+
+    while(stack.length > 0 || currentNode){
+
+      while(currentNode){
+        stack.insert(currentNode);
+        currentNode = currentNode.left;
+      }
+
+      currentNode = stack.pop()!;
+      
+      if(currentNode){
+        if(currentNode.id === id){
+          return currentNode;
+        }
+      }
+
+      currentNode = currentNode.right
+    }
+
+    return null;
+  }
+
+  /**
+   * Update item.
+   * If item can't be found, it will be created.
+  */
+  update(id: string, item: T, value: number): void{
+    const stack = new Stack<BSTNode<T>>();
+    let currentNode: BSTNode<T> | null = this.root;
+
+    while(stack.length > 0 || currentNode){
+
+      while(currentNode){
+        stack.insert(currentNode);
+        currentNode = currentNode.left;
+      }
+
+      currentNode = stack.pop()!;
+      
+      if(currentNode){
+        if(currentNode.id === id){
+          currentNode.item = item;
+          currentNode.value = value;
+          return;
+        }
+      }
+
+      currentNode = currentNode.right
+    }
+
+    this.insert(value, item, id);
   }
 
   remove(id: string): void{
