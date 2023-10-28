@@ -5,26 +5,18 @@ import CustomTable from '../components/custom-table/CustomTable';
 import { oldData } from '../components/custom-table/custom-table';
 import { useEffect, useState } from 'react';
 import { TypeCustomTable } from '../components/custom-table/custom-table-types';
+import { CustomBST } from '../../../ts/dsa';
 
 const dailyStack: Stack<typeof oldData> = new Stack<typeof oldData>();
 
 function DailyTable(){
-  const [dailyTable, setDailyTable] = useState<TypeCustomTable["categoryMap"] | null>(null);
-  const [subcategories, setSubcategories] = useState<TypeCustomTable["subCategoryMap"] | null>(null);
+  const [dailyBST, setDailyBST] = useState<CustomBST<TypeCustomTable["customTableEntry"]>>(new CustomBST());
+  const [dailySubcategoriesBST, setDailySubcategoriesBST] = useState<CustomBST<TypeCustomTable["customTableEntry"]>>(new CustomBST());
 
-  useEffect(()=>{
-    setDailyTable(prev => prev = new Map());
-    setSubcategories(prev => prev = new Map());
-
-    return()=>{
-      setDailyTable(prev => prev = null);
-      setSubcategories(prev => prev = null);
-    }
-  }, [])
 
   return(
-    <CustomTable title="Daily Manager" tableUse="daily" stack={dailyStack} currentTable={dailyTable} 
-                  currentSubcategories={subcategories} />
+    <CustomTable title="Daily Manager" tableUse="daily" stack={dailyStack} categoryBST={dailyBST} 
+                  subcategoryBST={dailySubcategoriesBST} />
   )
 }
 

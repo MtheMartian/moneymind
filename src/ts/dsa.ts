@@ -328,10 +328,12 @@ export class CustomBST<T>{
     }
 
     const parentChildNodes = this.returnParentChildNodes(id);
+    console.log(parentChildNodes);
 
     if(parentChildNodes){
       this.length--;
       const [parent, child] = parentChildNodes;
+      console.log(child);
       
       if(!child && parent){
 
