@@ -240,20 +240,27 @@ export class CustomBST<T>{
 
       while(currentNode){
         stack.insert(currentNode);
+        console.log(stack.length);
         currentNode = currentNode.left;
+
       }
 
       currentNode = stack.pop()!;
       
-      if(currentNode){
-        if(currentNode.id === id){
-          const parentNode = stack.pop();
+      if(currentNode && currentNode.id === id){
+        const parentNode = stack.pop();
+        console.log(parentNode);
+
+        if(parentNode){
           parentChildNodes.parentNode = parentNode;
           parentChildNodes.childNode = currentNode;
           return parentChildNodes;
         }
+        else{
+          parentChildNodes.parentNode = currentNode;
+          return parentChildNodes;
+        }
       }
-
       currentNode = currentNode.right
     }
 
