@@ -63,6 +63,17 @@ export class Stack<T>{
     this.length = 0;
     this.head = this.tail = null;
   }
+
+  items(): MyNode<T>[]{
+    let currentNode: MyNode<T> | null = this.head;
+    const nodes: MyNode<T>[] = [];
+    while(currentNode){
+      nodes.push(currentNode);
+      currentNode = currentNode.prev;
+    }
+
+    return nodes;
+  }
 }
 
 // ******* QuickSort ******* //
@@ -242,8 +253,9 @@ export class CustomBST<T>{
         stack.insert(currentNode);
         console.log(stack.length);
         currentNode = currentNode.left;
-
       }
+
+      console.log(stack.items());
 
       currentNode = stack.pop()!;
       
