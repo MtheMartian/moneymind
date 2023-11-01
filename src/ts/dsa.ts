@@ -205,7 +205,7 @@ export class CustomBST<T>{
   */
   traverse(order: string): BSTNode<T>[]{
     if(!this.root){
-      console.log("There's nothing to traverse!");
+      console.error("There's nothing to traverse!");
       return [];
     }
 
@@ -235,6 +235,8 @@ export class CustomBST<T>{
       }
     }
 
+    console.log(nodes);
+
     return nodes;
   }
 
@@ -247,34 +249,39 @@ export class CustomBST<T>{
       childNode: null
     };
 
+
+    const nodes: BSTNode<T>[] = [];
+
+    // Keep track of current node in the nodes array using nodeIdx;
+    let nodeIdx: number = 0;
+
     while(stack.length > 0 || currentNode){
 
       while(currentNode){
         stack.insert(currentNode);
-        console.log(stack.length);
         currentNode = currentNode.left;
       }
 
-      console.log(stack.items());
-
       currentNode = stack.pop()!;
+      nodes.push(currentNode);
       
       if(currentNode && currentNode.id === id){
-        const parentNode = stack.pop();
-        console.log(parentNode);
+        // Use nodeIdx variable to get the correct nodes (parent and child (currentNode));
+        // Ternary operations are pretty self explinatory.
+        const parentNodeIdx: number = nodeIdx - 1;
 
-        if(parentNode){
-          parentChildNodes.parentNode = parentNode;
-          parentChildNodes.childNode = currentNode;
-          return parentChildNodes;
-        }
-        else{
-          parentChildNodes.parentNode = currentNode;
-          return parentChildNodes;
-        }
+        parentChildNodes.parentNode = parentNodeIdx < 0 ? nodes[nodeIdx] : nodes[parentNodeIdx];
+        parentChildNodes.childNode = nodeIdx === 0 ? null : nodes[nodeIdx];
+
+        return parentChildNodes;
       }
+
+      nodeIdx++;
+
       currentNode = currentNode.right
     }
+
+    console.log(nodes);
 
     return parentChildNodes;
   }
