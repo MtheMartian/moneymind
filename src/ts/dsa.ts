@@ -428,4 +428,8 @@ export class CustomBST<T>{
 
     console.log("Unable to find the item.");
   }
+
+  clear(): void{
+    this.root = null;
+  }
 }

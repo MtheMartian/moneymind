@@ -496,10 +496,10 @@ function CustomTableBody(props: {categoryBST: CustomBST<TypeCustomTable["customT
       <div id="custom-table-body-content">
         <div id="custom-table-body-cells-wrapper">
           <div id="custom-table-body-sections">
-            <p>Category</p>
-            <p>Amount</p>
+            <button>Category</button>
+            <button>Amount</button>
             <p>Initial Amount</p>
-            <p>Last Updated</p>
+            <button>Last Updated</button>
           </div>
           <div id="custom-table-body-cells">
             {entries.map((entry) =>
@@ -557,6 +557,38 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
       console.log(props.stack.head?.value);
   }
 
+  function updateCustomBSTNodes(nodes: BSTNode<TypeCustomTable["customTableEntry"]>[],
+                                  targetTree: string): BSTNode<TypeCustomTable["customTableEntry"]>[]{
+
+    if(nodes.length === 0){
+      if(targetTree === "category"){
+        props.categoryBST.clear();
+        props.subcategoryBST.clear();
+        return [];
+      }
+      else if(targetTree === "subcategory"){
+        props.subcategoryBST.clear();
+        return [];
+      }
+    }                
+
+    nodes.forEach(node =>{
+      if(targetTree === "category"){
+        props.categoryBST.update(node.id, node.item, node.value);
+      }
+      else if(targetTree === "subcategory"){
+        props.subcategoryBST.update(node.id, node.item, node.value);
+      }
+    });
+
+    if(targetTree === "subcategory"){
+      return props.subcategoryBST.traverse("desc");
+    }
+
+    return props.categoryBST.traverse("desc");
+  }
+
+
   // ******* Input Handlers ******* //
   function updateInput(e: ChangeEvent<HTMLInputElement>): void{
     const inputs: string = editInputs(e, amountInputValue, "number");
@@ -575,8 +607,11 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
 
   function displayEditOptions(){
     if(toggleEdit){
+      const updatedCategories = props.categoryBST.traverse("desc");
+      const updatedSubcategories = props.subcategoryBST.traverse("desc");
+
       setToggleEdit(prev => prev = false);
-      updateStates(categories, subcategories, oldData.oldBudget);
+      updateStates(updatedCategories, updatedSubcategories, oldData.oldBudget);
     }
     else{
       addToStack();
@@ -606,6 +641,7 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
     addToStack();
     setCategories(props.categoryBST.traverse("desc"));
     setChange(prev => prev = true);
+    setAmountInputValue(prev => prev = "");
     displayInsert();
   }
 
@@ -634,7 +670,10 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
       setChange(prev => prev = false);
     }
 
-    updateStates(previousData.oldEntries, previousData.oldSubEntries, previousData.oldBudget);
+    const oldCategories = updateCustomBSTNodes(previousData.oldEntries, "category");
+    const oldSubcategories = updateCustomBSTNodes(previousData.oldSubEntries, "subcategory");
+
+    updateStates(oldCategories, oldSubcategories, previousData.oldBudget);
     setToggleEdit(prev => prev = false);
     setChange(prev => prev = true);
   }
