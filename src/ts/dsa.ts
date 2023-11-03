@@ -205,7 +205,6 @@ export class CustomBST<T>{
   */
   traverse(order: string): BSTNode<T>[]{
     if(!this.root){
-      console.error("There's nothing to traverse!");
       return [];
     }
 
@@ -234,8 +233,6 @@ export class CustomBST<T>{
         currentNode = currentNode.right
       }
     }
-
-    console.log(nodes);
 
     return nodes;
   }

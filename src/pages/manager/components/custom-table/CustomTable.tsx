@@ -73,7 +73,6 @@ function CustomTableBottom(props: {budget: number, toggleEdit: boolean, setChang
     if(budgetInput.current){
       budgetInput.current!.selectionStart = caretPosition;
       budgetInput.current!.selectionEnd = caretPosition;
-      console.log(`useEffect: ${caretPosition}`);
     }
   }, [budgetInputValue]);
 
@@ -552,9 +551,20 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
   }
 
   function addToStack(): void{
-    props.stack.insert({...oldData, oldEntries: categories, oldSubEntries: subcategories,
+    const oldCategories: typeof categories = [];
+    const oldSubcategories: typeof subcategories = []
+
+    categories.forEach(node =>{
+      oldCategories.push(new BSTNode(node.item, node.value, node.id));
+    });
+
+    subcategories.forEach(node =>{
+      oldSubcategories.push(new BSTNode(node.item, node.value, node.id));
+    })
+
+    props.stack.insert({...oldData, oldEntries: oldCategories, oldSubEntries: oldSubcategories,
       oldBudget: budget});
-      console.log(props.stack.head?.value);
+      console.log(props.stack.items());
   }
 
   function updateCustomBSTNodes(nodes: BSTNode<TypeCustomTable["customTableEntry"]>[],
