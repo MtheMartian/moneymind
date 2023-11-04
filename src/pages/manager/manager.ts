@@ -1,4 +1,5 @@
 import { ChangeEvent, SyntheticEvent } from "react";
+import { quickSort } from "../../ts/dsa";
 
 // ******* General ******* //
 export function uniqueId(): string{
@@ -141,5 +142,51 @@ export function checkIfInputEmpty(element: HTMLInputElement): boolean{
   element.style.cssText = "";
   
   return false;
+}
+
+// ******* String to weight ******* //
+function findLongestString(strArr: string[]): number{
+  let longest: number = strArr[0].length;
+
+  for(let i: number = 1; i < strArr.length; i++){
+    if(strArr[i].length > longest){
+      longest = strArr[i].length;
+    }
+  }
+
+  return longest;
+}
+
+function returnWeight(char: string): string{
+  const letters = new Map([['a', '01'], ['b', '02'], ['c', '03'], ['d', '04'],
+                          ['e', '05'], ['f', '06'], ['g', '07'], ['h', '08'],
+                          ['i', '09'], ['j', '10'], ['k', '11'], ['l', '12'],
+                          ['m', '13'], ['n', '14'], ['o', '15'], ['p', '16'],
+                          ['q', '17'], ['r', '18'], ['s', '19'], ['t', '20'],
+                          ['u', '21'], ['v', '22'], ['w', '23'], ['x', '24'],
+                          ['y', '25'], ['z', '26']]);
+  
+    if(letters.get(char) === undefined){
+      return "00";
+    }
+  
+  return letters.get(char)!;
+}
+
+export function convertStringToWeight(str: string, strArr: string[]): number{
+  const longestString: number = findLongestString(strArr);
+
+  str = str.toLowerCase();
+  let weight: string = "";
+
+  for(let i: number = 0; i < str.length; i++){
+    weight += returnWeight(str[i]);
+  }
+
+  for(let i: number = 0; i < (longestString - str.length); i++){
+    weight += "00";
+  }
+
+  return Number(weight);
 }
 

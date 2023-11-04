@@ -1,9 +1,12 @@
 import { TypeCustomTable } from './custom-table-types';
+import { convertStringToWeight } from '../../manager';
+import { quickSort, BSTNode } from '../../../../ts/dsa';
 
-export let oldData: {oldTableMap: TypeCustomTable["categoryMap"], oldSubMap: TypeCustomTable["subCategoryMap"], 
-              oldBudget: number} = {
-  oldTableMap: new Map(),
-  oldSubMap: new Map(),
+export let oldData: {oldEntries: BSTNode<TypeCustomTable["customTableEntry"]>[], 
+                    oldSubEntries: BSTNode<TypeCustomTable["customTableEntry"]>[], 
+                    oldBudget: number} = {
+  oldEntries: [],
+  oldSubEntries: [],
   oldBudget: 0
 }
 
@@ -14,3 +17,5 @@ export function todaysDate(): string{
 }
 
 export const linkMap = new Map(); // Used to link daily table to the monthly one
+
+// ******* Sort Tables ******* //
