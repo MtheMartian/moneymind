@@ -173,56 +173,20 @@ function returnWeight(char: string): string{
   return letters.get(char)!;
 }
 
-export function convertStringsToWeights(strArr: string[], sort: string | null): Map<number, string[]>{
+export function convertStringToWeight(str: string, strArr: string[]): number{
   const longestString: number = findLongestString(strArr);
-  let weightedStringsMap: Map<number, string[]> = new Map(); 
 
-  strArr.forEach((currStr, index) =>{
-    currStr = currStr.toLowerCase();
-    let weight: string = "";
+  str = str.toLowerCase();
+  let weight: string = "";
 
-    if(Number.isInteger(Number(currStr[0]))){
-      if(weightedStringsMap.get(0) !== undefined){
-        const currItem: string[] = weightedStringsMap.get(0)!;
-        currItem.unshift(currStr);
-
-        weightedStringsMap.set(0, currItem);
-      }
-      else{
-        weightedStringsMap.set(0, [currStr]);
-      }
-    }
-    else{
-      for(let i: number = 0; i < currStr.length; i++){
-        weight += returnWeight(currStr[i]);
-      }
-    
-      for(let i: number = 0; i < (longestString - currStr.length); i++){
-        weight += "00";
-      }
-
-      if(weightedStringsMap.get(Number(weight)) !== undefined){
-        const currItem: string[] = weightedStringsMap.get(Number(weight))!;
-        currItem.unshift(currStr);
-
-        weightedStringsMap.set(Number(weight), currItem);
-      }
-      else{
-        weightedStringsMap.set(Number(weight), [currStr]);
-      }
-    }
-  })
-
-  if(sort){
-    const sortedWeights = quickSort(Array.from(weightedStringsMap.keys()), sort);
-    const newMap: Map<number, string[]> = new Map();
-    sortedWeights.forEach(weight =>{
-      newMap.set(weight, weightedStringsMap.get(weight)!);
-    });
-
-    weightedStringsMap = newMap;
+  for(let i: number = 0; i < str.length; i++){
+    weight += returnWeight(str[i]);
   }
 
-  return weightedStringsMap;
+  for(let i: number = 0; i < (longestString - str.length); i++){
+    weight += "00";
+  }
+
+  return Number(weight);
 }
 
