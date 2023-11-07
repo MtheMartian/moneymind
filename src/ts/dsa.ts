@@ -131,15 +131,18 @@ export function quickSort(arr: number[], sort: string): number[]{
   return quickSortHelper(0, arr.length - 1, arr, sort);
 }
 
+/**
+ * @property value (0: Date, 1: Category/Subcategory, 2: Amount)
+ */
 // ******* Binary Search Tree ******* //
 export class BSTNode<T>{
-  value: number;
+  value: number[];
   left: BSTNode<T> | null;
   right: BSTNode<T> | null;
   item: T;
   id: string;
 
-  constructor(item: T, value: number, id: string){
+  constructor(item: T, value: number[], id: string){
     this.value = value;
     this.item = item;
     this.right = null;
@@ -157,7 +160,7 @@ export class CustomBST<T>{
     this.root = null;
   }
 
-  private organize(node: BSTNode<T>): void{
+  private organize(node: BSTNode<T>, idx: number): void{
     if(!this.root){
       return;
     }
@@ -168,7 +171,7 @@ export class CustomBST<T>{
     while(currentNode){
       stack.insert(currentNode);
 
-      if(node.value > currentNode.value){
+      if(node.value[idx] > currentNode.value[idx]){
         currentNode = currentNode.right;
       }
       else{
@@ -178,7 +181,7 @@ export class CustomBST<T>{
 
     currentNode = stack.pop()!;
 
-    if(node.value > currentNode.value){
+    if(node.value[idx] > currentNode.value[idx]){
       currentNode.right = node;
     }
     else{
@@ -186,7 +189,10 @@ export class CustomBST<T>{
     }
   }
 
-  insert(value: number, item: T, id: string): void{
+    /**
+ * @param idx (0: Date, 1: Category/Subcategory, 2: Amount)
+ */
+  insert(value: number[], item: T, id: string, idx: number): void{
     const newNode: BSTNode<T> = new BSTNode(item, value, id);
     this.length++;
 
@@ -195,7 +201,7 @@ export class CustomBST<T>{
       return;
     }
 
-    this.organize(newNode);
+    this.organize(newNode, idx);
   }
 
   /**
@@ -316,8 +322,9 @@ export class CustomBST<T>{
   /**
    * Update item.
    * If item can't be found, it will be created.
+   * @param idx (0: Date, 1: Category/Subcategory, 2: Amount)
   */
-  update(id: string, item: T, value: number): void{
+  update(id: string, item: T, value: number[], idx: number): void{
     const stack = new Stack<BSTNode<T>>();
     let currentNode: BSTNode<T> | null = this.root;
 
@@ -341,10 +348,14 @@ export class CustomBST<T>{
       currentNode = currentNode.right
     }
 
-    this.insert(value, item, id);
+    this.insert(value, item, id, idx);
   }
 
-  remove(id: string): void{
+  /**
+   * Remove node.
+   * @param idx (0: Date, 1: Category/Subcategory, 2: Amount)
+  */
+  remove(id: string, idx: number): void{
     if(!this.root){
       console.log("Nothing to remove!");
       return;
@@ -370,7 +381,7 @@ export class CustomBST<T>{
         }
         else if(parent.left && parent.right){
           this.root = parent.left;
-          this.organize(parent.right);
+          this.organize(parent.right, idx);
           return;
         }
         else{
@@ -387,12 +398,12 @@ export class CustomBST<T>{
           }
           else if(!child.left && child.right){
             parent.left = null;
-            this.organize(child.right);
+            this.organize(child.right, idx);
             return;
           }
           else if(child.left && child.right){
             parent.left = child.left;
-            this.organize(child.right);
+            this.organize(child.right, idx);
             return;
           }
           else{
@@ -403,7 +414,7 @@ export class CustomBST<T>{
         else{
           if(child.left && !child.right){
             parent.right = null;
-            this.organize(child.left);
+            this.organize(child.left, idx);
             return;
           }
           else if(!child.left && child.right){
@@ -412,7 +423,7 @@ export class CustomBST<T>{
           }
           else if(child.left && child.right){
             parent.right = child.right;
-            this.organize(child.left);
+            this.organize(child.left, idx);
             return;
           }
           else{
@@ -428,5 +439,22 @@ export class CustomBST<T>{
 
   clear(): void{
     this.root = null;
+  }
+
+  /**
+   * @param idx (0: Date, 1: Category/Subcategory, 2: Amount)
+  */
+  reconstruct(nodes: BSTNode<T>[], idx: number): void{
+    const newNodes: BSTNode<T>[] = [];
+
+    nodes.forEach(node =>{
+      newNodes.push(new BSTNode<T>(node.item, node.value, node.id));
+    });
+
+    this.clear();
+
+    newNodes.forEach(node =>{
+      this.insert(node.value, node.item, node.id, idx);
+    });
   }
 }

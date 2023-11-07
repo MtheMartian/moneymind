@@ -10,6 +10,10 @@ export let oldData: {oldEntries: BSTNode<TypeCustomTable["customTableEntry"]>[],
   oldBudget: 0
 }
 
+export const customTableVariables: {customBSTVariable: number} = {
+  customBSTVariable: 0
+}
+
 export function todaysDate(): string{
   const currentDate: Date = new Date(Date.now());
   const month: number = currentDate.getMonth() + 1;

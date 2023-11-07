@@ -145,7 +145,7 @@ export function checkIfInputEmpty(element: HTMLInputElement): boolean{
 }
 
 // ******* String to weight ******* //
-function findLongestString(strArr: string[]): number{
+export function findLongestString(strArr: string[]): number{
   let longest: number = strArr[0].length;
 
   for(let i: number = 1; i < strArr.length; i++){
@@ -173,8 +173,8 @@ function returnWeight(char: string): string{
   return letters.get(char)!;
 }
 
-export function convertStringToWeight(str: string, strArr: string[]): number{
-  const longestString: number = findLongestString(strArr);
+export function convertStringToWeight(str: string, strLength: number): number{
+  const longestString: number = strLength;
 
   str = str.toLowerCase();
   let weight: string = "";
