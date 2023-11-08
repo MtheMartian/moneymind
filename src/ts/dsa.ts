@@ -240,6 +240,7 @@ export class CustomBST<T>{
       }
     }
 
+    console.log(nodes);
     return nodes;
   }
 
@@ -391,7 +392,7 @@ export class CustomBST<T>{
       }
       else if(child && parent){
 
-        if(child.value <= parent.value){
+        if(child.value[idx] <= parent.value[idx]){
           if(child.left && !child.right){
             parent.left = child.left;
             return;

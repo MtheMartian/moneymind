@@ -368,7 +368,7 @@ function CustomTableBodyCell(props:{id: string, category: string, amount: number
     props.setChange(true);
     props.categoryBST.remove(props.id, customTableVariables.customBSTVariable);
     clearAssociatedSubcategories();
-    props.setCategories(props.categoryBST.traverse("desc"));
+    props.setCategories(props.categoryBST.traverse(customTableVariables.customBSTNodeOrder));
     props.setCategoryId(null);
   }
 
@@ -452,23 +452,32 @@ function CustomTableBody(props: {categoryBST: CustomBST<TypeCustomTable["customT
       sortCounter.current[idx] = 0;
       customTableVariables.customBSTVariable = 0;
       props.categoryBST.reconstruct(categories, 0);
+      props.setCategories(props.categoryBST.traverse("desc"));
+      customTableVariables.customBSTNodeOrder = "desc";
+    }
+
+    function setSortedCategories(idx: number): void{
+      customTableVariables.customBSTVariable = idx;
+      sortCounter.current[idx]++;
+      console.log(sortCounter.current[idx]);
+      props.categoryBST.reconstruct(categories, idx);
+
+      if(sortCounter.current[idx] === 1){
+        props.setCategories(props.categoryBST.traverse("asc"));
+        customTableVariables.customBSTNodeOrder = "asc";
+      }
+      else if(sortCounter.current[idx] === 2){
+        props.setCategories(props.categoryBST.traverse("desc"));
+        customTableVariables.customBSTNodeOrder = "desc";
+      }
+      else if(sortCounter.current[idx] === 3){
+        resetToDefaultSorting(idx);
+      }
     }
 
     switch(sectionToSort){
       case "date":
-        customTableVariables.customBSTVariable = 0;
-        sortCounter.current[0]++;
-        props.categoryBST.reconstruct(categories, 0);
-
-        if(sortCounter.current[0] === 1){
-          props.setCategories(props.categoryBST.traverse("desc"));
-        }
-        else if(sortCounter.current[0] === 2){
-          props.setCategories(props.categoryBST.traverse("asc"));
-        }
-        else if(sortCounter.current[0] === 3){
-          resetToDefaultSorting(0);
-        }
+        setSortedCategories(0);
 
         if(sortCounter.current[1] !== 0 || sortCounter.current[2] !== 0){
           sortCounter.current[1] = 0;
@@ -478,22 +487,7 @@ function CustomTableBody(props: {categoryBST: CustomBST<TypeCustomTable["customT
         break;
 
       case "category":
-        customTableVariables.customBSTVariable = 1;
-        sortCounter.current[1]++;
-        console.log(sortCounter.current[1]);
-        props.categoryBST.reconstruct(categories, 1);
-
-        if(sortCounter.current[1] === 1){
-          props.setCategories(props.categoryBST.traverse("asc"));
-          console.log(props.categoryBST.traverse("asc"));
-        }
-        else if(sortCounter.current[1] === 2){
-          props.setCategories(props.categoryBST.traverse("desc"));
-          console.log(props.categoryBST.traverse("desc"));
-        }
-        else if(sortCounter.current[1] === 3){
-          resetToDefaultSorting(1);
-        }
+        setSortedCategories(1);
 
         if(sortCounter.current[0] !== 0 || sortCounter.current[2] !== 0){
           sortCounter.current[0] = 0;
@@ -503,19 +497,7 @@ function CustomTableBody(props: {categoryBST: CustomBST<TypeCustomTable["customT
         break;
 
       case "amount":
-        customTableVariables.customBSTVariable = 2;
-        sortCounter.current[2]++;
-        props.categoryBST.reconstruct(categories, 2);
-
-        if(sortCounter.current[2] === 1){
-          props.setCategories(props.categoryBST.traverse("asc"));
-        }
-        else if(sortCounter.current[2] === 2){
-          props.setCategories(props.categoryBST.traverse("desc"));
-        }
-        else if(sortCounter.current[2] === 3){
-          resetToDefaultSorting(2);
-        }
+        setSortedCategories(2);
 
         if(sortCounter.current[0] !== 0 || sortCounter.current[1] !== 0){
           sortCounter.current[0] = 0;
@@ -524,6 +506,8 @@ function CustomTableBody(props: {categoryBST: CustomBST<TypeCustomTable["customT
 
         break;
     }
+
+    console.log(customTableVariables.customBSTVariable);
   }
 
   // ******* Functions ******* //
