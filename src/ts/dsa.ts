@@ -240,7 +240,6 @@ export class CustomBST<T>{
       }
     }
 
-    console.log(nodes);
     return nodes;
   }
 
@@ -256,22 +255,20 @@ export class CustomBST<T>{
 
     const nodes: BSTNode<T>[] = [];
 
-    // Keep track of current node in the nodes array using nodeIdx;
-    let nodeIdx: number = 0;
-
     while(stack.length > 0 || currentNode){
 
       while(currentNode){
         stack.insert(currentNode);
+        nodes.push(currentNode);
         currentNode = currentNode.left;
       }
 
       currentNode = stack.pop()!;
-      nodes.push(currentNode);
       
       if(currentNode && currentNode.id === id){
         // Use nodeIdx variable to get the correct nodes (parent and child (currentNode));
         // Ternary operations are pretty self explinatory.
+        const nodeIdx: number = nodes.length - 1;
         const parentNodeIdx: number = nodeIdx - 1;
 
         parentChildNodes.parentNode = parentNodeIdx < 0 ? nodes[nodeIdx] : nodes[parentNodeIdx];
@@ -280,12 +277,8 @@ export class CustomBST<T>{
         return parentChildNodes;
       }
 
-      nodeIdx++;
-
       currentNode = currentNode.right
     }
-
-    console.log(nodes);
 
     return parentChildNodes;
   }
@@ -457,5 +450,7 @@ export class CustomBST<T>{
     newNodes.forEach(node =>{
       this.insert(node.value, node.item, node.id, idx);
     });
+
+    console.log(this.traverse("asc"));
   }
 }

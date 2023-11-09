@@ -446,12 +446,11 @@ function CustomTableBody(props: {categoryBST: CustomBST<TypeCustomTable["customT
 
   function sortCategoriesSection(sectionToSort: string): undefined{
     sectionToSort = sectionToSort.toLowerCase();
-    const categories = props.categories;
 
     function resetToDefaultSorting(idx: number): void{
       sortCounter.current[idx] = 0;
       customTableVariables.customBSTVariable = 0;
-      props.categoryBST.reconstruct(categories, 0);
+      props.categoryBST.reconstruct(props.categories, 0);
       props.setCategories(props.categoryBST.traverse("desc"));
       customTableVariables.customBSTNodeOrder = "desc";
     }
@@ -459,8 +458,7 @@ function CustomTableBody(props: {categoryBST: CustomBST<TypeCustomTable["customT
     function setSortedCategories(idx: number): void{
       customTableVariables.customBSTVariable = idx;
       sortCounter.current[idx]++;
-      console.log(sortCounter.current[idx]);
-      props.categoryBST.reconstruct(categories, idx);
+      props.categoryBST.reconstruct(props.categories, idx);
 
       if(sortCounter.current[idx] === 1){
         props.setCategories(props.categoryBST.traverse("asc"));
@@ -506,8 +504,6 @@ function CustomTableBody(props: {categoryBST: CustomBST<TypeCustomTable["customT
 
         break;
     }
-
-    console.log(customTableVariables.customBSTVariable);
   }
 
   // ******* Functions ******* //
