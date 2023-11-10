@@ -13,8 +13,6 @@ import searchIcon from '../../../../assets/manager-icons/search-48px.svg';
 import undoIcon from '../../../../assets/manager-icons/undo-48px.svg';
 import deleteIcon from '../../../../assets/manager-icons/delete-48px.svg';
 
-const stack = new Stack<typeof oldData>();
-
 function CustomTableBottom(props: {budget: number, toggleEdit: boolean, setChange: Function, 
                                   categories: BSTNode<TypeCustomTable["customTableEntry"]>[],
                                   subcategories: BSTNode<TypeCustomTable["customTableEntry"]>[]}){
@@ -363,7 +361,7 @@ function CustomTableBodyCell(props:{id: string, category: string, amount: number
   }
 
    // ******* Button Handlers ******* //
-  function deleteButtonHandler(e: React.SyntheticEvent<HTMLButtonElement, MouseEvent>): void{
+  function deleteButtonHandler(): void{
     props.addToStack();
     props.setChange(true);
     props.categoryBST.remove(props.id, customTableVariables.customBSTVariable);

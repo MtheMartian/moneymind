@@ -254,12 +254,15 @@ export class CustomBST<T>{
 
 
     const nodes: BSTNode<T>[] = [];
+    // Keep track of currentNode index in nodes array using idx variable.
+    let nodeIdx: number = -1;
 
     while(stack.length > 0 || currentNode){
 
       while(currentNode){
         stack.insert(currentNode);
         nodes.push(currentNode);
+        nodeIdx++;
         currentNode = currentNode.left;
       }
 
@@ -268,7 +271,6 @@ export class CustomBST<T>{
       if(currentNode && currentNode.id === id){
         // Use nodeIdx variable to get the correct nodes (parent and child (currentNode));
         // Ternary operations are pretty self explinatory.
-        const nodeIdx: number = nodes.length - 1;
         const parentNodeIdx: number = nodeIdx - 1;
 
         parentChildNodes.parentNode = parentNodeIdx < 0 ? nodes[nodeIdx] : nodes[parentNodeIdx];
@@ -276,6 +278,8 @@ export class CustomBST<T>{
 
         return parentChildNodes;
       }
+
+      nodeIdx--;
 
       currentNode = currentNode.right
     }
