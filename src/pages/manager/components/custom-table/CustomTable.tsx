@@ -296,7 +296,7 @@ function SubCategory(props: {categoryBST: CustomBST<TypeCustomTable["customTable
   )
 }
 
-function CustomTableBodyCell(props:{id: string, category: string, amount: number,
+function CustomTableBodyCell(props:{currentCategory: BSTNode<TypeCustomTable["customTableEntry"]>,
                               toggleEdit: boolean, categoryBST: CustomBST<TypeCustomTable["customTableEntry"]>,
                               setCategories: Function, setSubcategories: Function, budget: number, 
                               displaySubCategories: MouseEventHandler<HTMLDivElement>, setChange: Function,
@@ -328,18 +328,35 @@ function CustomTableBodyCell(props:{id: string, category: string, amount: number
   function clearAssociatedSubcategories(): void{
     const subcategories = props.subcategoryBST.traverse("desc");
     subcategories.forEach(subcategory =>{
-      if(subcategory.item.entryId === props.id){
+      if(subcategory.item.entryId === props.currentCategory.id){
         props.subcategoryBST.remove(subcategory.id, customTableVariables.customBSTVariable);
       }
     });
+  }
+
+  function totalAmount(): number{
+    const subEntries = props.subcategoryBST.traverse("desc");
+    let summedAmounts: number = props.currentCategory.item.entryAmount;
+
+    subEntries.forEach(subEntry =>{
+      if(props.currentCategory.id === subEntry.item.entryId){
+        summedAmounts += subEntry.item.entryAmount;
+      }
+    });
+
+    // if(props.tableUse === "daily"){
+    //   storeDailyEntries(categoryId, summedAmounts);
+    // }
+
+    return summedAmounts;
   }
 
   // ******* Input Handlers ******* //
   function amountUpdate(e: ChangeEvent<HTMLInputElement>): void{
     props.setChange(true);
     const inputs: string = editInputs(e, amountValue, "number");
-    const currCategory = props.categoryBST.retrieve(props.id)!;
-    props.categoryBST.update(props.id, {...currCategory.item, entryAmount: Number(inputs)}, 
+    const currCategory = props.currentCategory;
+    props.categoryBST.update(currCategory.id, {...currCategory.item, entryAmount: Number(inputs)}, 
                             currCategory.value, customTableVariables.customBSTVariable);
     setAmountValue(prev => prev = inputs);
   }
@@ -349,14 +366,14 @@ function CustomTableBodyCell(props:{id: string, category: string, amount: number
     const currentElement: HTMLInputElement = e.currentTarget;
 
     const inputs: string = editInputs(e, categoryValue, "string");
-    const currCategory = props.categoryBST.retrieve(props.id)!;
+    const currCategory = props.currentCategory;
     setCategoryValue(prev => prev = inputs);
 
     if(checkIfInputEmpty(currentElement)){
       return;
     }
 
-    props.categoryBST.update(props.id, {...currCategory.item, entryName: inputs}, 
+    props.categoryBST.update(currCategory.id, {...currCategory.item, entryName: inputs}, 
                             currCategory.value, customTableVariables.customBSTVariable);
   }
 
@@ -364,7 +381,7 @@ function CustomTableBodyCell(props:{id: string, category: string, amount: number
   function deleteButtonHandler(): void{
     props.addToStack();
     props.setChange(true);
-    props.categoryBST.remove(props.id, customTableVariables.customBSTVariable);
+    props.categoryBST.remove(props.currentCategory.id, customTableVariables.customBSTVariable);
     clearAssociatedSubcategories();
     props.setCategories(props.categoryBST.traverse(customTableVariables.customBSTNodeOrder));
     props.setCategoryId(null);
@@ -372,14 +389,15 @@ function CustomTableBodyCell(props:{id: string, category: string, amount: number
 
   // ******* UseEffects ******* //
   useEffect(()=>{
-    setAmountValue(prev => prev = String(props.amount));
-    setCategoryValue(prev => prev = props.category);
+    const amount: number = totalAmount();
+    setAmountValue(prev => prev = String(amount));
+    setCategoryValue(prev => prev = props.currentCategory.item.entryName);
 
     return()=>{
       setAmountValue(prev => prev = "0");
       setCategoryValue(prev => prev = "");
     }
-  }, [props.amount, props.budget])
+  }, [props.currentCategory, props.budget])
 
   useEffect(()=>{
     if(amountInput.current){
@@ -398,8 +416,8 @@ function CustomTableBodyCell(props:{id: string, category: string, amount: number
   }, [categoryValue]);
 
   return(
-    <div data-id={props.id} className="custom-table-body-cell non-subcategory-cell clickable " 
-          style={{boxShadow: highlightCell(props.amount)}}
+    <div data-id={props.currentCategory.id} className="custom-table-body-cell non-subcategory-cell clickable " 
+          style={{boxShadow: highlightCell(totalAmount())}}
             onClick={props.toggleEdit ? undefined : props.displaySubCategories}>
       <input type="text" className="cell-inputs" value={categoryValue} 
               disabled={props.toggleEdit ? undefined : true} onChange={categoryUpdate} 
@@ -409,7 +427,7 @@ function CustomTableBodyCell(props:{id: string, category: string, amount: number
               onSelect={getCaretPosition} />
       {props.toggleEdit ? 
         <div className="custom-table-body-cell-options">
-          <button data-id={props.id} onClick={deleteButtonHandler} className="custom-table-body-delete-button">
+          <button data-id={props.currentCategory.id} onClick={deleteButtonHandler} className="custom-table-body-delete-button">
             <img src={deleteIcon} alt="delete" className="manager-icons" />
           </button>
         </div> : null}
@@ -568,9 +586,7 @@ function CustomTableBody(props: {categoryBST: CustomBST<TypeCustomTable["customT
           </div>
           <div id="custom-table-body-cells">
             {entries.map((entry) =>
-              <CustomTableBodyCell id={entry.id} category={entry.item.entryName} 
-                                    amount={totalAmount(entry.id, entry.item.entryAmount)}
-                                    budget={props.budget} categoryBST={props.categoryBST} 
+              <CustomTableBodyCell currentCategory={entry} budget={props.budget} categoryBST={props.categoryBST} 
                                     setCategories={props.setCategories} displaySubCategories={displaySubcategories} 
                                     toggleEdit={props.toggleEdit} key={entry.id} setChange={props.setChange}
                                     addToStack={props.addToStack} subcategoryBST={props.subcategoryBST} 
