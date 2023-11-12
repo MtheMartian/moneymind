@@ -7,7 +7,7 @@ import { user } from '../../../../data/user';
 import { editInputs, uniqueId, checkIfInputEmpty, checkIfInputEmptyCell,
           getCaretPosition, caretPosition, findLongestString, convertStringToWeight } from '../../manager';
 import { Stack, CustomBST, BSTNode } from '../../../../ts/dsa';
-import { oldData, todaysDate, linkMap, customTableVariables } from './custom-table';
+import { oldData, todaysDate, customTableVariables } from './custom-table';
 import exportIcon from '../../../../assets/manager-icons/export-48px.svg';
 import searchIcon from '../../../../assets/manager-icons/search-48px.svg';
 import undoIcon from '../../../../assets/manager-icons/undo-48px.svg';
@@ -90,7 +90,7 @@ function CustomTableBottom(props: {budget: number, toggleEdit: boolean, setChang
   )
 }
 
-function SubCategoryCell(props:{id: string, subcategory: string, amount: number,
+function SubCategoryCell(props:{currSubcategory: BSTNode<TypeCustomTable["customTableEntry"]>,
                                 subcategoryBST: CustomBST<TypeCustomTable["customTableEntry"]>, 
                                 setSubcategories: Function, toggleEdit: boolean, 
                                 setChange: Function, addToStack: Function}){
@@ -100,8 +100,8 @@ function SubCategoryCell(props:{id: string, subcategory: string, amount: number,
   const subcategoryInputRef = useRef<HTMLInputElement>(null);
 
   // ******* States ******* //
-  const [subcategoryValue, setSubcategoryValue] = useState<string>(props.subcategory);
-  const [amountValue, setAmountValue] = useState<string>(String(props.amount));
+  const [subcategoryValue, setSubcategoryValue] = useState<string>(props.currSubcategory.item.entryName);
+  const [amountValue, setAmountValue] = useState<string>(String(props.currSubcategory.item.entryAmount));
 
   // ******* Functions ******* //
   // ******* Input Handlers ******* //
@@ -110,14 +110,14 @@ function SubCategoryCell(props:{id: string, subcategory: string, amount: number,
     const currentElement: HTMLInputElement = e.currentTarget;
 
     const inputs: string = editInputs(e, amountValue, "number");
-    const currSubcategory = props.subcategoryBST.retrieve(props.id)!;
+    const currSubcategory = props.currSubcategory;
     setAmountValue(prev => prev = inputs);
 
     if(checkIfInputEmpty(currentElement) || Number(currentElement.value) <= 0){
       return;
     }
 
-    props.subcategoryBST.update(props.id, {...currSubcategory.item, entryAmount: Number(inputs)}, currSubcategory.value, 0);
+    props.subcategoryBST.update(props.currSubcategory.id, {...currSubcategory.item, entryAmount: Number(inputs)}, currSubcategory.value, 0);
   }
 
   function subcategoryUpdate(e: ChangeEvent<HTMLInputElement>): void{
@@ -125,22 +125,22 @@ function SubCategoryCell(props:{id: string, subcategory: string, amount: number,
     props.setChange(true);
 
     const inputs: string = editInputs(e, subcategoryValue, "string");
-    const currSubcategory = props.subcategoryBST.retrieve(props.id)!;
+    const currSubcategory = props.currSubcategory;
     setSubcategoryValue(prev => prev = inputs);
 
     if(checkIfInputEmptyCell(e)){
       return;
     }
 
-    props.subcategoryBST.update(props.id, {...currSubcategory.item, entryName: inputs}, currSubcategory.value, 0);
+    props.subcategoryBST.update(currSubcategory.id, {...currSubcategory.item, entryName: inputs}, currSubcategory.value, 0);
   }
 
   // ******* Button Handlers ******* //
-  function deleteButtonHandler(e: SyntheticEvent<HTMLButtonElement, MouseEvent>){
+  function deleteButtonHandler(): void{
     props.addToStack();
     props.setChange(true);
 
-    props.subcategoryBST.remove(props.id, 0);
+    props.subcategoryBST.remove(props.currSubcategory.id, 0);
     props.setSubcategories(props.subcategoryBST.retrieve("desc"));
   }
 
@@ -171,7 +171,7 @@ function SubCategoryCell(props:{id: string, subcategory: string, amount: number,
               onSelect={getCaretPosition} />
       {props.toggleEdit ? 
       <div className="custom-table-body-cell-options">
-        <button data-id={props.id} onClick={deleteButtonHandler} className="custom-table-body-delete-button">
+        <button data-id={props.currSubcategory.id} onClick={deleteButtonHandler} className="custom-table-body-delete-button">
           <img src={deleteIcon} alt="delete" className="manager-icons" />
         </button>
       </div> : null}
@@ -285,8 +285,7 @@ function SubCategory(props: {categoryBST: CustomBST<TypeCustomTable["customTable
         {subcategories.length === 0 && props.categoryId ? <p>Empty</p> : null}
         {subcategories.map(subcategory =>
           subcategory.item.entryId && subcategory.item.entryId === props.categoryId ? 
-          <SubCategoryCell id={subcategory.id} subcategory={subcategory.item.entryName} 
-                            amount={subcategory.item.entryAmount} subcategoryBST={props.subcategoryBST} 
+          <SubCategoryCell currSubcategory={subcategory} subcategoryBST={props.subcategoryBST} 
                             setSubcategories={props.setSubcategories} toggleEdit={props.toggleEdit} 
                             key={subcategory.id} setChange={props.setChange} 
                             addToStack={props.addToStack}/> : null
@@ -301,7 +300,7 @@ function CustomTableBodyCell(props:{currentCategory: BSTNode<TypeCustomTable["cu
                               setCategories: Function, setSubcategories: Function, budget: number, 
                               displaySubCategories: MouseEventHandler<HTMLDivElement>, setChange: Function,
                               addToStack: Function, subcategoryBST: CustomBST<TypeCustomTable["customTableEntry"]>,
-                              setCategoryId: Function}){
+                              setCategoryId: Function, subcategories: BSTNode<TypeCustomTable["customTableEntry"]>[]}){
 
   // ******* References ******* //
   const categoryInput = useRef<HTMLInputElement>(null);
@@ -397,7 +396,7 @@ function CustomTableBodyCell(props:{currentCategory: BSTNode<TypeCustomTable["cu
       setAmountValue(prev => prev = "0");
       setCategoryValue(prev => prev = "");
     }
-  }, [props.currentCategory, props.budget])
+  }, [props.currentCategory, props.budget, props.subcategories]);
 
   useEffect(()=>{
     if(amountInput.current){
@@ -443,7 +442,6 @@ function CustomTableBody(props: {categoryBST: CustomBST<TypeCustomTable["customT
                                 subcategories: BSTNode<TypeCustomTable["customTableEntry"]>[]}){
 
   // ******* Reference ******* //
-  const sortToggle = useRef<boolean>(false);
   const sortCounter = useRef<number[]>([0, 0, 0]);
 
    // ******* States ******* //
@@ -522,37 +520,6 @@ function CustomTableBody(props: {categoryBST: CustomBST<TypeCustomTable["customT
     }
   }
 
-  // ******* Functions ******* //
-  // function storeDailyEntries(categoryId: string, summedAmount: number): void{
-  //   if(summedAmount <= 0){
-  //     return;
-  //   }
-
-  //   const convertToMonthly: number = summedAmount / 28;
-  //   const currentCategory = props.tableMap!.get(categoryId);
-  //   linkMap.set(categoryId, {...currentCategory, totalAmount: Number(convertToMonthly.toFixed(2))});
-  //   const myJSON: string = JSON.stringify(Array.from(linkMap.entries()));
-  //   console.log(myJSON);
-  //   sessionStorage.setItem("linkMap", myJSON);
-  // }
-
-  function totalAmount(entryId: string, amount: number): number{
-    const subEntries = props.subcategoryBST.traverse("desc");
-    let summedAmounts: number = amount;
-
-    subEntries.forEach(subEntry =>{
-      if(entryId === subEntry.item.entryId){
-        summedAmounts += subEntry.item.entryAmount;
-      }
-    });
-
-    // if(props.tableUse === "daily"){
-    //   storeDailyEntries(categoryId, summedAmounts);
-    // }
-
-    return summedAmounts;
-  }
-
   // ******* UseEffects ******* //
   useEffect(()=>{
     if(props.categoryBST.length === 0){
@@ -590,7 +557,8 @@ function CustomTableBody(props: {categoryBST: CustomBST<TypeCustomTable["customT
                                     setCategories={props.setCategories} displaySubCategories={displaySubcategories} 
                                     toggleEdit={props.toggleEdit} key={entry.id} setChange={props.setChange}
                                     addToStack={props.addToStack} subcategoryBST={props.subcategoryBST} 
-                                    setCategoryId={setCategoryId} setSubcategories={props.setSubcategories} />
+                                    setCategoryId={setCategoryId} setSubcategories={props.setSubcategories} 
+                                    subcategories={props.subcategories}/>
             )}
           </div>
         </div>
@@ -666,7 +634,7 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
 
     nodes.forEach(node =>{
       if(targetTree === "category"){
-        props.categoryBST.update(node.id, node.item, node.value, 0);
+        props.categoryBST.update(node.id, node.item, node.value, customTableVariables.customBSTVariable);
       }
       else if(targetTree === "subcategory"){
         props.subcategoryBST.update(node.id, node.item, node.value, 0);
@@ -677,7 +645,7 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
       return props.subcategoryBST.traverse("desc");
     }
 
-    return props.categoryBST.traverse("desc");
+    return props.categoryBST.traverse(customTableVariables.customBSTNodeOrder);
   }
 
   // These two functions are used to set the values of the CustomBST
@@ -797,8 +765,11 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
       setChange(prev => prev = false);
     }
 
-    const oldCategories = updateCustomBSTNodes(previousData.oldEntries, "category");
-    const oldSubcategories = updateCustomBSTNodes(previousData.oldSubEntries, "subcategory");
+    props.categoryBST.reconstruct(previousData.oldEntries, customTableVariables.customBSTVariable);
+    props.subcategoryBST.reconstruct(previousData.oldSubEntries, 0);
+
+    const oldCategories = props.categoryBST.traverse(customTableVariables.customBSTNodeOrder);
+    const oldSubcategories = props.subcategoryBST.traverse("desc");
 
     updateStates(oldCategories, oldSubcategories, previousData.oldBudget);
     setToggleEdit(prev => prev = false);
