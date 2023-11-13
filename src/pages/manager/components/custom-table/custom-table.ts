@@ -15,12 +15,6 @@ export const customTableVariables: {customBSTVariable: number, customBSTNodeOrde
   customBSTNodeOrder: "desc"
 }
 
-export function todaysDate(): string{
-  const currentDate: Date = new Date(Date.now());
-  const month: number = currentDate.getMonth() + 1;
-  return `${currentDate.getFullYear()}/${month}/${currentDate.getDate()}`;
-}
-
 export const linkMap = new Map(); // Used to link daily table to the monthly one
 
 // ******* Sort Tables ******* //

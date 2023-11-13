@@ -190,3 +190,10 @@ export function convertStringToWeight(str: string, strLength: number): number{
   return Number(weight);
 }
 
+export function convertDateToString(currentDateMS: number): string{
+  const currentDate: Date = new Date(currentDateMS);
+  const month: number = currentDate.getMonth() + 1;
+  return `${currentDate.getFullYear()}/${month}/${currentDate.getDate()}`;
+}
+
+

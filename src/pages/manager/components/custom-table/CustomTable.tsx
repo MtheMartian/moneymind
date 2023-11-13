@@ -5,9 +5,10 @@ import '../../manager.css';
 import { TypeCustomTable } from './custom-table-types';
 import { user } from '../../../../data/user';
 import { editInputs, uniqueId, checkIfInputEmpty, checkIfInputEmptyCell,
-          getCaretPosition, caretPosition, findLongestString, convertStringToWeight } from '../../manager';
+        getCaretPosition, caretPosition, findLongestString, convertStringToWeight,
+        convertDateToString } from '../../manager';
 import { Stack, CustomBST, BSTNode } from '../../../../ts/dsa';
-import { oldData, todaysDate, customTableVariables } from './custom-table';
+import { oldData,  customTableVariables } from './custom-table';
 import exportIcon from '../../../../assets/manager-icons/export-48px.svg';
 import searchIcon from '../../../../assets/manager-icons/search-48px.svg';
 import undoIcon from '../../../../assets/manager-icons/undo-48px.svg';
@@ -93,7 +94,8 @@ function CustomTableBottom(props: {budget: number, toggleEdit: boolean, setChang
 function SubCategoryCell(props:{currSubcategory: BSTNode<TypeCustomTable["customTableEntry"]>,
                                 subcategoryBST: CustomBST<TypeCustomTable["customTableEntry"]>, 
                                 setSubcategories: Function, toggleEdit: boolean, 
-                                setChange: Function, addToStack: Function}){
+                                setChange: Function, addToStack: Function,
+                                updateLastUpdated: Function}){
 
   // ******* References ******* //
   const amountInputRef = useRef<HTMLInputElement>(null);
@@ -118,6 +120,7 @@ function SubCategoryCell(props:{currSubcategory: BSTNode<TypeCustomTable["custom
     }
 
     props.subcategoryBST.update(props.currSubcategory.id, {...currSubcategory.item, entryAmount: Number(inputs)}, currSubcategory.value, 0);
+    props.updateLastUpdated();
   }
 
   function subcategoryUpdate(e: ChangeEvent<HTMLInputElement>): void{
@@ -133,6 +136,7 @@ function SubCategoryCell(props:{currSubcategory: BSTNode<TypeCustomTable["custom
     }
 
     props.subcategoryBST.update(currSubcategory.id, {...currSubcategory.item, entryName: inputs}, currSubcategory.value, 0);
+    props.updateLastUpdated();
   }
 
   // ******* Button Handlers ******* //
@@ -141,6 +145,7 @@ function SubCategoryCell(props:{currSubcategory: BSTNode<TypeCustomTable["custom
     props.setChange(true);
 
     props.subcategoryBST.remove(props.currSubcategory.id, 0);
+    props.updateLastUpdated();
     props.setSubcategories(props.subcategoryBST.retrieve("desc"));
   }
 
@@ -208,6 +213,20 @@ function SubCategory(props: {categoryBST: CustomBST<TypeCustomTable["customTable
     return props.subcategoryBST.traverse("desc");
   }, [props.subcategories]);
 
+  // ******* Function ******* //
+  function updateLastUpdated(): void{
+    if(props.categoryId){
+      const currCategory = props.categoryBST.retrieve(props.categoryId)!;
+      const entryValues: number[] = [...currCategory.value];
+      entryValues[3] = Date.now();
+
+      props.categoryBST.update(currCategory.id, {...currCategory.item}, 
+                            entryValues, customTableVariables.customBSTVariable);
+
+      console.log("I updated!");
+    }
+  }
+
   // ******* Input Handlers ******* //
   function updateInput(e: ChangeEvent<HTMLInputElement>): void{
     const inputs: string = editInputs(e, amountInputValue, "number");
@@ -230,9 +249,11 @@ function SubCategory(props: {categoryBST: CustomBST<TypeCustomTable["customTable
     const currDate: number = Date.now();
     let subcategoryString: string = subCategoryInput.current!.value;
 
+    updateLastUpdated();
+
     if(props.tableUse === "daily"){
       if(subcategoryString === "" || subcategoryString === " "){
-        subcategoryString = todaysDate();
+        subcategoryString = convertDateToString(currDate);
       }
     }
     props.subcategoryBST.insert([currDate, 0, 0], {entryName: subcategoryString, 
@@ -288,7 +309,7 @@ function SubCategory(props: {categoryBST: CustomBST<TypeCustomTable["customTable
           <SubCategoryCell currSubcategory={subcategory} subcategoryBST={props.subcategoryBST} 
                             setSubcategories={props.setSubcategories} toggleEdit={props.toggleEdit} 
                             key={subcategory.id} setChange={props.setChange} 
-                            addToStack={props.addToStack}/> : null
+                            addToStack={props.addToStack} updateLastUpdated={updateLastUpdated} /> : null
         )}
       </div>
     </div>
@@ -355,17 +376,21 @@ function CustomTableBodyCell(props:{currentCategory: BSTNode<TypeCustomTable["cu
     props.setChange(true);
     const inputs: string = editInputs(e, amountValue, "number");
     const currCategory = props.currentCategory;
+    const entryValues: number[] = [...currCategory.value];
+    entryValues[3] = Date.now();
+
     props.categoryBST.update(currCategory.id, {...currCategory.item, entryAmount: Number(inputs)}, 
-                            currCategory.value, customTableVariables.customBSTVariable);
+                            entryValues, customTableVariables.customBSTVariable);
     setAmountValue(prev => prev = inputs);
   }
 
   function categoryUpdate(e: ChangeEvent<HTMLInputElement>): void{
     props.setChange(true);
     const currentElement: HTMLInputElement = e.currentTarget;
-
     const inputs: string = editInputs(e, categoryValue, "string");
     const currCategory = props.currentCategory;
+    const entryValues: number[] = [...currCategory.value];
+    entryValues[3] = Date.now();
     setCategoryValue(prev => prev = inputs);
 
     if(checkIfInputEmpty(currentElement)){
@@ -373,7 +398,7 @@ function CustomTableBodyCell(props:{currentCategory: BSTNode<TypeCustomTable["cu
     }
 
     props.categoryBST.update(currCategory.id, {...currCategory.item, entryName: inputs}, 
-                            currCategory.value, customTableVariables.customBSTVariable);
+                            entryValues, customTableVariables.customBSTVariable);
   }
 
    // ******* Button Handlers ******* //
@@ -424,6 +449,8 @@ function CustomTableBodyCell(props:{currentCategory: BSTNode<TypeCustomTable["cu
       <input type="text" className="cell-inputs" inputMode="numeric" pattern='[0-9]*' value={amountValue} 
               disabled={props.toggleEdit ? undefined : true} onChange={amountUpdate} 
               onSelect={getCaretPosition} />
+      <p>{props.currentCategory.item.initalAmount}</p>
+      <p>{convertDateToString(props.currentCategory.item.lastUpdated)}</p>
       {props.toggleEdit ? 
         <div className="custom-table-body-cell-options">
           <button data-id={props.currentCategory.id} onClick={deleteButtonHandler} className="custom-table-body-delete-button">
@@ -488,21 +515,12 @@ function CustomTableBody(props: {categoryBST: CustomBST<TypeCustomTable["customT
     }
 
     switch(sectionToSort){
-      case "date":
-        setSortedCategories(0);
-
-        if(sortCounter.current[1] !== 0 || sortCounter.current[2] !== 0){
-          sortCounter.current[1] = 0;
-          sortCounter.current[2] = 0;
-        }
-
-        break;
 
       case "category":
         setSortedCategories(1);
 
-        if(sortCounter.current[0] !== 0 || sortCounter.current[2] !== 0){
-          sortCounter.current[0] = 0;
+        if(sortCounter.current[3] !== 0 || sortCounter.current[2] !== 0){
+          sortCounter.current[3] = 0;
           sortCounter.current[2] = 0;
         }
 
@@ -511,11 +529,21 @@ function CustomTableBody(props: {categoryBST: CustomBST<TypeCustomTable["customT
       case "amount":
         setSortedCategories(2);
 
-        if(sortCounter.current[0] !== 0 || sortCounter.current[1] !== 0){
-          sortCounter.current[0] = 0;
+        if(sortCounter.current[3] !== 0 || sortCounter.current[1] !== 0){
+          sortCounter.current[3] = 0;
           sortCounter.current[1] = 0;
         }
 
+        break;
+
+      case "date":
+        setSortedCategories(3);
+  
+        if(sortCounter.current[1] !== 0 || sortCounter.current[2] !== 0){
+          sortCounter.current[1] = 0;
+          sortCounter.current[2] = 0;
+        }
+  
         break;
     }
   }
@@ -724,11 +752,11 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
 
     if(props.tableUse === "daily"){
       if(newEntryName === "" || newEntryName === " "){
-        newEntryName = todaysDate();
+        newEntryName = convertDateToString(currentTime);
       }
     }
 
-    props.categoryBST.insert([currentTime, 0, 0], {entryName: newEntryName, entryAmount: Number(amountInputValue),
+    props.categoryBST.insert([currentTime, 0, 0, currentTime], {entryName: newEntryName, entryAmount: Number(amountInputValue),
                                       entryId: null, lastUpdated: currentTime, 
                                       initalAmount: Number(amountInputValue)}, uId, 0);
  

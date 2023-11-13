@@ -132,7 +132,7 @@ export function quickSort(arr: number[], sort: string): number[]{
 }
 
 /**
- * @property value (0: Date, 1: Category/Subcategory, 2: Amount)
+ * @property value (0: Date, 1: Category/Subcategory, 2: Amount, 3: LastUpdated)
  */
 // ******* Binary Search Tree ******* //
 export class BSTNode<T>{
@@ -190,7 +190,7 @@ export class CustomBST<T>{
   }
 
     /**
- * @param idx (0: Date, 1: Category/Subcategory, 2: Amount)
+ * @param idx (0: Date, 1: Category/Subcategory, 2: Amount, 3: LastUpdated)
  */
   insert(value: number[], item: T, id: string, idx: number): void{
     const newNode: BSTNode<T> = new BSTNode(item, value, id);
@@ -320,7 +320,7 @@ export class CustomBST<T>{
   /**
    * Update item.
    * If item can't be found, it will be created.
-   * @param idx (0: Date, 1: Category/Subcategory, 2: Amount)
+   * @param idx (0: Date, 1: Category/Subcategory, 2: Amount, 3: LastUpdated)
   */
   update(id: string, item: T, value: number[], idx: number): void{
     const stack = new Stack<BSTNode<T>>();
@@ -351,7 +351,7 @@ export class CustomBST<T>{
 
   /**
    * Remove node.
-   * @param idx (0: Date, 1: Category/Subcategory, 2: Amount)
+   * @param idx (0: Date, 1: Category/Subcategory, 2: Amount, 3: LastUpdated)
   */
   remove(id: string, idx: number): void{
     if(!this.root){
@@ -440,7 +440,7 @@ export class CustomBST<T>{
   }
 
   /**
-   * @param idx (0: Date, 1: Category/Subcategory, 2: Amount)
+   * @param idx (0: Date, 1: Category/Subcategory, 2: Amount, 3: LastUpdated)
   */
   reconstruct(nodes: BSTNode<T>[], idx: number): void{
     const newNodes: BSTNode<T>[] = [];
