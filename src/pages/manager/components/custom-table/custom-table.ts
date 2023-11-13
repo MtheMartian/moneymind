@@ -10,10 +10,9 @@ export let oldData: {oldEntries: BSTNode<TypeCustomTable["customTableEntry"]>[],
   oldBudget: 0
 }
 
-export function todaysDate(): string{
-  const currentDate: Date = new Date(Date.now());
-  const month: number = currentDate.getMonth() + 1;
-  return `${currentDate.getFullYear()}/${month}/${currentDate.getDate()}`;
+export const customTableVariables: {customBSTVariable: number, customBSTNodeOrder: string} = {
+  customBSTVariable: 0,
+  customBSTNodeOrder: "desc"
 }
 
 export const linkMap = new Map(); // Used to link daily table to the monthly one
