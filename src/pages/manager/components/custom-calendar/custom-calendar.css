@@ -1,0 +1,37 @@
+:root{
+  --primary-color: rgb(111, 252, 195);
+  --calendar-borders: 2px solid rgb(102, 102, 102);
+}
+
+#calendar{
+  margin-top: 10px;
+  width: calc(100vw - calc(14rem + 21px));
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  overflow-x: auto;
+  padding: 3rem;
+  gap: 1rem;
+}
+
+.calendar-item-wrapper{
+  display: grid;
+  grid-template-rows: 3rem 1fr;
+  height: calc(80vh - 80px);
+  border: var(--calendar-borders);
+  border-radius: 10px;
+  gap: 7px;
+}
+
+.calendar-item-date{
+  background-color: var(--primary-color);
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  width: 10rem;
+  text-align: center;
+  display: grid;
+  place-items: center;
+}
+
+
+

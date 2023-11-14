@@ -22,6 +22,15 @@ export default function ManagerSideMenu(){
       <ul className="manager-side-menu-sections">
         <div className="manager-side-menu-header">
           <img className="manager-icons" src={calculator} alt="calculator" />
+          <h3>Calendar</h3>
+        </div>
+        <li>
+          <Link to={"/manager/calendar"}>Calendar</Link>  
+        </li>
+      </ul>
+      <ul className="manager-side-menu-sections">
+        <div className="manager-side-menu-header">
+          <img className="manager-icons" src={calculator} alt="calculator" />
           <h3>Calculators</h3>
         </div>
         <li>
