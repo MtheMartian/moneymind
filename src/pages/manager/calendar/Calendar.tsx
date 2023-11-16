@@ -1,6 +1,18 @@
 import '../components/custom-calendar/custom-calendar.css';
 import {useEffect, useRef, useState, useMemo} from 'react';
 
+function CalendarContent(){
+  
+}
+
+function CalendarCustomDropdown(){
+  return(
+    <div>
+      <input type="text" placeholder="Date"/>
+    </div>
+  )
+}
+
 function Calendar(){
 
   //const [selectedDate, setSelectedDate] = useState<Date>(new Date(Date.now()));
@@ -9,15 +21,17 @@ function Calendar(){
   const calendar = useRef<HTMLDivElement>(null);
   const [currentYear, setCurrentYear] = useState<number>(todayDate.current.getFullYear());
   const [currentMonth, setCurrentMonth] = useState<number>(todayDate.current.getMonth());
+  const [currentDate, setCurrentDate] = useState<number>(todayDate.current.getDate());
+
 
 
   const dates = useMemo<Date[]>(()=>{
 
     const datesArr: Date[] =[];
     for(let j: number = 0; j <= 31; j++){
-      const currentDate: Date = new Date(currentYear, currentMonth, j);
-      if(currentDate.getMonth() === currentMonth){
-        datesArr.push(currentDate);
+      const currDate: Date = new Date(currentYear, currentMonth, j);
+      if(currDate.getMonth() === currentMonth){
+        datesArr.push(currDate);
       }
     }
 
@@ -46,12 +60,21 @@ function Calendar(){
       setCurrentMonth(prev => prev = returnMonthInt(currURL.get("month")!));
     }
 
+    if(currURL.has("date")){
+      setCurrentDate(prev => prev = Number(currURL.get("date")));
+    }
+
     if(!currURL.has("year") && !currURL.has("month") && calendar.current){
-      const calendarItem = calendar.current.querySelector(`#calendar-item-wrapper-${todayDate.current.getDate()}`);
+      const calendarItem = calendar.current.querySelector(`#calendar-item-wrapper-${currentDate}`);
       calendarItem!.scrollIntoView({behavior: "smooth", block: "nearest", inline: "start"});
     }
 
-  }, [currentYear, currentMonth]);
+    if(currURL.has("date") && calendar.current){
+      const calendarItem = calendar.current.querySelector(`#calendar-item-wrapper-${currentDate}`);
+      calendarItem!.scrollIntoView({behavior: "smooth", block: "nearest", inline: "start"});
+    }
+
+  }, [currentYear, currentMonth, currentDate]);
 
   return(
     <div id="calendar" ref={calendar}>

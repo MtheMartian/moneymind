@@ -12,6 +12,7 @@
   overflow-x: auto;
   padding: 3rem;
   gap: 1rem;
+  scroll-behavior: smooth;
 }
 
 .calendar-item-wrapper{
@@ -21,13 +22,14 @@
   border: var(--calendar-borders);
   border-radius: 10px;
   gap: 7px;
+  min-width: 300px;
 }
 
 .calendar-item-date{
   background-color: var(--primary-color);
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
-  width: 10rem;
+  width: 100%;
   text-align: center;
   display: grid;
   place-items: center;
