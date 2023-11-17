@@ -8,7 +8,27 @@ function CalendarContent(){
 function CalendarCustomDropdown(){
   return(
     <div>
-      <input type="text" placeholder="Date"/>
+      <div>
+        <div>
+          <input type="text" inputMode='numeric' pattern='pattern=[0-9]*' placeholder='Year'/>
+          <button>Show</button>
+        </div>
+        <div></div>
+      </div>
+      <div>
+        <div>
+          <input type="text" placeholder='Month'/>
+          <button>Show</button>
+        </div>
+        <div></div>
+      </div>
+      <div>
+        <div>
+          <input type="text" inputMode='numeric' pattern='pattern=[0-9]*' placeholder='Date'/>
+          <button>Show</button>
+        </div>
+        <div></div>
+      </div>
     </div>
   )
 }
