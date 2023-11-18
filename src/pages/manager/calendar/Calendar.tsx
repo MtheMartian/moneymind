@@ -1,4 +1,4 @@
-import '../components/custom-calendar/custom-calendar.css';
+import './calendar.css';
 import {useEffect, useRef, useState, useMemo} from 'react';
 
 function CalendarContent(){
@@ -29,6 +29,7 @@ function CalendarCustomDropdown(){
         </div>
         <div></div>
       </div>
+      <div>Go</div>
     </div>
   )
 }
