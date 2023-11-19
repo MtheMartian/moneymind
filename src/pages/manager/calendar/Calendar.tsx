@@ -1,16 +1,20 @@
 import './calendar.css';
 import {useEffect, useRef, useState, useMemo} from 'react';
+import { checkIfFullNumber } from './calendarts';
 
 function CalendarContent(){
   
 }
 
 function CalendarCustomDropdown(){
+  const yearInput = useRef<HTMLInputElement>(null);
+
   return(
     <div>
       <div>
         <div>
-          <input type="text" inputMode='numeric' pattern='pattern=[0-9]*' placeholder='Year'/>
+          <input type="text" inputMode='numeric' pattern='pattern=[0-9]*' placeholder='Year'
+            ref={yearInput} onChange={(e)=>{checkIfFullNumber(e, "year")}}/>
           <button>Show</button>
         </div>
         <div></div>
@@ -99,6 +103,7 @@ function Calendar(){
 
   return(
     <div id="calendar" ref={calendar}>
+      <CalendarCustomDropdown />
       {dates.map(date =>
       <div className="calendar-item-wrapper" id={`calendar-item-wrapper-${date.getDate()}`}>
         <div className="calendar-item-date">
