@@ -2,48 +2,22 @@ import { highlightElementError } from "../manager";
 import { ChangeEvent } from "react";
 
 const inputVerifyArr: boolean[] = [true, true ,true];
+export const todayDate: Date = new Date(Date.now());
 
-export function checkIfFullNumber(elementEvent: ChangeEvent<HTMLInputElement>, calendarType?: string): void{
+export const monthsInt: Map<string, number> = new Map([["january", 0], ["february", 1], ["march", 2], 
+                                                    ["april", 3], ["may", 4], ["june", 5],
+                                                    ["july", 6], ["august", 7], ["september", 8], 
+                                                    ["october", 9], ["november", 10], ["december", 11]]);
+
+export function checkIfFullNumber(elementEvent: ChangeEvent<HTMLInputElement>): void{
 
   const element: HTMLInputElement = elementEvent.currentTarget;
   const input: string = element.value;
 
-  if(Number.isInteger(Number(input))){
-
-    const inputToNumber: number = Number(input);
-
-    if(calendarType){
-      const todayDate: Date = new Date(Date.now());
-
-      switch(calendarType){
-        case "year":
-          if(inputToNumber < 2023 || inputToNumber > todayDate.getUTCFullYear()){
-            highlightElementError(element, false);
-            inputVerifyArr[0] = false;
-          }
-          else{
-            inputVerifyArr[0] = true;
-          }
-
-          return;
-
-        case "date":
-          if(inputToNumber < 1 || inputToNumber > 31){
-            highlightElementError(element, false);
-            inputVerifyArr[2] = false;
-          }
-          else{
-            inputVerifyArr[2] = true;
-          }
-
-          return;
-      }
-    }
-
+  if(Number.isInteger(Number(input)) && Number(input) > 0){
     highlightElementError(element, true); 
     return;
   }
 
   highlightElementError(element, false);
-  inputVerifyArr.push(false);
 }

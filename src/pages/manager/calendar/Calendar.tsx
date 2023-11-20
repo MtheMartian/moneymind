@@ -1,6 +1,6 @@
 import './calendar.css';
 import {useEffect, useRef, useState, useMemo} from 'react';
-import { checkIfFullNumber } from './calendarts';
+import { checkIfFullNumber, monthsInt, todayDate } from './calendarts';
 
 function CalendarContent(){
   
@@ -8,27 +8,29 @@ function CalendarContent(){
 
 function CalendarCustomDropdown(){
   const yearInput = useRef<HTMLInputElement>(null);
+  const dateEntries = useRef<number[]>([todayDate.getUTCFullYear(), todayDate.getMonth(), todayDate.getDate()]);
 
   return(
     <div>
       <div>
         <div>
           <input type="text" inputMode='numeric' pattern='pattern=[0-9]*' placeholder='Year'
-            ref={yearInput} onChange={(e)=>{checkIfFullNumber(e, "year")}}/>
+            ref={yearInput} onChange={checkIfFullNumber}/>
           <button>Show</button>
         </div>
         <div></div>
       </div>
       <div>
         <div>
-          <input type="text" placeholder='Month'/>
+          <input type="text" placeholder='Month' onChange={checkIfFullNumber} />
           <button>Show</button>
         </div>
         <div></div>
       </div>
       <div>
         <div>
-          <input type="text" inputMode='numeric' pattern='pattern=[0-9]*' placeholder='Date'/>
+          <input type="text" inputMode='numeric' pattern='pattern=[0-9]*' placeholder='Date'
+            onChange={checkIfFullNumber} />
           <button>Show</button>
         </div>
         <div></div>
@@ -41,12 +43,12 @@ function CalendarCustomDropdown(){
 function Calendar(){
 
   //const [selectedDate, setSelectedDate] = useState<Date>(new Date(Date.now()));
-  const todayDate = useRef<Date>(new Date(Date.now()));
+  
 
   const calendar = useRef<HTMLDivElement>(null);
-  const [currentYear, setCurrentYear] = useState<number>(todayDate.current.getFullYear());
-  const [currentMonth, setCurrentMonth] = useState<number>(todayDate.current.getMonth());
-  const [currentDate, setCurrentDate] = useState<number>(todayDate.current.getDate());
+  const [currentYear, setCurrentYear] = useState<number>(todayDate.getFullYear());
+  const [currentMonth, setCurrentMonth] = useState<number>(todayDate.getMonth());
+  const [currentDate, setCurrentDate] = useState<number>(todayDate.getDate());
 
 
 
@@ -65,12 +67,8 @@ function Calendar(){
 
   function returnMonthInt(month: string): number{
     month = month.toLowerCase();
-    const monthsInt: Map<string, number> = new Map([["january", 0], ["february", 1], ["march", 2], 
-                                                    ["april", 3], ["may", 4], ["june", 5],
-                                                    ["july", 6], ["august", 7], ["september", 8], 
-                                                    ["october", 9], ["november", 10], ["december", 11]]);
 
-    return typeof monthsInt.get(month) !== "undefined" ? monthsInt.get(month)! : todayDate.current.getMonth();
+    return typeof monthsInt.get(month) !== "undefined" ? monthsInt.get(month)! : todayDate.getMonth();
   }
 
 
@@ -82,7 +80,7 @@ function Calendar(){
     }
 
     if(currURL.has("month")){
-      setCurrentMonth(prev => prev = returnMonthInt(currURL.get("month")!));
+      setCurrentMonth(prev => prev = Number(currURL.get("month")));
     }
 
     if(currURL.has("date")){
