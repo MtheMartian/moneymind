@@ -6,6 +6,39 @@ function CalendarContent(){
   
 }
 
+function CustomDropDown(props: {dateType: string}){
+  const [dateTypeArr, setDateTypeArr] = useState<number[]>([]);
+
+  // ******* Functions ******* //
+  function addSelectionToArray(elementEvent: SyntheticEvent<HTMLDivElement, MouseEvent>): void{
+    const currElement: HTMLDivElement = elementEvent.currentTarget;
+
+    switch(props.dateType){
+    case "year":
+    dateEntries[0] = Number(currElement.textContent);
+    break;
+
+    case "month":
+    dateEntries[1] = Number(currElement.textContent);
+    break;
+
+    case "date":
+    dateEntries[2] = Number(currElement.textContent);
+    break;
+    }
+  }
+
+  return(
+    <div>
+      {dateTypeArr.map(dateType=>
+        <div onClick={addSelectionToArray}>
+          {dateType}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function CalendarCustomDropdown(props: {setCurrentYear: Function, setCurrentMonth: Function, setCurrentDate: Function}){
   // ******* Reference ******* //
   const yearInput = useRef<HTMLInputElement>(null);
@@ -45,8 +78,11 @@ function CalendarCustomDropdown(props: {setCurrentYear: Function, setCurrentMont
 
   // ******* UseEffects ******* //
   useEffect(()=>{
+    setYears(prev => prev = [2023]);
+    setMonths(prev => prev = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+    setDates(prev => prev = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]);
 
-  })
+  }, [])
 
   return(
     <div>
@@ -56,13 +92,7 @@ function CalendarCustomDropdown(props: {setCurrentYear: Function, setCurrentMont
             ref={yearInput} onChange={checkIfFullNumber}/>
           <button>Show</button>
         </div>
-        <div>
-          {years.map(year=>
-            <div onClick={(e)=> addSelectionToArray(e, "year")}>
-              {year}
-            </div>
-          )}
-        </div>
+        
       </div>
       <div>
         <div>
