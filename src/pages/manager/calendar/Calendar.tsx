@@ -1,17 +1,26 @@
 import './calendar.css';
 import {useEffect, useRef, useState, useMemo, SyntheticEvent} from 'react';
-import { checkIfFullNumber, monthsInt, todayDate } from './calendarts';
+import { checkIfFullNumber, dateEntries } from './calendarts';
 
 function CalendarContent(){
   
 }
 
-function CustomDropDown(props: {dateType: string}){
+function CustomDropDown(props: {dateType: string, inputElement: HTMLInputElement | null,
+                                setSelectedDropdown: Function}){
+  // ******* States ******* //
   const [dateTypeArr, setDateTypeArr] = useState<number[]>([]);
 
   // ******* Functions ******* //
   function addSelectionToArray(elementEvent: SyntheticEvent<HTMLDivElement, MouseEvent>): void{
+    if(!props.inputElement){
+      return;
+    }
+
     const currElement: HTMLDivElement = elementEvent.currentTarget;
+
+    props.inputElement.value = currElement.textContent!;
+    props.setSelectedDropdown(-1);
 
     switch(props.dateType){
     case "year":
@@ -28,6 +37,23 @@ function CustomDropDown(props: {dateType: string}){
     }
   }
 
+  // ******* UseEffects ******* //
+  useEffect(()=>{
+    switch(props.dateType){
+      case "year":
+        setDateTypeArr(prev => prev = [2023]);
+        break;
+
+      case "month":
+        setDateTypeArr(prev => prev = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+        break;
+
+      case "date":
+        setDateTypeArr(prev => prev = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]);
+        break;
+    }
+  }, []);
+
   return(
     <div>
       {dateTypeArr.map(dateType=>
@@ -42,45 +68,33 @@ function CustomDropDown(props: {dateType: string}){
 function CalendarCustomDropdown(props: {setCurrentYear: Function, setCurrentMonth: Function, setCurrentDate: Function}){
   // ******* Reference ******* //
   const yearInput = useRef<HTMLInputElement>(null);
-  const dateEntries = useRef<number[]>([todayDate.getUTCFullYear(), todayDate.getMonth(), todayDate.getDate()]);
+  const monthInput = useRef<HTMLInputElement>(null);
+  const dateInput = useRef<HTMLInputElement>(null);
 
   // ******* States ******* //
-  const [years, setYears] = useState<number[]>([]);
-  const [months, setMonths] = useState<number[]>([]);
-  const [dates, setDates] = useState<number[]>([]);
-
-  // ******* Functions ******* //
-  function addSelectionToArray(elementEvent: SyntheticEvent<HTMLDivElement, MouseEvent>,
-                                dateType: string): void{
-    const currElement: HTMLDivElement = elementEvent.currentTarget;
-
-    switch(dateType){
-      case "year":
-        dateEntries.current[0] = Number(currElement.textContent);
-        break;
-
-      case "month":
-        dateEntries.current[1] = Number(currElement.textContent);
-        break;
-
-      case "date":
-        dateEntries.current[2] = Number(currElement.textContent);
-        break;
-    }
-  }
+  const [selectedDropdown, setSelectedDropDown] = useState<number>(-1);
 
   // ******* Button Handlers ******* //
   function goButtonHandler(): void{
-    props.setCurrentYear(dateEntries.current[0]);
-    props.setCurrentMonth(dateEntries.current[1]);
-    props.setCurrentDate(dateEntries.current[2]);
+    const newURL: string = `/manager/calendar?year=${dateEntries[0]}&month=${dateEntries[1]}&date=${dateEntries[2]}`;
+    window.history.pushState(null, "", newURL);
+    props.setCurrentYear(dateEntries[0]);
+    props.setCurrentMonth(dateEntries[1]);
+    props.setCurrentDate(dateEntries[2]);
+  }
+
+  function showDropdownButtonHandler(idx: number): void{
+    if(selectedDropdown === idx){
+      setSelectedDropDown(prev => prev = -1);
+      return;
+    }
+     
+    setSelectedDropDown(prev => prev = idx);
   }
 
   // ******* UseEffects ******* //
   useEffect(()=>{
-    setYears(prev => prev = [2023]);
-    setMonths(prev => prev = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
-    setDates(prev => prev = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]);
+    
 
   }, [])
 
@@ -90,36 +104,35 @@ function CalendarCustomDropdown(props: {setCurrentYear: Function, setCurrentMont
         <div>
           <input type="text" inputMode='numeric' pattern='pattern=[0-9]*' placeholder='Year'
             ref={yearInput} onChange={checkIfFullNumber}/>
-          <button>Show</button>
+          <button onClick={()=> showDropdownButtonHandler(0)}>Show</button>
         </div>
+        {selectedDropdown === 0 ? 
+            <CustomDropDown dateType='year' inputElement={yearInput.current} 
+              setSelectedDropdown={setSelectedDropDown}/> : null
+        }
         
       </div>
       <div>
         <div>
-          <input type="text" placeholder='Month' onChange={checkIfFullNumber} />
-          <button>Show</button>
+          <input type="text" placeholder='Month' onChange={checkIfFullNumber} 
+            ref={monthInput} />
+          <button onClick={()=> showDropdownButtonHandler(1)}>Show</button>
         </div>
-        <div>
-          {months.map(month=>
-            <div onClick={(e)=> addSelectionToArray(e, "month")}>
-              {month}
-            </div>
-          )}
-        </div>
+        {selectedDropdown === 1 ?
+          <CustomDropDown dateType='month' inputElement={monthInput.current} 
+            setSelectedDropdown={setSelectedDropDown}/> : null
+        }
       </div>
       <div>
         <div>
           <input type="text" inputMode='numeric' pattern='pattern=[0-9]*' placeholder='Date'
-            onChange={checkIfFullNumber} />
-          <button>Show</button>
+            onChange={checkIfFullNumber} ref={dateInput} />
+          <button onClick={()=> showDropdownButtonHandler(2)}>Show</button>
         </div>
-        <div>
-          {dates.map(date=>
-            <div onClick={(e)=> addSelectionToArray(e, "date")}>
-              {date}
-            </div>
-          )}
-        </div>
+        {selectedDropdown === 2 ?
+          <CustomDropDown dateType='date' inputElement={dateInput.current} 
+            setSelectedDropdown={setSelectedDropDown}/> : null
+        }
       </div>
       <div onClick={goButtonHandler}>Go</div>
     </div>
@@ -130,31 +143,26 @@ function Calendar(){
   
   // ******* Reference ******* //
   const calendar = useRef<HTMLDivElement>(null);
+  const todayDate = useRef<Date>(new Date(Date.now()));
 
   // ******* States ******* //
-  const [currentYear, setCurrentYear] = useState<number>(todayDate.getFullYear());
-  const [currentMonth, setCurrentMonth] = useState<number>(todayDate.getMonth());
-  const [currentDate, setCurrentDate] = useState<number>(todayDate.getDate());
-  const [dates, setDates] = useState<Date[]>([]);
+  const [currentYear, setCurrentYear] = useState<number>(todayDate.current.getFullYear());
+  const [currentMonth, setCurrentMonth] = useState<number>(todayDate.current.getMonth() + 1);
+  const [currentDate, setCurrentDate] = useState<number>(todayDate.current.getDate());
 
-  // ******* UseEffects ******* //
-  // Setup the calendar
-  useEffect(()=>{
-    const datesArr: Date[] =[];
+  const datesArr = useMemo<Date[]>(()=>{
+    const tempArr: Date[] = [];
     for(let j: number = 0; j <= 31; j++){
-      const currDate: Date = new Date(currentYear, currentMonth, j);
-      if(currDate.getMonth() === currentMonth){
-        datesArr.push(currDate);
+      const currDate: Date = new Date(currentYear, currentMonth - 1, j);
+      if(currDate.getMonth() === currentMonth - 1){
+        tempArr.push(currDate);
       }
     }
 
-    setDates(prev => prev = datesArr);
-
-    return()=>{
-      setDates(prev => prev = []);
-    }
+    return tempArr;
   }, [currentYear, currentMonth, currentDate]);
 
+  // ******* UseEffects ******* //
   // Get date options from URL (if present), scroll to today's/selected date.
   useEffect(()=>{
     const currURL: URLSearchParams = new URL(window.location.href).searchParams;
@@ -173,12 +181,12 @@ function Calendar(){
 
     if(!currURL.has("year") && !currURL.has("month") && calendar.current){
       const calendarItem = calendar.current.querySelector(`#calendar-item-wrapper-${currentDate}`);
-      calendarItem!.scrollIntoView({behavior: "smooth", block: "nearest", inline: "start"});
+      calendarItem?.scrollIntoView({behavior: "smooth", block: "nearest", inline: "start"});
     }
 
     if(currURL.has("date") && calendar.current){
       const calendarItem = calendar.current.querySelector(`#calendar-item-wrapper-${currentDate}`);
-      calendarItem!.scrollIntoView({behavior: "smooth", block: "nearest", inline: "start"});
+      calendarItem?.scrollIntoView({behavior: "smooth", block: "nearest", inline: "start"});
     }
 
   }, [currentYear, currentMonth, currentDate]);
@@ -187,7 +195,7 @@ function Calendar(){
     <div id="calendar" ref={calendar}>
       <CalendarCustomDropdown setCurrentYear={setCurrentYear} setCurrentMonth={setCurrentMonth}
                               setCurrentDate={setCurrentDate} />
-      {dates.map(date =>
+      {datesArr.map(date =>
       <div className="calendar-item-wrapper" id={`calendar-item-wrapper-${date.getDate()}`}>
         <div className="calendar-item-date">
           <p>{date.toDateString()}</p>
