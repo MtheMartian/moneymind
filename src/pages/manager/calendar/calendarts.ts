@@ -9,7 +9,7 @@ export const monthsInt: Map<string, number> = new Map([["january", 0], ["februar
                                                     ["october", 9], ["november", 10], ["december", 11]]);
 
 const todaysDate: Date = new Date(Date.now());
-export const dateEntries: number[] = [todaysDate.getUTCFullYear(), todaysDate.getMonth(), todays];
+export const dateEntries: number[] = [-1, -1, -1];
 
 export function checkIfFullNumber(elementEvent: ChangeEvent<HTMLInputElement>): void{
 

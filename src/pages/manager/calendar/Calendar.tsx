@@ -76,11 +76,39 @@ function CalendarCustomDropdown(props: {setCurrentYear: Function, setCurrentMont
 
   // ******* Button Handlers ******* //
   function goButtonHandler(): void{
+    const currDate: Date = new Date(Date.now());
+
+    // If blank inputs
+    if(dateEntries[0] === -1 && dateEntries[1] === -1 && dateEntries[2] === -1){
+      yearInput.current!.style.border = "2px solid red";
+      monthInput.current!.style.border = "2px solid red";
+      dateInput.current!.style.border = "2px solid red";
+
+      return;
+    }
+
+    if(dateEntries[0] === -1){
+      dateEntries[0] = currDate.getUTCFullYear();
+    }
+
+    if(dateEntries[1] === -1){
+      dateEntries[1] = currDate.getMonth();
+    }
+
+    if(dateEntries[2] === -1){
+      dateEntries[2] = 1;
+    }
+
+    // Push new URL
     const newURL: string = `/manager/calendar?year=${dateEntries[0]}&month=${dateEntries[1]}&date=${dateEntries[2]}`;
     window.history.pushState(null, "", newURL);
     props.setCurrentYear(dateEntries[0]);
     props.setCurrentMonth(dateEntries[1]);
     props.setCurrentDate(dateEntries[2]);
+
+    yearInput.current!.style.cssText = "";
+    monthInput.current!.style.cssText = "";
+    dateInput.current!.style.cssText = "";
   }
 
   function showDropdownButtonHandler(idx: number): void{
