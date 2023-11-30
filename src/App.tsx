@@ -6,6 +6,7 @@ import ManagerSideMenu from "./components/manager-aside/ManagerAside";
 import Footer from "./components/footer/Footer";
 import DailyTable from "./pages/manager/daily-table/DailyTable";
 import MonthlyTable from "./pages/manager/monthly-table/MonthlyTable";
+import Calendar from "./pages/manager/calendar/Calendar";
 
 function Layout(){
   return(
@@ -45,6 +46,10 @@ function App(){
     {
       path: "/manager/daily",
       element: <DailyTable />
+    },
+    {
+      path: "/manager/calendar",
+      element: <Calendar />
     }
   ]
   },

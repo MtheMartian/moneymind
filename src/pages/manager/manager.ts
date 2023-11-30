@@ -196,4 +196,13 @@ export function convertDateToString(currentDateMS: number): string{
   return `${currentDate.getFullYear()}/${month}/${currentDate.getDate()}`;
 }
 
+export function highlightElementError(element: HTMLInputElement, correct: boolean): void{
+  if(!correct){
+    element.style.border = "2px solid red";
+    return;
+  }
+
+  element.style.border = "2px solid rgb(111, 252, 195)";
+}
+
 
