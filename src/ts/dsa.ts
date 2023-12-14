@@ -339,6 +339,7 @@ export class CustomBST<T>{
         if(currentNode.id === id){
           currentNode.item = item;
           currentNode.value = value;
+          currentNode.id = id;
           return;
         }
       }

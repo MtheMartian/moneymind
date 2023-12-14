@@ -199,11 +199,11 @@ function SubCategory(props: {categoryBST: CustomBST<TypeCustomTable["customTable
   const amountInput = useRef<HTMLInputElement>(null);
 
    // ******* Memo ******* //
-   const categorySelected = useMemo<string | null>(()=>{
+   const categorySelected = useMemo<BSTNode<TypeCustomTable["customTableEntry"]> | null>(()=>{
     if(props.categoryId){
       const retrievedCategory = props.categoryBST.retrieve(props.categoryId);
       if(retrievedCategory){
-        return retrievedCategory.item.entryName;
+        return retrievedCategory;
       }
     }
     return null;
@@ -258,8 +258,11 @@ function SubCategory(props: {categoryBST: CustomBST<TypeCustomTable["customTable
     }
     props.subcategoryBST.insert([currDate, 0, 0], {entryName: subcategoryString, 
                                           entryAmount: Number(amountInput.current!.value),
-                                          entryId: props.categoryId, lastUpdated: currDate,
-                                          initalAmount: Number(amountInput.current!.value)}, uId, 0);                             
+                                          linkId: categorySelected!.item.linkId, lastUpdated: currDate,
+                                          initalAmount: Number(amountInput.current!.value), 
+                                          isCategory: false, 
+                                          isMonthly: props.tableUse === "monthly" ? true : false,
+                                          dateCreated: currDate, id: uId}, uId, 0);                             
 
     props.setSubcategories(props.subcategoryBST.traverse("desc"));
     setAddSubCategoryForm(prev => prev = false);
@@ -277,7 +280,7 @@ function SubCategory(props: {categoryBST: CustomBST<TypeCustomTable["customTable
   return(
     <div id="custom-table-body-subcategory">
       <div id="custom-table-body-subcategory-header">
-        {categorySelected ? <h2>{`${categorySelected}'s Subcategories`}</h2> : null}
+        {categorySelected ? <h2>{`${categorySelected.item.entryName}'s Subcategories`}</h2> : null}
         {categorySelected ? 
         <button className="manager-buttons" onClick={displayAddSubCategoryForm}>Add Entry</button> 
         : null}
@@ -305,7 +308,7 @@ function SubCategory(props: {categoryBST: CustomBST<TypeCustomTable["customTable
         {props.categoryId ? null : <p>Select a category to view/add subcategories...</p>}
         {subcategories.length === 0 && props.categoryId ? <p>Empty</p> : null}
         {subcategories.map(subcategory =>
-          subcategory.item.entryId && subcategory.item.entryId === props.categoryId ? 
+          categorySelected && subcategory.item.linkId === categorySelected.item.linkId ? 
           <SubCategoryCell currSubcategory={subcategory} subcategoryBST={props.subcategoryBST} 
                             setSubcategories={props.setSubcategories} toggleEdit={props.toggleEdit} 
                             key={subcategory.id} setChange={props.setChange} 
@@ -348,7 +351,7 @@ function CustomTableBodyCell(props:{currentCategory: BSTNode<TypeCustomTable["cu
   function clearAssociatedSubcategories(): void{
     const subcategories = props.subcategoryBST.traverse("desc");
     subcategories.forEach(subcategory =>{
-      if(subcategory.item.entryId === props.currentCategory.id){
+      if(subcategory.item.linkId === props.currentCategory.item.linkId){
         props.subcategoryBST.remove(subcategory.id, customTableVariables.customBSTVariable);
       }
     });
@@ -359,7 +362,7 @@ function CustomTableBodyCell(props:{currentCategory: BSTNode<TypeCustomTable["cu
     let summedAmounts: number = props.currentCategory.item.entryAmount;
 
     subEntries.forEach(subEntry =>{
-      if(props.currentCategory.id === subEntry.item.entryId){
+      if(props.currentCategory.item.linkId === subEntry.item.linkId){
         summedAmounts += subEntry.item.entryAmount;
       }
     });
@@ -679,12 +682,12 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
   // These two functions are used to set the values of the CustomBST
   // (e.g. sorting/reconstructing the CustomBST).
   // It's an array of numbers (0: Date, 1: Category/Subcategory, 2: Amount).
-  function totalAmount(entryId: string, amount: number): number{
+  function totalAmount(linkId: string, amount: number): number{
     const subEntries = props.subcategoryBST.traverse("desc");
     let summedAmounts: number = amount;
 
     subEntries.forEach(subEntry =>{
-      if(entryId === subEntry.item.entryId){
+      if(linkId === subEntry.item.linkId){
         summedAmounts += subEntry.item.entryAmount;
       }
     });
@@ -705,9 +708,27 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
     nodes.forEach(node =>{
       const weight: number = convertStringToWeight(node.item.entryName, longestString);
       console.log(`Weight: ${weight}`);
-      const currentTotalAmount: number = totalAmount(node.id, node.item.entryAmount);
+      const currentTotalAmount: number = totalAmount(node.item.linkId, node.item.entryAmount);
       props.categoryBST.update(node.id, node.item, [node.value[0], weight, currentTotalAmount], 0);
     });
+  }
+
+  async function retrieveDataFromDB(): Promise<void>{
+    const response: Response = await fetch("https://localhost:7158/api/tables");
+
+    if(response.ok){
+      const returnedData: Map<string, TypeCustomTable["customTableEntry"]> = await response.json();
+
+      Array.from(returnedData.keys()).forEach(key =>{
+        const currentItem: TypeCustomTable["customTableEntry"] | undefined = returnedData.get(key);
+
+        if(typeof currentItem !== "undefined"){
+          if(currentItem.isCategory){
+            props.categoryBST.update(key, currentItem, [0, 0, 0], 0);
+          }
+        }
+      });
+    }
   }
 //
 
@@ -757,8 +778,10 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
     }
 
     props.categoryBST.insert([currentTime, 0, 0, currentTime], {entryName: newEntryName, entryAmount: Number(amountInputValue),
-                                      entryId: null, lastUpdated: currentTime, 
-                                      initalAmount: Number(amountInputValue)}, uId, 0);
+                                      linkId: uId, lastUpdated: currentTime, 
+                                      initalAmount: Number(amountInputValue), isCategory: true,
+                                      isMonthly: props.tableUse === "monthly" ? true : false,
+                                      dateCreated: currentTime, id: uId}, uId, 0);
  
     setNodeValues();
     addToStack();
@@ -768,17 +791,74 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
     displayInsert();
   }
 
-  function saveButtonHandler(): void{
-    setChange(prev => prev = false);
+  async function saveButtonHandler(): Promise<void>{
+    const nodeArray: BSTNode<TypeCustomTable["customTableEntry"]>[] = [];
+    const nodeArrayJson: {}[] = [];
+
     updateStates(categories, subcategories, oldData.oldBudget);
     
     categories.forEach(node =>{
       props.categoryBST.update(node.id, node.item, node.value, 0);
+      nodeArray.push(node);
     });
 
     subcategories.forEach(node =>{
       props.subcategoryBST.update(node.id, node.item, node.value, 0);
+      nodeArray.push(node);
     });
+
+    nodeArray.forEach(node =>{
+      nodeArrayJson.push({
+        "Id": node.id,
+        "DateCreated": node.item.dateCreated,
+        "LastUpdated": node.item.lastUpdated,
+        "EntryName": node.item.entryName,
+        "EntryAmount": node.item.entryAmount,
+        "InitialAmount": node.item.initalAmount,
+        "IsMonthly": node.item.isMonthly,
+        "IsCategory": node.item.isCategory,
+        "LinkID": node.item.linkId
+      });
+    });
+
+    const response: Response = await fetch("https://localhost:7158/api/tables", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(nodeArrayJson)
+    });
+
+    if(response.ok){
+      const response2: Response = await fetch("https://localhost:7158/api/tables");
+
+
+      const returnedData: Map<string, TypeCustomTable["customTableEntry"]> = await response2.json();
+      const returnedCategories: BSTNode<TypeCustomTable["customTableEntry"]>[] = [];
+      const returnedSubcategories: BSTNode<TypeCustomTable["customTableEntry"]>[] = [];
+
+      Array.from(returnedData.keys()).forEach(key =>{
+        const currentItem: TypeCustomTable["customTableEntry"] | undefined = returnedData.get(key);
+        if(typeof currentItem !== "undefined"){
+          if(currentItem.isCategory){
+            props.categoryBST.update(key,currentItem, )
+          }
+        }
+        
+      })
+  
+    returnedCategories.forEach(node =>{
+      props.categoryBST.update(node.item.id, node.item, node.value, 0);
+    });
+
+    returnedSubcategories.forEach(node =>{
+      props.subcategoryBST.update(node.item.id, node.item, node.value, 0);
+    });
+
+      setChange(prev => prev = false);
+      updateStates(returnedCategories, returnedSubcategories, oldData.oldBudget);
+    }
+
+    console.log(JSON.stringify(nodeArrayJson));
+    
   }
 
   function undoButtonHandler(): void{
