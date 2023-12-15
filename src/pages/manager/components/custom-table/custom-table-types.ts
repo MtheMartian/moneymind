@@ -5,7 +5,7 @@ type CustomTableTypes = {
   subCategoryEntries: [string, {subCategory: string, amount: number, categoryId: string}][],
   customTableEntry: {entryName: string, entryAmount: number, isCategory: boolean,
                       linkId: string, lastUpdated: number, dateCreated: number,
-                        initalAmount: number, isMonthly: boolean, id: string};
+                        initalAmount: number, isMonthly: boolean};
 }
 
 export type TypeCustomTable = CustomTableTypes;
