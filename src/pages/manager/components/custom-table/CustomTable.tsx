@@ -717,23 +717,23 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
     const response: Response = await fetch("https://localhost:7158/api/tables");
 
     if(response.ok){
-      const returnedData: Map<string, TypeCustomTable["customTableEntry"]> = await response.json();
+      const returnedData: {} = await response.json();
 
       const tempArr1: BSTNode<TypeCustomTable["customTableEntry"]>[] = [];
       const tempArr2: BSTNode<TypeCustomTable["customTableEntry"]>[] = [];
 
-      Array.from(returnedData.keys()).forEach(key =>{
-        const currentItem: TypeCustomTable["customTableEntry"] | undefined = returnedData.get(key);
+      console.log(Object.entries(returnedData));
 
-        if(typeof currentItem !== "undefined"){
-          if(currentItem.isCategory){
-            tempArr1.push(new BSTNode<TypeCustomTable["customTableEntry"]>(currentItem, [0, 0, 0], key)); 
-          }
-          else{
-            tempArr2.push(new BSTNode<TypeCustomTable["customTableEntry"]>(currentItem, [0, 0, 0], key)); 
-          }
+      for(let i: number = 0; i < Object.entries(returnedData)[0].length; i++){
+        const currentItem: TypeCustomTable["customTableEntry"] = Object.entries<TypeCustomTable["customTableEntry"]>(returnedData)[i][1];
+
+        if(currentItem.isCategory){
+          tempArr1.push(new BSTNode<TypeCustomTable["customTableEntry"]>(currentItem, [0, 0, 0], Object.entries(returnedData)[i][0])); 
         }
-      });
+        else{
+          tempArr2.push(new BSTNode<TypeCustomTable["customTableEntry"]>(currentItem, [0, 0, 0], Object.entries(returnedData)[i][0])); 
+        }
+      }
 
       props.categoryBST.reconstruct(tempArr1, customTableVariables.customBSTVariable);
       props.subcategoryBST.reconstruct(tempArr2, 0);
