@@ -210,8 +210,20 @@ function SubCategory(props: {categoryBST: CustomBST<TypeCustomTable["customTable
   }, [props.categoryId]);
 
    const subcategories = useMemo<BSTNode<TypeCustomTable["customTableEntry"]>[]>(()=>{
-    return props.subcategoryBST.traverse("desc");
-  }, [props.subcategories]);
+    const categorySelectedSubcategories: BSTNode<TypeCustomTable["customTableEntry"]>[] = [];
+
+    const allSubcategories: BSTNode<TypeCustomTable["customTableEntry"]>[] = props.subcategoryBST.traverse("desc");
+
+    allSubcategories.forEach(subcategory =>{
+      if(categorySelected){
+        if(categorySelected.item.linkId === subcategory.item.linkId){
+          categorySelectedSubcategories.push(subcategory);
+        }
+      }
+    });
+
+    return categorySelectedSubcategories;
+  }, [props.subcategories, props.categoryId]);
 
   // ******* Function ******* //
   function updateLastUpdated(): void{
@@ -308,7 +320,7 @@ function SubCategory(props: {categoryBST: CustomBST<TypeCustomTable["customTable
         {props.categoryId ? null : <p>Select a category to view/add subcategories...</p>}
         {subcategories.length === 0 && props.categoryId ? <p>Empty</p> : null}
         {subcategories.map(subcategory =>
-          categorySelected && subcategory.item.linkId === categorySelected.item.linkId ? 
+          categorySelected ? 
           <SubCategoryCell currSubcategory={subcategory} subcategoryBST={props.subcategoryBST} 
                             setSubcategories={props.setSubcategories} toggleEdit={props.toggleEdit} 
                             key={subcategory.id} setChange={props.setChange} 
@@ -719,12 +731,14 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
     if(response.ok){
       const returnedData: {} = await response.json();
 
+      console.log(returnedData);
+
       const tempArr1: BSTNode<TypeCustomTable["customTableEntry"]>[] = [];
       const tempArr2: BSTNode<TypeCustomTable["customTableEntry"]>[] = [];
 
       console.log(Object.entries(returnedData));
 
-      for(let i: number = 0; i < Object.entries(returnedData)[0].length; i++){
+      for(let i: number = 0; i < Object.entries(returnedData).length; i++){
         const currentItem: TypeCustomTable["customTableEntry"] = Object.entries<TypeCustomTable["customTableEntry"]>(returnedData)[i][1];
 
         if(currentItem.isCategory){
@@ -811,18 +825,8 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
   }
 
   async function saveButtonHandler(): Promise<void>{
-    const nodeArray: BSTNode<TypeCustomTable["customTableEntry"]>[] = [];
+    const nodeArray: BSTNode<TypeCustomTable["customTableEntry"]>[] = [...props.categoryBST.traverse("desc"), ...props.subcategoryBST.traverse("desc")];
     const nodeArrayJson: {}[] = [];
-
-    updateStates(categories, subcategories, oldData.oldBudget);
-    
-    categories.forEach(node =>{
-      nodeArray.push(node);
-    });
-
-    subcategories.forEach(node =>{
-      nodeArray.push(node);
-    });
 
     nodeArray.forEach(node =>{
       nodeArrayJson.push({
@@ -845,8 +849,8 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
     });
 
     if(response.ok){
-      setChange(prev => prev = false);
       retrieveDataFromDBAndUpdateTable();
+      setChange(prev => prev = false);
     }
 
     console.log(JSON.stringify(nodeArrayJson));
