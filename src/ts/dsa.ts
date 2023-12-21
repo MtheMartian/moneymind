@@ -76,6 +76,35 @@ export class Stack<T>{
   }
 }
 
+// ******* Queue ******* //
+export class Queue<T>{
+  head: MyNode<T> | null;
+  tail: MyNode<T> | null;
+  length: number;
+
+  constructor(){
+    this.head = this.tail = null;
+    this.length = 0;
+  }
+
+  insert(item: T){
+    const newNode: MyNode<T> = new MyNode(item);
+
+    this.length++;
+
+    if(!this.head){
+       this.head = newNode;
+       this.tail = newNode;
+    }
+    else{
+      const node: MyNode<T> = this.head;
+
+      node.next = newNode;
+      this.tail = newNode;
+    }
+  }
+}
+
 // ******* QuickSort ******* //
 function partition(low: number, high: number, arr: number[], sort: string): number{
   let idx: number = -1;
