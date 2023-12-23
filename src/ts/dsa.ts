@@ -87,21 +87,42 @@ export class Queue<T>{
     this.length = 0;
   }
 
-  insert(item: T){
+  enqueue(item: T): void{
     const newNode: MyNode<T> = new MyNode(item);
 
     this.length++;
 
-    if(!this.head){
-       this.head = newNode;
-       this.tail = newNode;
+    if(!this.head || !this.tail){
+       this.head = this.tail = newNode;
     }
     else{
-      const node: MyNode<T> = this.head;
+      const tempNode: MyNode<T> = this.tail;
 
-      node.next = newNode;
+      tempNode.next = newNode;
+      newNode.prev = tempNode;
       this.tail = newNode;
     }
+  }
+
+  dequeue(): MyNode<T> | null{
+    if(!this.head || !this.tail){
+      return null;
+    }
+
+    this.length--;
+
+    const tempNode: MyNode<T> = this.head;
+
+    this.head = this.head.next;
+
+    if(this.head){
+      this.head.prev = null;
+    }
+    else{
+      this.tail = null;
+    }
+
+    return tempNode;
   }
 }
 
