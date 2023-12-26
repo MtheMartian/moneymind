@@ -1,6 +1,6 @@
 import {Queue} from './dsa';
 
-class RequestQueue{
+export class RequestQueue{
   myQueue: Queue<{requestFunction: Function, resolve: Function, reject: Function}>;
   isProcessing: boolean;
 
@@ -14,13 +14,23 @@ class RequestQueue{
 
     while(this.myQueue.length > 0){
       const {requestFunction, resolve, reject} = this.myQueue.dequeue()!.value;
+      let retries: number = 3; 
 
-      try{
-        const result: Function = await requestFunction();
-        resolve(result);
+      while(retries > 0){
+        try{
+          const result: Function = await requestFunction();
+          resolve(result);
+          break;
+        }
+        catch(error){
+          retries--;
+          console.error(`Something went wrong with the request! ${error}`);
+          reject(error);
+        }
       }
-      catch(error){
-        reject(error);
+
+      if(retries <= 0){
+        reject(new Error("Max retries reached!"));
       }
     }
 
@@ -30,6 +40,8 @@ class RequestQueue{
   async enqueueRequest(requestFunction: Function): Promise<unknown>{
     return new Promise(async (resolve, reject) =>{
       this.myQueue.enqueue({requestFunction, resolve, reject});
+
+      console.log(`Queue Length: ${this.myQueue.length}`);
 
       if(!this.isProcessing){
         await this.startProcessing();
