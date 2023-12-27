@@ -36,6 +36,14 @@ function MonthlyTable(){
           }
         }
 
+        monthlyBST.current.traverse("desc").forEach(node =>{
+          console.log(`Category: ${node.item.linkId}`);
+        })
+
+        monthlySubcategoriesBST.current.traverse("desc").forEach(node =>{
+          console.log(`Subcategories: ${node.item.linkId}`);
+        })
+
         setSuccessfulRequest(prev => prev = true);
       }
     }

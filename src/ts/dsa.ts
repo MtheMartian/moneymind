@@ -251,6 +251,15 @@ export class CustomBST<T>{
       return;
     }
 
+    const allNodes: BSTNode<T>[] = this.traverse("desc");
+
+    for(let i: number = 0; i < allNodes.length; i++){
+      if(allNodes[i].id === id){
+        console.log("ID already exists!");
+        return;
+      }
+    }
+
     this.organize(newNode, idx);
   }
 
