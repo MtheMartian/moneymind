@@ -21,18 +21,39 @@ function MonthlyTable(){
       const response: Response = await fetch("https://localhost:7158/api/tables");
 
       if(response.ok){
-        const returnedData: {} = await response.json();
+        const returnedData: {[key: string]: {
+          id: string,
+          dateCreated: number,
+          lastUpdated: number,
+          entryName: string,
+          entryAmount: number,
+          initialAmount: number,
+          isMonthly: boolean,
+          isCategory: boolean,
+          linkID: string
+        }} = await response.json();
 
         console.log(returnedData);
 
         for(let i: number = 0; i < Object.entries(returnedData).length; i++){
-          const currentItem: TypeCustomTable["customTableEntry"] = Object.entries<TypeCustomTable["customTableEntry"]>(returnedData)[i][1];
+          const currentItem = Object.entries(returnedData)[i][1];
+
+          const newEntry: TypeCustomTable["customTableEntry"] = {
+            entryName: currentItem.entryName,
+            entryAmount: currentItem.entryAmount,
+            isCategory: currentItem.isCategory,
+            linkId: currentItem.linkID,
+            lastUpdated: currentItem.lastUpdated,
+            dateCreated: currentItem.dateCreated,
+            initalAmount: currentItem.initialAmount,
+            isMonthly: currentItem.isMonthly
+          }
 
           if(currentItem.isCategory){
-            monthlyBST.current.insert([0, 0, 0], currentItem, Object.entries(returnedData)[i][0], 0); 
+            monthlyBST.current.insert([0, 0, 0], newEntry, Object.entries(returnedData)[i][0], 0); 
           }
           else{
-            monthlySubcategoriesBST.current.insert([0, 0, 0], currentItem, Object.entries(returnedData)[i][0], 0); 
+            monthlySubcategoriesBST.current.insert([0, 0, 0], newEntry, Object.entries(returnedData)[i][0], 0); 
           }
         }
 
