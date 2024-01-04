@@ -6,6 +6,18 @@ type CustomTableTypes = {
   customTableEntry: {entryName: string, entryAmount: number, isCategory: boolean,
                       linkId: string, lastUpdated: number, dateCreated: number,
                         initalAmount: number, isMonthly: boolean};
+  
+  customTableEntryDB: {
+    id: string,
+    dateCreated: number,
+    lastUpdated: number,
+    entryName: string,
+    entryAmount: number,
+    initialAmount: number,
+    isMonthly: boolean,
+    isCategory: boolean,
+    linkID: string
+  }
 }
 
 export type TypeCustomTable = CustomTableTypes;

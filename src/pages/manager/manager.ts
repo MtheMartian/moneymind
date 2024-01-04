@@ -205,4 +205,6 @@ export function highlightElementError(element: HTMLInputElement, correct: boolea
   element.style.border = "2px solid rgb(111, 252, 195)";
 }
 
+// ******* Requests ******* //
+
 

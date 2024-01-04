@@ -13,6 +13,7 @@ import exportIcon from '../../../../assets/manager-icons/export-48px.svg';
 import searchIcon from '../../../../assets/manager-icons/search-48px.svg';
 import undoIcon from '../../../../assets/manager-icons/undo-48px.svg';
 import deleteIcon from '../../../../assets/manager-icons/delete-48px.svg';
+import { RequestQueue } from '../../../../ts/general-classes';
 
 function CustomTableBottom(props: {budget: number, toggleEdit: boolean, setChange: Function, 
                                   categories: BSTNode<TypeCustomTable["customTableEntry"]>[],
@@ -481,10 +482,12 @@ function CustomTableBody(props: {categoryBST: CustomBST<TypeCustomTable["customT
                                 setCategories: Function, setSubcategories: Function, addToStack: Function, 
                                 tableUse: string, budget: number, setChange: Function, toggleEdit: boolean,
                                 categories: BSTNode<TypeCustomTable["customTableEntry"]>[],
-                                subcategories: BSTNode<TypeCustomTable["customTableEntry"]>[]}){
+                                subcategories: BSTNode<TypeCustomTable["customTableEntry"]>[],
+                                updateTableFromDB: Function, asyncQueue: RequestQueue}){
 
   // ******* Reference ******* //
   const sortCounter = useRef<number[]>([0, 0, 0]);
+  const searchBar = useRef<HTMLInputElement>(null);
 
    // ******* States ******* //
   const [categoryId, setCategoryId] = useState<string | null>(null);
@@ -493,6 +496,14 @@ function CustomTableBody(props: {categoryBST: CustomBST<TypeCustomTable["customT
   const entries = useMemo<BSTNode<TypeCustomTable["customTableEntry"]>[]>(()=>{
     return props.categories;
   }, [props.categories]);
+
+  // ******* Input Handlers ******* //
+  function searchEntries(): void{
+    if(searchBar.current){
+      const input: string = searchBar.current.value;
+      props.asyncQueue.enqueueRequest(()=> props.updateTableFromDB(`https://localhost:7158/api/tables?search=${input}`));
+    }
+  }
 
    // ******* Button Handlers ******* //
   function displaySubcategories(e: SyntheticEvent<HTMLDivElement, MouseEvent>){
@@ -579,7 +590,8 @@ function CustomTableBody(props: {categoryBST: CustomBST<TypeCustomTable["customT
       <div id="custom-table-body-header">
         <div id="custom-table-body-search-container">
           <img src={searchIcon} alt="search" className="manager-icons" />
-          <input type="text" placeholder="Search..." />
+          <input type="text" placeholder="Search..." ref={searchBar}
+            onKeyUp={searchEntries}/>
         </div>
         <button id="custom-table-body-export-button">
           <img src={exportIcon} alt="export" className="manager-icons" />
@@ -633,6 +645,7 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
   // ******* References ******* //
   const categoryInput = useRef<HTMLInputElement>(null);
   const amountInput = useRef<HTMLInputElement>(null);
+  const asyncQueue = useRef<RequestQueue>(new RequestQueue());
 
   // ******* Functions ******* //
   function updateStates(entriesArr: BSTNode<TypeCustomTable["customTableEntry"]>[],
@@ -725,42 +738,56 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
     });
   }
 
-  async function retrieveDataFromDBAndUpdateTable(): Promise<void>{
-    const response: Response = await fetch("https://localhost:7158/api/tables");
+  async function retrieveDataFromDBAndUpdateTable(requestURL: string): Promise<void>{
+    try{
+      const response: Response = await fetch(requestURL);
 
-    if(response.ok){
-      const returnedData: {} = await response.json();
+      if(response.ok){
+        const returnedData: TypeCustomTable["customTableEntryDB"][] = await response.json();
 
-      console.log(returnedData);
+        console.log(returnedData);
 
-      const tempArr1: BSTNode<TypeCustomTable["customTableEntry"]>[] = [];
-      const tempArr2: BSTNode<TypeCustomTable["customTableEntry"]>[] = [];
+        const tempArr1: BSTNode<TypeCustomTable["customTableEntry"]>[] = [];
+        const tempArr2: BSTNode<TypeCustomTable["customTableEntry"]>[] = [];
 
-      console.log(Object.entries(returnedData));
+        for(let i: number = 0; i < returnedData.length; i++){
+          const currentItem: TypeCustomTable["customTableEntryDB"] = returnedData[i];
 
-      for(let i: number = 0; i < Object.entries(returnedData).length; i++){
-        const currentItem: TypeCustomTable["customTableEntry"] = Object.entries<TypeCustomTable["customTableEntry"]>(returnedData)[i][1];
+          const newEntry: TypeCustomTable["customTableEntry"] = {
+            entryName: currentItem.entryName,
+            entryAmount: currentItem.entryAmount,
+            isCategory: currentItem.isCategory,
+            linkId: currentItem.linkID,
+            lastUpdated: currentItem.lastUpdated,
+            dateCreated: currentItem.dateCreated,
+            initalAmount: currentItem.initialAmount,
+            isMonthly: currentItem.isMonthly
+          }
 
-        if(currentItem.isCategory){
-          tempArr1.push(new BSTNode<TypeCustomTable["customTableEntry"]>(currentItem, [0, 0, 0], Object.entries(returnedData)[i][0])); 
+          if(currentItem.isCategory){
+            tempArr1.push(new BSTNode<TypeCustomTable["customTableEntry"]>(newEntry, [0, 0, 0], currentItem.id)); 
+          }
+          else{
+            tempArr2.push(new BSTNode<TypeCustomTable["customTableEntry"]>(newEntry, [0, 0, 0], currentItem.id)); 
+          }
         }
-        else{
-          tempArr2.push(new BSTNode<TypeCustomTable["customTableEntry"]>(currentItem, [0, 0, 0], Object.entries(returnedData)[i][0])); 
-        }
+
+        props.categoryBST.reconstruct(tempArr1, customTableVariables.customBSTVariable);
+        props.subcategoryBST.reconstruct(tempArr2, 0);
+
+        setNodeValues(); //Set sorting values.
+
+        const allCategories: BSTNode<TypeCustomTable["customTableEntry"]>[] = props.categoryBST.traverse(customTableVariables.customBSTNodeOrder);
+        const allSubcategories: BSTNode<TypeCustomTable["customTableEntry"]>[] = props.subcategoryBST.traverse("desc");
+
+        updateStates(allCategories, allSubcategories, oldData.oldBudget);
       }
-
-      props.categoryBST.reconstruct(tempArr1, customTableVariables.customBSTVariable);
-      props.subcategoryBST.reconstruct(tempArr2, 0);
-
-      setNodeValues(); //Set sorting values.
-
-      const allCategories: BSTNode<TypeCustomTable["customTableEntry"]>[] = props.categoryBST.traverse(customTableVariables.customBSTNodeOrder);
-      const allSubcategories: BSTNode<TypeCustomTable["customTableEntry"]>[] = props.subcategoryBST.traverse("desc");
-
-      updateStates(allCategories, allSubcategories, oldData.oldBudget);
+      else{
+        console.error("Something went wrong! Data not retrieved!");
+      }
     }
-    else{
-      console.error("Something went wrong! Data not retrieved!");
+    catch(error){
+      console.error(`Something went wrong! ${error}`);
     }
   }
 //
@@ -849,7 +876,7 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
     });
 
     if(response.ok){
-      retrieveDataFromDBAndUpdateTable();
+      asyncQueue.current.enqueueRequest(()=> retrieveDataFromDBAndUpdateTable("https://localhost:7158/api/tables"));
       setChange(prev => prev = false);
     }
 
@@ -934,7 +961,9 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
                         subcategoryBST={props.subcategoryBST} setChange={setChange} 
                         addToStack={addToStack} tableUse={props.tableUse}
                         setSubcategories={setSubcategories} categories={categories} 
-                        subcategories={subcategories} setCategories={setCategories} />
+                        subcategories={subcategories} setCategories={setCategories} 
+                        updateTableFromDB={retrieveDataFromDBAndUpdateTable} 
+                        asyncQueue={asyncQueue.current} />
 
       <CustomTableBottom categories={categories} toggleEdit={toggleEdit} budget={budget} subcategories={subcategories}
                           setChange={setChange} />

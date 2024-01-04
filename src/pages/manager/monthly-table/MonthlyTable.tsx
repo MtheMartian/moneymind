@@ -21,17 +21,7 @@ function MonthlyTable(){
       const response: Response = await fetch("https://localhost:7158/api/tables");
 
       if(response.ok){
-        const returnedData: {[key: string]: {
-          id: string,
-          dateCreated: number,
-          lastUpdated: number,
-          entryName: string,
-          entryAmount: number,
-          initialAmount: number,
-          isMonthly: boolean,
-          isCategory: boolean,
-          linkID: string
-        }} = await response.json();
+        const returnedData: TypeCustomTable["customTableEntryDB"][] = await response.json();
 
         console.log(returnedData);
 
