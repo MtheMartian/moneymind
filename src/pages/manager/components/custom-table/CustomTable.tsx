@@ -96,7 +96,7 @@ function SubCategoryCell(props:{currSubcategory: BSTNode<TypeCustomTable["custom
                                 subcategoryBST: CustomBST<TypeCustomTable["customTableEntry"]>, 
                                 setSubcategories: Function, toggleEdit: boolean, 
                                 setChange: Function, addToStack: Function,
-                                updateLastUpdated: Function}){
+                                updateLastUpdated: Function, updateStates: Function}){
 
   // ******* References ******* //
   const amountInputRef = useRef<HTMLInputElement>(null);
@@ -147,7 +147,7 @@ function SubCategoryCell(props:{currSubcategory: BSTNode<TypeCustomTable["custom
 
     props.subcategoryBST.remove(props.currSubcategory.id, 0);
     props.updateLastUpdated();
-    props.setSubcategories(props.subcategoryBST.retrieve("desc"));
+    props.updateStates(null, props.subcategoryBST.retrieve("desc"), null);
   }
 
   // ******* UseEffects ******* //
@@ -189,7 +189,8 @@ function SubCategory(props: {categoryBST: CustomBST<TypeCustomTable["customTable
                       subcategoryBST: CustomBST<TypeCustomTable["customTableEntry"]>, 
                       setSubcategories: Function, toggleEdit: boolean, categoryId: string | null,
                       setCategories: Function, setChange: Function, addToStack: Function, 
-                      tableUse: string, subcategories: BSTNode<TypeCustomTable["customTableEntry"]>[]}){
+                      tableUse: string, subcategories: BSTNode<TypeCustomTable["customTableEntry"]>[],
+                      updateStates: Function}){
                         
  // ******* States ******* //
   const [addSubcategoryForm, setAddSubCategoryForm] = useState<boolean>(false);
@@ -217,7 +218,7 @@ function SubCategory(props: {categoryBST: CustomBST<TypeCustomTable["customTable
 
     allSubcategories.forEach(subcategory =>{
       if(categorySelected){
-        if(categorySelected.item.linkId === subcategory.item.linkId){
+        if(categorySelected.item.linkID === subcategory.item.linkID){
           categorySelectedSubcategories.push(subcategory);
         }
       }
@@ -271,13 +272,13 @@ function SubCategory(props: {categoryBST: CustomBST<TypeCustomTable["customTable
     }
     props.subcategoryBST.insert([currDate, 0, 0], {entryName: subcategoryString, 
                                           entryAmount: Number(amountInput.current!.value),
-                                          linkId: categorySelected!.item.linkId, lastUpdated: currDate,
-                                          initalAmount: Number(amountInput.current!.value), 
+                                          linkID: categorySelected!.item.linkID, lastUpdated: currDate,
+                                          initialAmount: Number(amountInput.current!.value), 
                                           isCategory: false, 
                                           isMonthly: props.tableUse === "monthly" ? true : false,
-                                          dateCreated: currDate}, uId, 0);                             
+                                          dateCreated: currDate, id: uId}, uId, 0);                             
 
-    props.setSubcategories(props.subcategoryBST.traverse("desc"));
+    props.updateStates(null, props.subcategoryBST.traverse("desc"), null);
     setAddSubCategoryForm(prev => prev = false);
   }
 
@@ -325,7 +326,8 @@ function SubCategory(props: {categoryBST: CustomBST<TypeCustomTable["customTable
           <SubCategoryCell currSubcategory={subcategory} subcategoryBST={props.subcategoryBST} 
                             setSubcategories={props.setSubcategories} toggleEdit={props.toggleEdit} 
                             key={subcategory.id} setChange={props.setChange} 
-                            addToStack={props.addToStack} updateLastUpdated={updateLastUpdated} /> : null
+                            addToStack={props.addToStack} updateLastUpdated={updateLastUpdated} 
+                            updateStates={props.updateStates} /> : null
         )}
       </div>
     </div>
@@ -337,7 +339,8 @@ function CustomTableBodyCell(props:{currentCategory: BSTNode<TypeCustomTable["cu
                               setCategories: Function, setSubcategories: Function, budget: number, 
                               displaySubCategories: MouseEventHandler<HTMLDivElement>, setChange: Function,
                               addToStack: Function, subcategoryBST: CustomBST<TypeCustomTable["customTableEntry"]>,
-                              setCategoryId: Function, subcategories: BSTNode<TypeCustomTable["customTableEntry"]>[]}){
+                              setCategoryId: Function, subcategories: BSTNode<TypeCustomTable["customTableEntry"]>[],
+                              updateStates: Function}){
 
   // ******* References ******* //
   const categoryInput = useRef<HTMLInputElement>(null);
@@ -364,7 +367,7 @@ function CustomTableBodyCell(props:{currentCategory: BSTNode<TypeCustomTable["cu
   function clearAssociatedSubcategories(): void{
     const subcategories = props.subcategoryBST.traverse("desc");
     subcategories.forEach(subcategory =>{
-      if(subcategory.item.linkId === props.currentCategory.item.linkId){
+      if(subcategory.item.linkID === props.currentCategory.item.linkID){
         props.subcategoryBST.remove(subcategory.id, customTableVariables.customBSTVariable);
       }
     });
@@ -375,7 +378,7 @@ function CustomTableBodyCell(props:{currentCategory: BSTNode<TypeCustomTable["cu
     let summedAmounts: number = props.currentCategory.item.entryAmount;
 
     subEntries.forEach(subEntry =>{
-      if(props.currentCategory.item.linkId === subEntry.item.linkId){
+      if(props.currentCategory.item.linkID === subEntry.item.linkID){
         summedAmounts += subEntry.item.entryAmount;
       }
     });
@@ -423,7 +426,7 @@ function CustomTableBodyCell(props:{currentCategory: BSTNode<TypeCustomTable["cu
     props.setChange(true);
     props.categoryBST.remove(props.currentCategory.id, customTableVariables.customBSTVariable);
     clearAssociatedSubcategories();
-    props.setCategories(props.categoryBST.traverse(customTableVariables.customBSTNodeOrder));
+    props.updateStates(props.categoryBST.traverse(customTableVariables.customBSTNodeOrder), null, null);
     props.setCategoryId(null);
   }
 
@@ -465,7 +468,7 @@ function CustomTableBodyCell(props:{currentCategory: BSTNode<TypeCustomTable["cu
       <input type="text" className="cell-inputs" inputMode="numeric" pattern='[0-9]*' value={amountValue} 
               disabled={props.toggleEdit ? undefined : true} onChange={amountUpdate} 
               onSelect={getCaretPosition} />
-      <p>{props.currentCategory.item.initalAmount}</p>
+      <p>{props.currentCategory.item.initialAmount}</p>
       <p>{convertDateToString(props.currentCategory.item.lastUpdated)}</p>
       {props.toggleEdit ? 
         <div className="custom-table-body-cell-options">
@@ -483,7 +486,8 @@ function CustomTableBody(props: {categoryBST: CustomBST<TypeCustomTable["customT
                                 tableUse: string, budget: number, setChange: Function, toggleEdit: boolean,
                                 categories: BSTNode<TypeCustomTable["customTableEntry"]>[],
                                 subcategories: BSTNode<TypeCustomTable["customTableEntry"]>[],
-                                updateTableFromDB: Function, asyncQueue: RequestQueue}){
+                                updateTableFromDB: Function, asyncQueue: RequestQueue,
+                                updateStates: Function}){
 
   // ******* Reference ******* //
   const sortCounter = useRef<number[]>([0, 0, 0]);
@@ -518,7 +522,7 @@ function CustomTableBody(props: {categoryBST: CustomBST<TypeCustomTable["customT
       sortCounter.current[idx] = 0;
       customTableVariables.customBSTVariable = 0;
       props.categoryBST.reconstruct(props.categories, 0);
-      props.setCategories(props.categoryBST.traverse("desc"));
+      props.updateStates(props.categoryBST.traverse("desc"), null, null);
       customTableVariables.customBSTNodeOrder = "desc";
     }
 
@@ -528,11 +532,11 @@ function CustomTableBody(props: {categoryBST: CustomBST<TypeCustomTable["customT
       props.categoryBST.reconstruct(props.categories, idx);
 
       if(sortCounter.current[idx] === 1){
-        props.setCategories(props.categoryBST.traverse("asc"));
+        props.updateStates(props.categoryBST.traverse("asc"), null, null);
         customTableVariables.customBSTNodeOrder = "asc";
       }
       else if(sortCounter.current[idx] === 2){
-        props.setCategories(props.categoryBST.traverse("desc"));
+        props.updateStates(props.categoryBST.traverse("desc"), null, null);
         customTableVariables.customBSTNodeOrder = "desc";
       }
       else if(sortCounter.current[idx] === 3){
@@ -613,7 +617,7 @@ function CustomTableBody(props: {categoryBST: CustomBST<TypeCustomTable["customT
                                     toggleEdit={props.toggleEdit} key={entry.id} setChange={props.setChange}
                                     addToStack={props.addToStack} subcategoryBST={props.subcategoryBST} 
                                     setCategoryId={setCategoryId} setSubcategories={props.setSubcategories} 
-                                    subcategories={props.subcategories}/>
+                                    subcategories={props.subcategories} updateStates= {props.updateStates}/>
             )}
           </div>
         </div>
@@ -622,7 +626,8 @@ function CustomTableBody(props: {categoryBST: CustomBST<TypeCustomTable["customT
                       setChange={props.setChange} categoryBST={props.categoryBST}
                       addToStack={props.addToStack} tableUse={props.tableUse} 
                       setSubcategories={props.setSubcategories} 
-                      subcategoryBST={props.subcategoryBST} />
+                      subcategoryBST={props.subcategoryBST} 
+                      updateStates={props.updateStates} />
       </div>
     </div>
   );
@@ -648,14 +653,23 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
   const asyncQueue = useRef<RequestQueue>(new RequestQueue());
 
   // ******* Functions ******* //
-  function updateStates(entriesArr: BSTNode<TypeCustomTable["customTableEntry"]>[],
-                        subEntriesArr: BSTNode<TypeCustomTable["customTableEntry"]>[],
-                        currBudget: number): void{
-    setBudget(prev => prev = currBudget);
-    setCategories(prev => prev = entriesArr);
-    setSubcategories(prev => prev = subEntriesArr);
+  function updateStates(entriesArr: BSTNode<TypeCustomTable["customTableEntry"]>[] | null,
+                        subEntriesArr: BSTNode<TypeCustomTable["customTableEntry"]>[] | null,
+                        currBudget: number | null): void{
+    if(entriesArr){
+      setCategories(prev => prev = entriesArr);
+    }
+
+    if(subEntriesArr){
+      setSubcategories(prev => prev = subEntriesArr);
+    }
+
+    if(currBudget){
+      setBudget(prev => prev = currBudget);
+    } 
   }
 
+  // Function to add changes to a stack for potential 'Undo'
   function addToStack(): void{
     const oldCategories: typeof categories = [];
     const oldSubcategories: typeof subcategories = []
@@ -673,37 +687,6 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
       console.log(props.stack.items());
   }
 
-  function updateCustomBSTNodes(nodes: BSTNode<TypeCustomTable["customTableEntry"]>[],
-                                  targetTree: string): BSTNode<TypeCustomTable["customTableEntry"]>[]{
-
-    if(nodes.length === 0){
-      if(targetTree === "category"){
-        props.categoryBST.clear();
-        props.subcategoryBST.clear();
-        return [];
-      }
-      else if(targetTree === "subcategory"){
-        props.subcategoryBST.clear();
-        return [];
-      }
-    }                
-
-    nodes.forEach(node =>{
-      if(targetTree === "category"){
-        props.categoryBST.update(node.id, node.item, node.value, customTableVariables.customBSTVariable);
-      }
-      else if(targetTree === "subcategory"){
-        props.subcategoryBST.update(node.id, node.item, node.value, 0);
-      }
-    });
-
-    if(targetTree === "subcategory"){
-      return props.subcategoryBST.traverse("desc");
-    }
-
-    return props.categoryBST.traverse(customTableVariables.customBSTNodeOrder);
-  }
-
   // These two functions are used to set the values of the CustomBST
   // (e.g. sorting/reconstructing the CustomBST).
   // It's an array of numbers (0: Date, 1: Category/Subcategory, 2: Amount).
@@ -712,7 +695,7 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
     let summedAmounts: number = amount;
 
     subEntries.forEach(subEntry =>{
-      if(linkId === subEntry.item.linkId){
+      if(linkId === subEntry.item.linkID){
         summedAmounts += subEntry.item.entryAmount;
       }
     });
@@ -733,7 +716,7 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
     nodes.forEach(node =>{
       const weight: number = convertStringToWeight(node.item.entryName, longestString);
       console.log(`Weight: ${weight}`);
-      const currentTotalAmount: number = totalAmount(node.item.linkId, node.item.entryAmount);
+      const currentTotalAmount: number = totalAmount(node.item.linkID, node.item.entryAmount);
       props.categoryBST.update(node.id, node.item, [node.value[0], weight, currentTotalAmount], 0);
     });
   }
@@ -743,7 +726,7 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
       const response: Response = await fetch(requestURL);
 
       if(response.ok){
-        const returnedData: TypeCustomTable["customTableEntryDB"][] = await response.json();
+        const returnedData: TypeCustomTable["customTableEntry"][] = await response.json();
 
         console.log(returnedData);
 
@@ -751,24 +734,13 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
         const tempArr2: BSTNode<TypeCustomTable["customTableEntry"]>[] = [];
 
         for(let i: number = 0; i < returnedData.length; i++){
-          const currentItem: TypeCustomTable["customTableEntryDB"] = returnedData[i];
-
-          const newEntry: TypeCustomTable["customTableEntry"] = {
-            entryName: currentItem.entryName,
-            entryAmount: currentItem.entryAmount,
-            isCategory: currentItem.isCategory,
-            linkId: currentItem.linkID,
-            lastUpdated: currentItem.lastUpdated,
-            dateCreated: currentItem.dateCreated,
-            initalAmount: currentItem.initialAmount,
-            isMonthly: currentItem.isMonthly
-          }
+          const currentItem: TypeCustomTable["customTableEntry"] = returnedData[i];
 
           if(currentItem.isCategory){
-            tempArr1.push(new BSTNode<TypeCustomTable["customTableEntry"]>(newEntry, [0, 0, 0], currentItem.id)); 
+            tempArr1.push(new BSTNode<TypeCustomTable["customTableEntry"]>(currentItem, [0, 0, 0], currentItem.id)); 
           }
           else{
-            tempArr2.push(new BSTNode<TypeCustomTable["customTableEntry"]>(newEntry, [0, 0, 0], currentItem.id)); 
+            tempArr2.push(new BSTNode<TypeCustomTable["customTableEntry"]>(currentItem, [0, 0, 0], currentItem.id)); 
           }
         }
 
@@ -838,10 +810,10 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
     }
 
     props.categoryBST.insert([currentTime, 0, 0, currentTime], {entryName: newEntryName, entryAmount: Number(amountInputValue),
-                                      linkId: uId, lastUpdated: currentTime, 
-                                      initalAmount: Number(amountInputValue), isCategory: true,
+                                      linkID: uId, lastUpdated: currentTime, 
+                                      initialAmount: Number(amountInputValue), isCategory: true,
                                       isMonthly: props.tableUse === "monthly" ? true : false,
-                                      dateCreated: currentTime}, uId, 0);
+                                      dateCreated: currentTime, id: uId}, uId, 0);
  
     setNodeValues();
     addToStack();
@@ -862,10 +834,10 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
         "LastUpdated": node.item.lastUpdated,
         "EntryName": node.item.entryName,
         "EntryAmount": node.item.entryAmount,
-        "InitialAmount": node.item.initalAmount,
+        "InitialAmount": node.item.initialAmount,
         "IsMonthly": node.item.isMonthly,
         "IsCategory": node.item.isCategory,
-        "LinkID": node.item.linkId
+        "LinkID": node.item.linkID
       });
     });
 
@@ -963,7 +935,7 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
                         setSubcategories={setSubcategories} categories={categories} 
                         subcategories={subcategories} setCategories={setCategories} 
                         updateTableFromDB={retrieveDataFromDBAndUpdateTable} 
-                        asyncQueue={asyncQueue.current} />
+                        asyncQueue={asyncQueue.current} updateStates={updateStates}/>
 
       <CustomTableBottom categories={categories} toggleEdit={toggleEdit} budget={budget} subcategories={subcategories}
                           setChange={setChange} />

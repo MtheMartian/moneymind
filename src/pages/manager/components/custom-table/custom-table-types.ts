@@ -3,11 +3,7 @@ type CustomTableTypes = {
   subCategoryMap: Map<string, {subCategory: string, amount: number, categoryId: string}>,
   categoryEntries: [string, {category: string, amount: number}][],
   subCategoryEntries: [string, {subCategory: string, amount: number, categoryId: string}][],
-  customTableEntry: {entryName: string, entryAmount: number, isCategory: boolean,
-                      linkId: string, lastUpdated: number, dateCreated: number,
-                        initalAmount: number, isMonthly: boolean};
-  
-  customTableEntryDB: {
+  customTableEntry: {
     id: string,
     dateCreated: number,
     lastUpdated: number,
