@@ -23,6 +23,10 @@ function MonthlyTable(){
       if(response.ok){
         const returnedData: TypeCustomTable["customTableEntry"][] = await response.json();
 
+        if(returnedData.length === 0){
+          return;
+        }
+
         console.log(returnedData);
 
         for(let i: number = 0; i < returnedData.length; i++){

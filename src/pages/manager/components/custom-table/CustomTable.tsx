@@ -504,8 +504,8 @@ function CustomTableBody(props: {categoryBST: CustomBST<TypeCustomTable["customT
   // ******* Input Handlers ******* //
   function searchEntries(): void{
     if(searchBar.current){
-      const input: string = searchBar.current.value;
-      props.asyncQueue.enqueueRequest(()=> props.updateTableFromDB(`https://localhost:7158/api/tables?search=${input}`));
+      const input: string = searchBar.current.value.length > 0 ? searchBar.current.value : "<Empty>";
+      props.asyncQueue.enqueueRequest(()=> props.updateTableFromDB(`https://localhost:7158/api/tables/search?entry=${input}`));
     }
   }
 
@@ -727,6 +727,10 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
 
       if(response.ok){
         const returnedData: TypeCustomTable["customTableEntry"][] = await response.json();
+
+        if(returnedData.length === 0){
+          return;
+        }
 
         console.log(returnedData);
 
