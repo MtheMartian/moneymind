@@ -41,8 +41,6 @@ export class RequestQueue{
     return new Promise(async (resolve, reject) =>{
       this.myQueue.enqueue({requestFunction, resolve, reject});
 
-      console.log(`Queue Length: ${this.myQueue.length}`);
-
       if(!this.isProcessing){
         await this.startProcessing();
       }

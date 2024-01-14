@@ -1,5 +1,6 @@
 import { ChangeEvent, SyntheticEvent } from "react";
 import { quickSort } from "../../ts/dsa";
+import { TypeCustomTable } from "./components/custom-table/custom-table-types";
 
 // ******* General ******* //
 export function uniqueId(): string{
@@ -206,5 +207,10 @@ export function highlightElementError(element: HTMLInputElement, correct: boolea
 }
 
 // ******* Requests ******* //
+export async function getEntriesRequest(requestURL: string):Promise<TypeCustomTable["customTableEntry"][]>{
+  const response: Response = await fetch(requestURL);
+  const returnedData: TypeCustomTable["customTableEntry"][] = await response.json();
 
+  return returnedData;
+}
 

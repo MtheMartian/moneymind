@@ -1,9 +1,23 @@
 import './calendar.css';
 import {useEffect, useRef, useState, useMemo, SyntheticEvent} from 'react';
 import { checkIfFullNumber, dateEntries } from './calendarts';
+import { RequestQueue } from '../../../ts/general-classes';
+import { TypeCustomTable } from '../components/custom-table/custom-table-types';
+import { getEntriesRequest } from '../manager';
+import { CustomBST, BSTNode } from '../../../ts/dsa';
 
-function CalendarContent(){
-  
+function CalendarContent(props: {currentDateItems: TypeCustomTable["customTableEntry"][]}){
+  // ******* References ******* //
+
+  const sortedCurrentDateItems = useMemo<BSTNode<TypeCustomTable["customTableEntry"]>[]>(()=>{
+    const contentBST: CustomBST<TypeCustomTable["customTableEntry"]> = new CustomBST();
+
+    props.currentDateItems.forEach(item =>{
+      contentBST.insert([item.dateCreated, 0, 0], item, item.id, 0);
+    })
+
+    return contentBST.traverse("asc");
+  }, [props.currentDateItems]);
 }
 
 function CustomDropDown(props: {dateType: string, inputElement: HTMLInputElement | null,
@@ -172,11 +186,13 @@ function Calendar(){
   // ******* Reference ******* //
   const calendar = useRef<HTMLDivElement>(null);
   const todayDate = useRef<Date>(new Date(Date.now()));
+  const asyncQueue = useRef<RequestQueue>(new RequestQueue());
 
   // ******* States ******* //
   const [currentYear, setCurrentYear] = useState<number>(todayDate.current.getFullYear());
   const [currentMonth, setCurrentMonth] = useState<number>(todayDate.current.getMonth() + 1);
   const [currentDate, setCurrentDate] = useState<number>(todayDate.current.getDate());
+  const [currentDateItems, setCurrentDateItems] = useState<TypeCustomTable["customTableEntry"][] | null>(null);
 
   const datesArr = useMemo<Date[]>(()=>{
     const tempArr: Date[] = [];
@@ -217,6 +233,25 @@ function Calendar(){
       calendarItem?.scrollIntoView({behavior: "smooth", block: "nearest", inline: "start"});
     }
 
+  }, [currentYear, currentMonth, currentDate]);
+
+  useEffect(()=>{
+    async function getEntriesBasedOnDate(): Promise<void>{
+      const requestURL: string = `https://localhost:7158/api/tables/calendar?year=${currentYear}&month=${currentMonth}&date=${currentDate}`;
+      try{
+        const returnedData: TypeCustomTable["customTableEntry"][] = await getEntriesRequest(requestURL);
+        setCurrentDateItems(prev => prev = returnedData);
+      }
+      catch(err){
+        console.error(`Woopsies! Couldn't retrieve data for this date. ${err}`);
+      }
+    }
+
+    asyncQueue.current.enqueueRequest(getEntriesBasedOnDate);
+
+    return()=>{
+      setCurrentDateItems(prev => prev = null);
+    }
   }, [currentYear, currentMonth, currentDate]);
 
   return(

@@ -6,7 +6,7 @@ import { TypeCustomTable } from './custom-table-types';
 import { user } from '../../../../data/user';
 import { editInputs, uniqueId, checkIfInputEmpty, checkIfInputEmptyCell,
         getCaretPosition, caretPosition, findLongestString, convertStringToWeight,
-        convertDateToString } from '../../manager';
+        convertDateToString, getEntriesRequest } from '../../manager';
 import { Stack, CustomBST, BSTNode } from '../../../../ts/dsa';
 import { oldData,  customTableVariables } from './custom-table';
 import exportIcon from '../../../../assets/manager-icons/export-48px.svg';
@@ -723,10 +723,7 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
 
   async function retrieveDataFromDBAndUpdateTable(requestURL: string): Promise<void>{
     try{
-      const response: Response = await fetch(requestURL);
-
-      if(response.ok){
-        const returnedData: TypeCustomTable["customTableEntry"][] = await response.json();
+      const returnedData: TypeCustomTable["customTableEntry"][] = await getEntriesRequest(requestURL);
 
         if(returnedData.length === 0){
           return;
@@ -757,10 +754,6 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
         const allSubcategories: BSTNode<TypeCustomTable["customTableEntry"]>[] = props.subcategoryBST.traverse("desc");
 
         updateStates(allCategories, allSubcategories, oldData.oldBudget);
-      }
-      else{
-        console.error("Something went wrong! Data not retrieved!");
-      }
     }
     catch(error){
       console.error(`Something went wrong! ${error}`);
