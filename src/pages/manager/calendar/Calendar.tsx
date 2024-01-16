@@ -8,7 +8,6 @@ import { CustomBST, BSTNode } from '../../../ts/dsa';
 
 function CalendarContent(props: {currentDateItems: TypeCustomTable["customTableEntry"][]}){
   // ******* References ******* //
-
   const sortedCurrentDateItems = useMemo<BSTNode<TypeCustomTable["customTableEntry"]>[]>(()=>{
     const contentBST: CustomBST<TypeCustomTable["customTableEntry"]> = new CustomBST();
 
@@ -18,6 +17,7 @@ function CalendarContent(props: {currentDateItems: TypeCustomTable["customTableE
 
     return contentBST.traverse("asc");
   }, [props.currentDateItems]);
+  
 }
 
 function CustomDropDown(props: {dateType: string, inputElement: HTMLInputElement | null,
@@ -181,8 +181,18 @@ function CalendarCustomDropdown(props: {setCurrentYear: Function, setCurrentMont
   )
 }
 
+function CalendarDateBox(props:{currDate: Date}){
+  return(
+    <div className="calendar-item-wrapper" id={`calendar-item-wrapper-${props.currDate.getDate()}`}>
+      <div className="calendar-item-date">
+        <p>{props.currDate.toDateString()}</p>
+      </div>
+      <div className="calendar-item">content</div>
+    </div>
+  )
+}
+
 function Calendar(){
-  
   // ******* Reference ******* //
   const calendar = useRef<HTMLDivElement>(null);
   const todayDate = useRef<Date>(new Date(Date.now()));
@@ -204,6 +214,12 @@ function Calendar(){
     }
 
     return tempArr;
+  }, [currentYear, currentMonth, currentDate]);
+
+  const dateEntriesMap = useMemo<Map<number, TypeCustomTable["customTableEntry"][]>>(()=>{
+    currentDateItems?.forEach(item =>{
+      if()
+    })
   }, [currentYear, currentMonth, currentDate]);
 
   // ******* UseEffects ******* //
@@ -258,13 +274,8 @@ function Calendar(){
     <div id="calendar" ref={calendar}>
       <CalendarCustomDropdown setCurrentYear={setCurrentYear} setCurrentMonth={setCurrentMonth}
                               setCurrentDate={setCurrentDate} />
-      {datesArr.map(date =>
-      <div className="calendar-item-wrapper" id={`calendar-item-wrapper-${date.getDate()}`}>
-        <div className="calendar-item-date">
-          <p>{date.toDateString()}</p>
-        </div>
-        <div className="calendar-item">content</div>
-      </div>
+      {datesArr.map((date, index) =>
+        <CalendarDateBox currDate={date} key={`date${index}`} />
       )}
     </div>
   )
