@@ -4,22 +4,9 @@ import { checkIfFullNumber, dateEntries } from './calendarts';
 import { RequestQueue } from '../../../ts/general-classes';
 import { TypeCustomTable } from '../components/custom-table/custom-table-types';
 import { getEntriesRequest } from '../manager';
-import { CustomBST, BSTNode } from '../../../ts/dsa';
+import { CustomBST, BSTNode, quickSort } from '../../../ts/dsa';
 
-function CalendarContent(props: {currentDateItems: TypeCustomTable["customTableEntry"][]}){
-  // ******* References ******* //
-  const sortedCurrentDateItems = useMemo<BSTNode<TypeCustomTable["customTableEntry"]>[]>(()=>{
-    const contentBST: CustomBST<TypeCustomTable["customTableEntry"]> = new CustomBST();
-
-    props.currentDateItems.forEach(item =>{
-      contentBST.insert([item.dateCreated, 0, 0], item, item.id, 0);
-    })
-
-    return contentBST.traverse("asc");
-  }, [props.currentDateItems]);
-  
-}
-
+// ------- Date Selection ------- //
 function CustomDropDown(props: {dateType: string, inputElement: HTMLInputElement | null,
                                 setSelectedDropdown: Function}){
   // ******* States ******* //
@@ -181,17 +168,34 @@ function CalendarCustomDropdown(props: {setCurrentYear: Function, setCurrentMont
   )
 }
 
-function CalendarDateBox(props:{currDate: Date}){
+// ------- Calendar Date Box & Date Box content ------- // 
+function CalendarDateBoxContent(props: {currentDateItems: TypeCustomTable["customTableEntry"][]}){
+  return(
+    <div>
+      {props.currentDateItems.map(item =>
+          <div>
+            {item.entryName}
+          </div>
+        )}
+    </div>
+  )
+}
+
+function CalendarDateBox(props:{currDate: Date, dateItemsMap: Map<number, TypeCustomTable["customTableEntry"][]> | null}){
   return(
     <div className="calendar-item-wrapper" id={`calendar-item-wrapper-${props.currDate.getDate()}`}>
       <div className="calendar-item-date">
         <p>{props.currDate.toDateString()}</p>
       </div>
-      <div className="calendar-item">content</div>
+      <div className="calendar-item">
+        {props.dateItemsMap? <CalendarDateBoxContent currentDateItems={props.dateItemsMap.get(props.currDate.getDate())!} 
+          key={`itemsDate${props.currDate.getDate()}`}/> : null}
+      </div>
     </div>
   )
 }
 
+// ------- Main Calendar ------- //
 function Calendar(){
   // ******* Reference ******* //
   const calendar = useRef<HTMLDivElement>(null);
@@ -202,7 +206,7 @@ function Calendar(){
   const [currentYear, setCurrentYear] = useState<number>(todayDate.current.getFullYear());
   const [currentMonth, setCurrentMonth] = useState<number>(todayDate.current.getMonth() + 1);
   const [currentDate, setCurrentDate] = useState<number>(todayDate.current.getDate());
-  const [currentDateItems, setCurrentDateItems] = useState<TypeCustomTable["customTableEntry"][] | null>(null);
+  const [currentDateItems, setCurrentDateItems] = useState<Map<number, TypeCustomTable["customTableEntry"][]> | null>(null);
 
   const datesArr = useMemo<Date[]>(()=>{
     const tempArr: Date[] = [];
@@ -214,12 +218,6 @@ function Calendar(){
     }
 
     return tempArr;
-  }, [currentYear, currentMonth, currentDate]);
-
-  const dateEntriesMap = useMemo<Map<number, TypeCustomTable["customTableEntry"][]>>(()=>{
-    currentDateItems?.forEach(item =>{
-      if()
-    })
   }, [currentYear, currentMonth, currentDate]);
 
   // ******* UseEffects ******* //
@@ -252,11 +250,34 @@ function Calendar(){
   }, [currentYear, currentMonth, currentDate]);
 
   useEffect(()=>{
+    function setDateItemsMap(items: TypeCustomTable["customTableEntry"][]): void{
+      const newMap: Map<number, TypeCustomTable["customTableEntry"][]> = new Map();
+      const contentBST: CustomBST<TypeCustomTable["customTableEntry"]> = new CustomBST();
+
+      items.forEach(item =>{
+        contentBST.insert([item.dateCreated, 0, 0], item, item.id, 0);
+      })
+
+      const sortedDateItems = contentBST.traverse("asc");
+
+      sortedDateItems.forEach(item =>{
+        const currentItemDate: number = new Date(item.item.dateCreated).getDate();
+        if(newMap.has(currentItemDate)){
+          newMap.get(currentItemDate)?.push(item.item);
+        }
+        else{
+          newMap.set(currentItemDate, []);
+        }
+      });
+
+      setCurrentDateItems(prev => prev = newMap);
+    }
+
     async function getEntriesBasedOnDate(): Promise<void>{
       const requestURL: string = `https://localhost:7158/api/tables/calendar?year=${currentYear}&month=${currentMonth}&date=${currentDate}`;
       try{
         const returnedData: TypeCustomTable["customTableEntry"][] = await getEntriesRequest(requestURL);
-        setCurrentDateItems(prev => prev = returnedData);
+        setDateItemsMap(returnedData);
       }
       catch(err){
         console.error(`Woopsies! Couldn't retrieve data for this date. ${err}`);
@@ -275,7 +296,7 @@ function Calendar(){
       <CalendarCustomDropdown setCurrentYear={setCurrentYear} setCurrentMonth={setCurrentMonth}
                               setCurrentDate={setCurrentDate} />
       {datesArr.map((date, index) =>
-        <CalendarDateBox currDate={date} key={`date${index}`} />
+        <CalendarDateBox currDate={date} dateItemsMap={currentDateItems} key={`date${index}`} />
       )}
     </div>
   )
