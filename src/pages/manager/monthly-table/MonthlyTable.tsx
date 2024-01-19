@@ -6,22 +6,47 @@ import CustomTable from '../components/custom-table/CustomTable';
 import { oldData } from '../components/custom-table/custom-table';
 import { useEffect, useState, useRef } from 'react';
 import { TypeCustomTable } from '../components/custom-table/custom-table-types';
+import { getEntriesRequest } from '../manager';
 
 const monthlyStack: Stack<typeof oldData> = new Stack<typeof oldData>();
 
 function MonthlyTable(){
   const asyncQueue: RequestQueue = new RequestQueue();
+  const todaysDate = useRef<Date>(new Date(Date.now()));
   const monthlyBST = useRef<CustomBST<TypeCustomTable["customTableEntry"]>>(new CustomBST());
   const monthlySubcategoriesBST = useRef<CustomBST<TypeCustomTable["customTableEntry"]>>(new CustomBST());
 
   const [successfulRequest, setSuccessfulRequest] = useState<boolean>(false);
 
+  function returnURLWithSearchParams(): string{
+    const currentURL: URLSearchParams = new URL(window.location.href).searchParams;
+    let currYear: number = todaysDate.current.getUTCFullYear();
+    let currMonth: number = todaysDate.current.getUTCMonth();
+
+    if(currentURL.has("year")){
+      const tempStr = currentURL.get("year");
+
+      if(tempStr && Number.isInteger(tempStr)){
+        currYear = Number(tempStr);
+      }
+    }
+
+    if(currentURL.has("month")){
+      const tempStr = currentURL.get("month");
+
+      if(tempStr && Number.isInteger(tempStr)){
+        currMonth = Number(tempStr);
+      }
+    }
+
+    return `https://localhost:7158/api/tables/period?year=${currYear}&month=${currMonth}`;
+  }
+
   useEffect(()=>{
     async function retrieveDataFromDB(): Promise<void>{
-      const response: Response = await fetch("https://localhost:7158/api/tables");
-
-      if(response.ok){
-        const returnedData: TypeCustomTable["customTableEntry"][] = await response.json();
+     try{
+        const requestURL: string = returnURLWithSearchParams();
+        const returnedData: TypeCustomTable["customTableEntry"][] = await getEntriesRequest(requestURL);
 
         if(returnedData.length === 0){
           return;
@@ -49,7 +74,10 @@ function MonthlyTable(){
         })
 
         setSuccessfulRequest(prev => prev = true);
-      }
+     }
+     catch(err){
+      console.error(`Couldn't fetch the data! ${err}`);
+     }
     }
 
     asyncQueue.enqueueRequest(retrieveDataFromDB);

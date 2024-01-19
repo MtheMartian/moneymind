@@ -172,11 +172,11 @@ function CalendarCustomDropdown(props: {setCurrentYear: Function, setCurrentMont
 function CalendarDateBoxContent(props: {currentDateItems: TypeCustomTable["customTableEntry"][]}){
   return(
     <div>
-      {props.currentDateItems.map(item =>
+      {props.currentDateItems? props.currentDateItems.map(item =>
           <div>
             {item.entryName}
           </div>
-        )}
+        ) : null}
     </div>
   )
 }
@@ -274,7 +274,7 @@ function Calendar(){
     }
 
     async function getEntriesBasedOnDate(): Promise<void>{
-      const requestURL: string = `https://localhost:7158/api/tables/calendar?year=${currentYear}&month=${currentMonth}&date=${currentDate}`;
+      const requestURL: string = `https://localhost:7158/api/tables/period?year=${currentYear}&month=${currentMonth}&date=${currentDate}`;
       try{
         const returnedData: TypeCustomTable["customTableEntry"][] = await getEntriesRequest(requestURL);
         setDateItemsMap(returnedData);
