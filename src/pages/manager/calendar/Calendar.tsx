@@ -1,5 +1,6 @@
 import './calendar.css';
 import {useEffect, useRef, useState, useMemo, SyntheticEvent} from 'react';
+import { Link } from 'react-router-dom';
 import { checkIfFullNumber, dateEntries } from './calendarts';
 import { RequestQueue } from '../../../ts/general-classes';
 import { TypeCustomTable } from '../components/custom-table/custom-table-types';
@@ -293,6 +294,7 @@ function Calendar(){
 
   return(
     <div id="calendar" ref={calendar}>
+      <Link to={`/manager?year=${currentYear}&month=${currentMonth}`} />
       <CalendarCustomDropdown setCurrentYear={setCurrentYear} setCurrentMonth={setCurrentMonth}
                               setCurrentDate={setCurrentDate} />
       {datesArr.map((date, index) =>
