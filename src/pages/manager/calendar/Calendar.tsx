@@ -174,9 +174,9 @@ function CalendarDateBoxContent(props: {currentDateItems: TypeCustomTable["custo
   return(
     <div>
       {props.currentDateItems? props.currentDateItems.map(item =>
-          <div>
+          <Link to={item.isMonthly ? `/manager/entry?id=${item.id}` : `/manager/daily/entry?id=${item.id}`}>
             {item.entryName}
-          </div>
+          </Link>
         ) : null}
     </div>
   )

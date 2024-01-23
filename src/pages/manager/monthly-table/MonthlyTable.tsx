@@ -15,24 +15,33 @@ function MonthlyTable(){
   const todaysDate = useRef<Date>(new Date(Date.now()));
   const monthlyBST = useRef<CustomBST<TypeCustomTable["customTableEntry"]>>(new CustomBST());
   const monthlySubcategoriesBST = useRef<CustomBST<TypeCustomTable["customTableEntry"]>>(new CustomBST());
+  const currentURL = useRef<URLSearchParams>(new URL(window.location.href).searchParams);
 
   const [successfulRequest, setSuccessfulRequest] = useState<boolean>(false);
 
   function returnURLWithSearchParams(): string{
-    const currentURL: URLSearchParams = new URL(window.location.href).searchParams;
+
+    if(currentURL.current.has("id")){
+      const tempStr = currentURL.current.get("id");
+      
+      if(tempStr && tempStr !== ""){
+        return `https://localhost:7158/api/tables/entry?id=${tempStr}`;
+      } 
+    }
+
     let currYear: number = todaysDate.current.getUTCFullYear();
     let currMonth: number = todaysDate.current.getUTCMonth();
 
-    if(currentURL.has("year")){
-      const tempStr = currentURL.get("year");
+    if(currentURL.current.has("year")){
+      const tempStr = currentURL.current.get("year");
 
       if(tempStr && Number.isInteger(tempStr)){
         currYear = Number(tempStr);
       }
     }
 
-    if(currentURL.has("month")){
-      const tempStr = currentURL.get("month");
+    if(currentURL.current.has("month")){
+      const tempStr = currentURL.current.get("month");
 
       if(tempStr && Number.isInteger(tempStr)){
         currMonth = Number(tempStr);
