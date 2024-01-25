@@ -30,12 +30,12 @@ function MonthlyTable(){
     }
 
     let currYear: number = todaysDate.current.getUTCFullYear();
-    let currMonth: number = todaysDate.current.getUTCMonth();
+    let currMonth: number = todaysDate.current.getUTCMonth() + 1;
 
     if(currentURL.current.has("year")){
       const tempStr = currentURL.current.get("year");
 
-      if(tempStr && Number.isInteger(tempStr)){
+      if(tempStr && Number.isInteger(Number(tempStr))){
         currYear = Number(tempStr);
       }
     }
@@ -43,10 +43,13 @@ function MonthlyTable(){
     if(currentURL.current.has("month")){
       const tempStr = currentURL.current.get("month");
 
-      if(tempStr && Number.isInteger(tempStr)){
+      if(tempStr && Number.isInteger(Number(tempStr))){
+        console.log(tempStr);
         currMonth = Number(tempStr);
       }
     }
+
+    console.log(currMonth);
 
     return `https://localhost:7158/api/tables/period?year=${currYear}&month=${currMonth}`;
   }
@@ -58,6 +61,7 @@ function MonthlyTable(){
         const returnedData: TypeCustomTable["customTableEntry"][] = await getEntriesRequest(requestURL);
 
         if(returnedData.length === 0){
+          setSuccessfulRequest(prev => prev = true);
           return;
         }
 

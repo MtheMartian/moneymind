@@ -8,7 +8,7 @@ import { editInputs, uniqueId, checkIfInputEmpty, checkIfInputEmptyCell,
         getCaretPosition, caretPosition, findLongestString, convertStringToWeight,
         convertDateToString, getEntriesRequest } from '../../manager';
 import { Stack, CustomBST, BSTNode } from '../../../../ts/dsa';
-import { oldData,  customTableVariables } from './custom-table';
+import { oldData,  customTableVariables, currentURLSearchParams } from './custom-table';
 import exportIcon from '../../../../assets/manager-icons/export-48px.svg';
 import searchIcon from '../../../../assets/manager-icons/search-48px.svg';
 import undoIcon from '../../../../assets/manager-icons/undo-48px.svg';
@@ -503,7 +503,7 @@ function CustomTableBody(props: {categoryBST: CustomBST<TypeCustomTable["customT
 
   // ******* Input Handlers ******* //
   function searchEntries(): void{
-    if(searchBar.current){
+    if(searchBar.current && !currentURLSearchParams.has("id")){
       const input: string = searchBar.current.value.length > 0 ? searchBar.current.value : "<Empty>";
       props.asyncQueue.enqueueRequest(()=> props.updateTableFromDB(`https://localhost:7158/api/tables/search?entry=${input}`));
     }
@@ -595,7 +595,7 @@ function CustomTableBody(props: {categoryBST: CustomBST<TypeCustomTable["customT
         <div id="custom-table-body-search-container">
           <img src={searchIcon} alt="search" className="manager-icons" />
           <input type="text" placeholder="Search..." ref={searchBar}
-            onKeyUp={searchEntries}/>
+            onKeyUp={searchEntries} disabled={currentURLSearchParams.has("id") ? true : undefined}/>
         </div>
         <button id="custom-table-body-export-button">
           <img src={exportIcon} alt="export" className="manager-icons" />

@@ -15,6 +15,12 @@ export const customTableVariables: {customBSTVariable: number, customBSTNodeOrde
   customBSTNodeOrder: "desc"
 }
 
+export const currentURLSearchParams: URLSearchParams = new URL(window.location.href).searchParams;
+
+function returnRequestURLBasedOnSearchParams(typeRequest: string): string{
+
+}
+
 export const linkMap = new Map(); // Used to link daily table to the monthly one
 
 // ******* Sort Tables ******* //

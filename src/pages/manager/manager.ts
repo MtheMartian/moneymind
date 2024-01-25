@@ -11,6 +11,8 @@ export function uniqueId(): string{
   return `${prefix}${timeStamp}-${counter++}-${crypto.getRandomValues(new Uint32Array(1))[0].toString(36)}`;
 }
 
+
+
 // ******* Text Inputs ******* //
 export let caretPosition: number = 0;
 let caretPositionEnd: number | null = null;
