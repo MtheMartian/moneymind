@@ -8,7 +8,7 @@ import { editInputs, uniqueId, checkIfInputEmpty, checkIfInputEmptyCell,
         getCaretPosition, caretPosition, findLongestString, convertStringToWeight,
         convertDateToString, getEntriesRequest } from '../../manager';
 import { Stack, CustomBST, BSTNode } from '../../../../ts/dsa';
-import { oldData,  customTableVariables, currentURLSearchParams } from './custom-table';
+import { oldData,  customTableVariables, currentURLSearchParams, returnRequestURLForSave } from './custom-table';
 import exportIcon from '../../../../assets/manager-icons/export-48px.svg';
 import searchIcon from '../../../../assets/manager-icons/search-48px.svg';
 import undoIcon from '../../../../assets/manager-icons/undo-48px.svg';
@@ -838,10 +838,14 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
       });
     });
 
-    const response: Response = await fetch("https://localhost:7158/api/tables", {
+    const requestString: string = returnRequestURLForSave();
+
+    const response: Response = await asyncQueue.current.enqueueRequest(async () => {
+      await fetch(requestString, {
       method: "POST",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify(nodeArrayJson)
+    });
     });
 
     if(response.ok){

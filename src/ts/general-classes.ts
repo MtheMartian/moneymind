@@ -37,8 +37,8 @@ export class RequestQueue{
     this.isProcessing = false;
   }
 
-  async enqueueRequest(requestFunction: Function): Promise<unknown>{
-    return new Promise(async (resolve, reject) =>{
+  async enqueueRequest(requestFunction: Function): Promise<Response>{
+    return new Promise<Response>(async (resolve, reject) =>{
       this.myQueue.enqueue({requestFunction, resolve, reject});
 
       if(!this.isProcessing){
