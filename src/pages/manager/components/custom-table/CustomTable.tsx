@@ -6,7 +6,7 @@ import { TypeCustomTable } from './custom-table-types';
 import { user } from '../../../../data/user';
 import { editInputs, uniqueId, checkIfInputEmpty, checkIfInputEmptyCell,
         getCaretPosition, caretPosition, findLongestString, convertStringToWeight,
-        convertDateToString, getEntriesRequest } from '../../manager';
+        convertDateToString, getEntriesRequest, returnRequestURL } from '../../manager';
 import { Stack, CustomBST, BSTNode } from '../../../../ts/dsa';
 import { oldData,  customTableVariables, currentURLSearchParams, returnRequestURLForSave } from './custom-table';
 import exportIcon from '../../../../assets/manager-icons/export-48px.svg';
@@ -505,7 +505,7 @@ function CustomTableBody(props: {categoryBST: CustomBST<TypeCustomTable["customT
   function searchEntries(): void{
     if(searchBar.current && !currentURLSearchParams.has("id")){
       const input: string = searchBar.current.value.length > 0 ? searchBar.current.value : "<Empty>";
-      props.asyncQueue.enqueueRequest(()=> props.updateTableFromDB(`https://localhost:7158/api/tables/search?entry=${input}`));
+      props.asyncQueue.enqueueRequest(()=> props.updateTableFromDB(returnRequestURL("search", input)));
     }
   }
 

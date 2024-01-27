@@ -13,6 +13,43 @@ export function uniqueId(): string{
 
 export const prefixURL: string = "https://localhost:7158/api/";
 
+// ******* Request URLs ******* //
+export const currentURLSearchParams: URLSearchParams = new URL(window.location.href).searchParams;
+const currentDate: Date = new Date(Date.now());
+
+export function returnRequestURL(requestFor?: string, input?: string): string{
+  const tempStr = currentURLSearchParams.get("year");
+  const tempStr2 = currentURLSearchParams.get("month");
+
+  switch(requestFor){
+    case "search":
+      if(currentURLSearchParams.has("year")|| currentURLSearchParams.has("month")){
+        return `${prefixURL}search?entry=${input ? input : "<Empty>"}&year=${tempStr ? tempStr : currentDate.getUTCFullYear()}&month=${tempStr2 ? tempStr2 : currentDate.getUTCMonth() + 1}`;
+      }
+
+      break;
+
+    case "save":
+      if(currentURLSearchParams.has("id")){
+        const tempStr: string | null = currentURLSearchParams.get("id");
+    
+        if(tempStr){
+          return `${prefixURL}tables/entry?id=${tempStr}`;
+        }
+      }
+    
+      if(currentURLSearchParams.has("year") || currentURLSearchParams.has("month")){
+        const tempStr = currentURLSearchParams.get("year");
+        const tempStr2 = currentURLSearchParams.get("month");
+        return `${prefixURL}tables/period?year=${tempStr ? tempStr : currentDate.getUTCFullYear()}&month=${tempStr2 ? tempStr2 : currentDate.getUTCMonth() + 1}`;
+      }
+
+      break;
+  }
+
+  return `${prefixURL}tables/period?year=${currentDate.getUTCFullYear()}&month=${currentDate.getUTCMonth() + 1}`;
+}
+
 // ******* Text Inputs ******* //
 export let caretPosition: number = 0;
 let caretPositionEnd: number | null = null;
