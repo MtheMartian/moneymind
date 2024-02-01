@@ -39,15 +39,47 @@ export function returnRequestURL(requestFor?: string, input?: string): string{
       }
     
       if(currentURLSearchParams.has("year") || currentURLSearchParams.has("month")){
-        const tempStr = currentURLSearchParams.get("year");
-        const tempStr2 = currentURLSearchParams.get("month");
         return `${prefixURL}tables/period?year=${tempStr ? tempStr : currentDate.getUTCFullYear()}&month=${tempStr2 ? tempStr2 : currentDate.getUTCMonth() + 1}`;
       }
 
       break;
   }
 
-  return `${prefixURL}tables/period?year=${currentDate.getUTCFullYear()}&month=${currentDate.getUTCMonth() + 1}`;
+  return `${prefixURL}tables/period?year=${tempStr ? tempStr : currentDate.getUTCFullYear()}&month=${tempStr2 ? tempStr2 : currentDate.getUTCMonth() + 1}`;
+}
+
+/**
+ * Default is the date from search params.
+ * @returns Date
+ */
+export function returnDateSearchParamsOr(input?: number): Date{
+  const year = currentURLSearchParams.get("year");
+  const month = currentURLSearchParams.get("month");
+
+  if(!year || !month){
+    return new Date();
+  }
+
+  const dateString: string = `${year}-${month}-01`;
+  let dateFromParams: Date = input !== undefined ? new Date(input) : new Date(dateString);
+
+  return dateFromParams;
+}
+
+export function checkIfSamePeriod(inputDate: Date): boolean{
+  if(inputDate.getUTCFullYear() !== currentDate.getUTCFullYear() ||
+      inputDate.getUTCMonth() !== currentDate.getUTCMonth()){
+        return false;
+      }
+
+      return true;
+}
+
+export async function getEntriesRequest(requestURL: string):Promise<TypeCustomTable["customTableEntry"][]>{
+  const response: Response = await fetch(requestURL);
+  const returnedData: TypeCustomTable["customTableEntry"][] = await response.json();
+
+  return returnedData;
 }
 
 // ******* Text Inputs ******* //
@@ -243,13 +275,5 @@ export function highlightElementError(element: HTMLInputElement, correct: boolea
   }
 
   element.style.border = "2px solid rgb(111, 252, 195)";
-}
-
-// ******* Requests ******* //
-export async function getEntriesRequest(requestURL: string):Promise<TypeCustomTable["customTableEntry"][]>{
-  const response: Response = await fetch(requestURL);
-  const returnedData: TypeCustomTable["customTableEntry"][] = await response.json();
-
-  return returnedData;
 }
 

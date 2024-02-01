@@ -6,9 +6,9 @@ import { TypeCustomTable } from './custom-table-types';
 import { user } from '../../../../data/user';
 import { editInputs, uniqueId, checkIfInputEmpty, checkIfInputEmptyCell,
         getCaretPosition, caretPosition, findLongestString, convertStringToWeight,
-        convertDateToString, getEntriesRequest, returnRequestURL } from '../../manager';
+        convertDateToString, getEntriesRequest, returnRequestURL, currentURLSearchParams, checkIfSamePeriod, returnDateSearchParamsOr } from '../../manager';
 import { Stack, CustomBST, BSTNode } from '../../../../ts/dsa';
-import { oldData,  customTableVariables, currentURLSearchParams, returnRequestURLForSave } from './custom-table';
+import { oldData,  customTableVariables } from './custom-table';
 import exportIcon from '../../../../assets/manager-icons/export-48px.svg';
 import searchIcon from '../../../../assets/manager-icons/search-48px.svg';
 import undoIcon from '../../../../assets/manager-icons/undo-48px.svg';
@@ -791,12 +791,31 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
     }
   }
 
+  function insertButtonPeriodChecker(): boolean{
+
+    if(categories.length > 0){
+      if(!checkIfSamePeriod(new Date(categories[0].item.dateCreated))){
+        return false;
+      }
+    }
+
+    if(!checkIfSamePeriod(returnDateSearchParamsOr())){
+      return false;
+    }
+
+    return true;
+  }
+
   function insertButtonHandler(): void{
     const uId: string = uniqueId();
     let newEntryName: string = categoryInput.current!.value;
     const currentTime: number = Date.now();
 
     if(checkIfInputEmpty(categoryInput.current!) && props.tableUse !== "daily"){
+      return;
+    }
+
+    if(!insertButtonPeriodChecker()){
       return;
     }
 
@@ -838,9 +857,9 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
       });
     });
 
-    const requestString: string = returnRequestURLForSave();
+    const requestString: string = returnRequestURL();
 
-    const response: Response = await asyncQueue.current.enqueueRequest(async () => {
+    asyncQueue.current.enqueueRequest(async () => {
       await fetch(requestString, {
       method: "POST",
       headers: {"Content-Type": "application/json"},
@@ -848,12 +867,10 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
     });
     });
 
-    if(response.ok){
-      asyncQueue.current.enqueueRequest(()=> retrieveDataFromDBAndUpdateTable("https://localhost:7158/api/tables"));
-      setChange(prev => prev = false);
-    }
-
     console.log(JSON.stringify(nodeArrayJson));
+
+    asyncQueue.current.enqueueRequest(()=> retrieveDataFromDBAndUpdateTable(returnRequestURL()));
+      setChange(prev => prev = false);
   }
 
   function undoButtonHandler(): void{
@@ -916,7 +933,7 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
               <button onClick={displayInsert} className="manager-buttons">Cancel</button>
             </div>
           </div> :
-          <button onClick={displayInsert} className="manager-buttons">Insert</button>}
+          <button onClick={displayInsert} className="manager-buttons" disabled={insertButtonPeriodChecker() ? undefined : true}>Insert</button>}
         </div>
         <div id="custom-table-saving-options">
           {props.stack.length > 0 ? 

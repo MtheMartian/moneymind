@@ -71,7 +71,7 @@ function MonthlyTable(){
           const currentItem: TypeCustomTable["customTableEntry"] = returnedData[i];
 
           if(currentItem.isCategory){
-            monthlyBST.current.insert([0, 0, 0], currentItem, Object.entries(returnedData)[i][0], 0); 
+            monthlyBST.current.insert([0, 0, 0], currentItem, currentItem.id, 0); 
           }
           else{
             monthlySubcategoriesBST.current.insert([0, 0, 0], currentItem, Object.entries(returnedData)[i][0], 0); 
