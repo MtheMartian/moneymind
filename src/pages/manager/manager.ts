@@ -11,7 +11,7 @@ export function uniqueId(): string{
   return `${prefix}${timeStamp}-${counter++}-${crypto.getRandomValues(new Uint32Array(1))[0].toString(36)}`;
 }
 
-export const prefixURL: string = "https://localhost:7158/api/";
+export const prefixURL: string = "https://localhost:7158/api/tables";
 
 // ******* Request URLs ******* //
 export const currentURLSearchParams: URLSearchParams = new URL(window.location.href).searchParams;
@@ -24,7 +24,7 @@ export function returnRequestURL(requestFor?: string, input?: string): string{
   switch(requestFor){
     case "search":
       if(currentURLSearchParams.has("year")|| currentURLSearchParams.has("month")){
-        return `${prefixURL}search?entry=${input ? input : "<Empty>"}&year=${tempStr ? tempStr : currentDate.getUTCFullYear()}&month=${tempStr2 ? tempStr2 : currentDate.getUTCMonth() + 1}`;
+        return `${prefixURL}/search?entry=${input ? input : "<Empty>"}&year=${tempStr ? tempStr : currentDate.getUTCFullYear()}&month=${tempStr2 ? tempStr2 : currentDate.getUTCMonth() + 1}`;
       }
 
       break;
@@ -34,18 +34,21 @@ export function returnRequestURL(requestFor?: string, input?: string): string{
         const tempStr: string | null = currentURLSearchParams.get("id");
     
         if(tempStr){
-          return `${prefixURL}tables/entry?id=${tempStr}`;
+          return `${prefixURL}/entry?id=${tempStr}`;
         }
       }
     
       if(currentURLSearchParams.has("year") || currentURLSearchParams.has("month")){
-        return `${prefixURL}tables/period?year=${tempStr ? tempStr : currentDate.getUTCFullYear()}&month=${tempStr2 ? tempStr2 : currentDate.getUTCMonth() + 1}`;
+        return `${prefixURL}/period?year=${tempStr ? tempStr : currentDate.getUTCFullYear()}&month=${tempStr2 ? tempStr2 : currentDate.getUTCMonth() + 1}`;
       }
 
       break;
+
+    case "all":
+      return `${prefixURL}`;
   }
 
-  return `${prefixURL}tables/period?year=${tempStr ? tempStr : currentDate.getUTCFullYear()}&month=${tempStr2 ? tempStr2 : currentDate.getUTCMonth() + 1}`;
+  return `${prefixURL}/period?year=${tempStr ? tempStr : currentDate.getUTCFullYear()}&month=${tempStr2 ? tempStr2 : currentDate.getUTCMonth() + 1}`;
 }
 
 /**
