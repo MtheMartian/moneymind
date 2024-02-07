@@ -4,22 +4,23 @@ import { RequestQueue } from '../../../ts/general-classes';
 import '../manager.css';
 import CustomTable from '../components/custom-table/CustomTable';
 import { oldData } from '../components/custom-table/custom-table';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { TypeCustomTable } from '../components/custom-table/custom-table-types';
-import { getEntriesRequest } from '../manager';
+import { currentURLSearchParams, getEntriesRequest } from '../manager';
 
 const monthlyStack: Stack<typeof oldData> = new Stack<typeof oldData>();
 
-function MonthlyTable(){
+function MonthlyTable(props: {redirected: boolean}){
   const asyncQueue: RequestQueue = new RequestQueue();
   const todaysDate = useRef<Date>(new Date(Date.now()));
-  const monthlyBST = useRef<CustomBST<TypeCustomTable["customTableEntry"]>>(new CustomBST());
-  const monthlySubcategoriesBST = useRef<CustomBST<TypeCustomTable["customTableEntry"]>>(new CustomBST());
+  const [monthlyBST, setMonthlyBST] = useState<CustomBST<TypeCustomTable["customTableEntry"]>>(new CustomBST());
+  const [monthlySubcategoriesBST, setMonthlySubcategoriesBST] = useState<CustomBST<TypeCustomTable["customTableEntry"]>>(new CustomBST());
   const currentURL = useRef<URLSearchParams>(new URL(window.location.href).searchParams);
 
   const [successfulRequest, setSuccessfulRequest] = useState<boolean>(false);
 
   function returnURLWithSearchParams(): string{
+    console.log(window.location.href);
 
     if(currentURL.current.has("id")){
       const tempStr = currentURL.current.get("id");
@@ -49,8 +50,6 @@ function MonthlyTable(){
       }
     }
 
-    console.log(currMonth);
-
     return `https://localhost:7158/api/tables/period?year=${currYear}&month=${currMonth}`;
   }
 
@@ -67,25 +66,30 @@ function MonthlyTable(){
 
         console.log(returnedData);
 
+        const newMonthlyBST: CustomBST<TypeCustomTable["customTableEntry"]> = new CustomBST();
+        const newMonthlySubCategoryBST: CustomBST<TypeCustomTable["customTableEntry"]> = new CustomBST();
+
         for(let i: number = 0; i < returnedData.length; i++){
           const currentItem: TypeCustomTable["customTableEntry"] = returnedData[i];
 
           if(currentItem.isCategory){
-            monthlyBST.current.insert([0, 0, 0], currentItem, currentItem.id, 0); 
+            newMonthlyBST.insert([0, 0, 0], currentItem, currentItem.id, 0); 
           }
           else{
-            monthlySubcategoriesBST.current.insert([0, 0, 0], currentItem, Object.entries(returnedData)[i][0], 0); 
+            newMonthlySubCategoryBST.insert([0, 0, 0], currentItem, Object.entries(returnedData)[i][0], 0); 
           }
         }
 
-        monthlyBST.current.traverse("desc").forEach(node =>{
+        newMonthlyBST.traverse("desc").forEach(node =>{
           console.log(`Category: ${node.item.linkID}`);
         })
 
-        monthlySubcategoriesBST.current.traverse("desc").forEach(node =>{
+        newMonthlySubCategoryBST.traverse("desc").forEach(node =>{
           console.log(`Subcategories: ${node.item.linkID}`);
         })
 
+        setMonthlyBST(prev => prev = newMonthlyBST);
+        setMonthlySubcategoriesBST(prev => prev = newMonthlySubCategoryBST);
         setSuccessfulRequest(prev => prev = true);
      }
      catch(err){
@@ -96,15 +100,17 @@ function MonthlyTable(){
     asyncQueue.enqueueRequest(retrieveDataFromDB);
 
     return()=>{
+      setMonthlyBST(prev => prev = new CustomBST<TypeCustomTable["customTableEntry"]>());
+      setMonthlySubcategoriesBST(prev => prev = new CustomBST<TypeCustomTable["customTableEntry"]>());
       setSuccessfulRequest(prev => prev = false);
     }
-  }, []);
+  }, [props.redirected]);
 
   return(
     <>
       {successfulRequest ? 
-        <CustomTable title="Monthly Manager" tableUse="monthly" stack={monthlyStack} categoryBST={monthlyBST.current}
-        subcategoryBST={monthlySubcategoriesBST.current} /> : <div>Loading...</div>
+        <CustomTable title="Monthly Manager" tableUse="monthly" stack={monthlyStack} categoryBST={monthlyBST}
+        subcategoryBST={monthlySubcategoriesBST} /> : <div>Loading...</div>
       }
     </>
   )

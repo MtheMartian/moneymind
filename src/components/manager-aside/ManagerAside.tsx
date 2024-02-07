@@ -3,8 +3,23 @@ import './manager-aside.css';
 import '../../pages/manager/manager.css';
 import table from '../../assets/manager-icons/table-48px.svg';
 import calculator from '../../assets/manager-icons/calculate-48px.svg';
+import { currentURLSearchParams } from "../../pages/manager/manager";
 
-export default function ManagerSideMenu(){
+export default function ManagerSideMenu(props: {setRedirected: Function}){
+  function forceRerender(): void{
+    const newSearchParams: URLSearchParams = new URL(window.location.href).searchParams;
+    const searchParams: string[][] = Array.from(newSearchParams.entries());
+
+    console.log(`Search Params: ${searchParams.length}`);
+
+    if(searchParams.length > 0){
+      props.setRedirected(true);
+    }
+    else{
+      props.setRedirected(false);
+    }
+  }
+
   return(
     <nav id="manager-side-menu">
       <ul className="manager-side-menu-sections">
@@ -13,10 +28,10 @@ export default function ManagerSideMenu(){
           <h3>Money Manager</h3>
         </div>
         <li>
-          <Link to={"/manager"}>Monthly Table</Link> 
+          <Link to={"/manager"} onClick={forceRerender}>Monthly Table</Link> 
         </li>
         <li>
-          <Link to={"/manager/daily"}>Daily Table</Link>
+          <Link to={"/manager/daily"} onClick={forceRerender}>Daily Table</Link>
         </li>
       </ul>
       <ul className="manager-side-menu-sections">

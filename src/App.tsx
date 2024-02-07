@@ -7,6 +7,7 @@ import Footer from "./components/footer/Footer";
 import DailyTable from "./pages/manager/daily-table/DailyTable";
 import MonthlyTable from "./pages/manager/monthly-table/MonthlyTable";
 import Calendar from "./pages/manager/calendar/Calendar";
+import {useState, useEffect} from 'react';
 
 function Layout(){
   return(
@@ -18,11 +19,11 @@ function Layout(){
   )
 }
 
-function ManagerLayout(){
+function ManagerLayout(props: {setRedirected: Function}){
   return(
     <>
     <MainHeader />
-    <ManagerSideMenu />
+    <ManagerSideMenu setRedirected={props.setRedirected}/>
     <main id="money-manager">
       <Outlet />
     </main>
@@ -32,16 +33,18 @@ function ManagerLayout(){
 }
 
 function App(){
+  const [redirected, setRedirected] = useState<boolean>(false);
+
   const router = createBrowserRouter([{
     path: "/",
     element: <Layout />,
   },
   {
     path: "/manager",
-    element: <ManagerLayout />,
+    element: <ManagerLayout setRedirected={setRedirected} />,
     children: [{
       path: "/manager",
-      element: <MonthlyTable />
+      element: <MonthlyTable redirected={redirected} />
     },
     {
       path: "/manager/daily",
