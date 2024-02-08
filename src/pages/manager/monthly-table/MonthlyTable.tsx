@@ -100,6 +100,7 @@ function MonthlyTable(props: {redirected: boolean}){
     asyncQueue.enqueueRequest(retrieveDataFromDB);
 
     return()=>{
+      currentURL.current = new URL(window.location.href).searchParams;
       setMonthlyBST(prev => prev = new CustomBST<TypeCustomTable["customTableEntry"]>());
       setMonthlySubcategoriesBST(prev => prev = new CustomBST<TypeCustomTable["customTableEntry"]>());
       setSuccessfulRequest(prev => prev = false);

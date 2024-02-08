@@ -4,6 +4,7 @@ import '../../pages/manager/manager.css';
 import table from '../../assets/manager-icons/table-48px.svg';
 import calculator from '../../assets/manager-icons/calculate-48px.svg';
 import { currentURLSearchParams } from "../../pages/manager/manager";
+import {useEffect} from 'react';
 
 export default function ManagerSideMenu(props: {setRedirected: Function}){
   function forceRerender(): void{
@@ -19,6 +20,10 @@ export default function ManagerSideMenu(props: {setRedirected: Function}){
       props.setRedirected(false);
     }
   }
+
+  useEffect(()=>{
+    //window.addEventListener("popstate", forceRerender);
+  }, []);
 
   return(
     <nav id="manager-side-menu">
