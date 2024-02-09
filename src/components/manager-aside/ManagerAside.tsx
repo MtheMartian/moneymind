@@ -9,21 +9,16 @@ import {useEffect} from 'react';
 export default function ManagerSideMenu(props: {setRedirected: Function}){
   function forceRerender(): void{
     const newSearchParams: URLSearchParams = new URL(window.location.href).searchParams;
-    const searchParams: string[][] = Array.from(newSearchParams.entries());
 
-    console.log(`Search Params: ${searchParams.length}`);
+    console.log(`Search Params: ${newSearchParams.size}`);
 
-    if(searchParams.length > 0){
+    if(newSearchParams.size > 0){
       props.setRedirected(true);
     }
     else{
       props.setRedirected(false);
     }
   }
-
-  useEffect(()=>{
-    //window.addEventListener("popstate", forceRerender);
-  }, []);
 
   return(
     <nav id="manager-side-menu">

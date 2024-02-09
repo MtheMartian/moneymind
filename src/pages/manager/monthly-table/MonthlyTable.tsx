@@ -20,8 +20,7 @@ function MonthlyTable(props: {redirected: boolean}){
   const [successfulRequest, setSuccessfulRequest] = useState<boolean>(false);
 
   function returnURLWithSearchParams(): string{
-    console.log(window.location.href);
-
+    
     if(currentURL.current.has("id")){
       const tempStr = currentURL.current.get("id");
       
