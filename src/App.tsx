@@ -33,18 +33,18 @@ function ManagerLayout(props: {setRedirected: Function}){
 }
 
 function App(){
-  const [redirected, setRedirected] = useState<boolean>(false);
+  const [redirected, setRedirected] = useState<boolean | null>(null);
 
-  function forceRerender(): void{
-    const newSearchParams: URLSearchParams = new URL(window.location.href).searchParams;
+  // Indices -> 1: Monthly Table, 2: Daily Table, 3: Calendar
+  const pagesToRerender = useRef<boolean[]>(new Array(3).fill(false));
 
-    console.log(`Search Params: ${newSearchParams.size}`);
-
-    if(newSearchParams.size > 0){
-      setRedirected(true);
-    }
-    else{
-      setRedirected(false);
+  function forceRerender(event: PopStateEvent): void{
+    const currentDocument: Window = event.currentTarget as Window;
+    const oldURL: string = new URL(window.location.href).pathname
+    const newURL: string = new URL(currentDocument.location.href).pathname;
+    
+    if(newURL.length > 8){
+      
     }
   }
 
@@ -53,7 +53,7 @@ function App(){
 
     return()=>{
       window.removeEventListener("popstate", forceRerender);
-      setRedirected(prev => prev = false);
+      setRedirected(prev => prev = null);
     }
   },[])
 

@@ -10,7 +10,7 @@ import { currentURLSearchParams, getEntriesRequest } from '../manager';
 
 const monthlyStack: Stack<typeof oldData> = new Stack<typeof oldData>();
 
-function MonthlyTable(props: {redirected: boolean}){
+function MonthlyTable(props: {redirected: boolean | null}){
   const asyncQueue: RequestQueue = new RequestQueue();
   const todaysDate = useRef<Date>(new Date(Date.now()));
   const [monthlyBST, setMonthlyBST] = useState<CustomBST<TypeCustomTable["customTableEntry"]>>(new CustomBST());
