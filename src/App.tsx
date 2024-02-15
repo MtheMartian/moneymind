@@ -8,6 +8,8 @@ import DailyTable from "./pages/manager/daily-table/DailyTable";
 import MonthlyTable from "./pages/manager/monthly-table/MonthlyTable";
 import Calendar from "./pages/manager/calendar/Calendar";
 import {useState, useEffect, useRef} from 'react';
+import {store, updateMonthlyState, updateDailyState, updateCalendarState} from './redux/store';
+import { Provider } from "react-redux";
 
 function Layout(){
   return(
@@ -25,7 +27,9 @@ function ManagerLayout(props: {setRedirected: Function}){
     <MainHeader />
     <ManagerSideMenu setRedirected={props.setRedirected} />
     <main id="money-manager">
-      <Outlet />
+      <Provider store={store}>
+        <Outlet />
+      </Provider>
     </main>
     <Footer />
     </>
@@ -33,18 +37,57 @@ function ManagerLayout(props: {setRedirected: Function}){
 }
 
 function App(){
-  const [redirected, setRedirected] = useState<boolean | null>(null);
+  const [redirected, setRedirected] = useState<number | null>(null);
 
-  // Indices -> 1: Monthly Table, 2: Daily Table, 3: Calendar
-  const pagesToRerender = useRef<boolean[]>(new Array(3).fill(false));
+  // Indices -> 0: Monthly Table, 1: Daily Table, 2: Calendar
+  // const pagesToRerender = useRef<boolean[]>(new Array(3).fill(false));
 
-  function forceRerender(event: PopStateEvent): void{
-    const currentDocument: Window = event.currentTarget as Window;
-    const oldURL: string = new URL(window.location.href).pathname
-    const newURL: string = new URL(currentDocument.location.href).pathname;
-    
-    if(newURL.length > 8){
+  // function forceRerenderHelper(idx: number): void{
+  //   for(let i: number = 0; i < pagesToRerender.current.length; i++){
+  //     if(i === idx){
+  //       pagesToRerender.current[i] = true;
+  //       continue;
+  //     }
+
+  //     pagesToRerender.current[i] = false;
+  //   }
+  // }
+
+  function forceRerender(event?: PopStateEvent, componentStr?: string): void{
+
+    let lastPathNameIdx: number = 0;
+    let tempStr: string = "";
+
+    if(event !== undefined || event && (!componentStr || componentStr === undefined)){
+      const currentDocument: Window = event.currentTarget as Window;
+      const historyURL: string = new URL(currentDocument.location.href).pathname;
       
+      for(let i: number = historyURL.length - 1; i >= 0; i--){
+        if(historyURL[i] === "/"){
+          lastPathNameIdx = i + 1;
+          break;
+        }
+      }
+
+      tempStr = historyURL.substring(lastPathNameIdx);
+    }
+    else if(componentStr || componentStr !== undefined){
+      tempStr = componentStr;
+    }
+
+
+    switch(tempStr){
+      case "manager":
+        store.dispatch(updateMonthlyState());
+        return;
+
+      case "daily":
+        store.dispatch(updateDailyState());
+        return;
+
+      case "calendar":
+        store.dispatch(updateCalendarState());
+        return;
     }
   }
 
@@ -55,7 +98,7 @@ function App(){
       window.removeEventListener("popstate", forceRerender);
       setRedirected(prev => prev = null);
     }
-  },[])
+  },[]);
 
   const router = createBrowserRouter([{
     path: "/",
@@ -63,10 +106,10 @@ function App(){
   },
   {
     path: "/manager",
-    element: <ManagerLayout setRedirected={setRedirected}/>,
+    element: <ManagerLayout setRedirected={forceRerender} />,
     children: [{
       path: "/manager",
-      element: <MonthlyTable redirected={redirected} />
+      element: <MonthlyTable />
     },
     {
       path: "/manager/daily",

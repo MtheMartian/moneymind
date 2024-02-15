@@ -7,17 +7,13 @@ import { currentURLSearchParams } from "../../pages/manager/manager";
 import {useEffect} from 'react';
 
 export default function ManagerSideMenu(props: {setRedirected: Function}){
-  function forceRerender(): void{
+  function forceRerender(page: number): void{
     const newSearchParams: URLSearchParams = new URL(window.location.href).searchParams;
 
     console.log(`Search Params: ${newSearchParams.size}`);
 
-    if(newSearchParams.size > 0){
-      props.setRedirected(true);
-    }
-    else{
-      props.setRedirected(false);
-    }
+    props.setRedirected(page);
+
   }
 
   return(
@@ -28,10 +24,10 @@ export default function ManagerSideMenu(props: {setRedirected: Function}){
           <h3>Money Manager</h3>
         </div>
         <li>
-          <Link to={"/manager"} onClick={forceRerender}>Monthly Table</Link> 
+          <Link to={"/manager"} onClick={()=> forceRerender(1)}>Monthly Table</Link> 
         </li>
         <li>
-          <Link to={"/manager/daily"} onClick={forceRerender}>Daily Table</Link>
+          <Link to={"/manager/daily"} onClick={()=> forceRerender(2)}>Daily Table</Link>
         </li>
       </ul>
       <ul className="manager-side-menu-sections">
@@ -40,7 +36,7 @@ export default function ManagerSideMenu(props: {setRedirected: Function}){
           <h3>Calendar</h3>
         </div>
         <li>
-          <Link to={"/manager/calendar"}>Calendar</Link>  
+          <Link to={"/manager/calendar"} onClick={()=> forceRerender(2)}>Calendar</Link>  
         </li>
       </ul>
       <ul className="manager-side-menu-sections">

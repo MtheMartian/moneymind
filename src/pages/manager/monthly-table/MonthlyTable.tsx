@@ -7,15 +7,20 @@ import { oldData } from '../components/custom-table/custom-table';
 import { useEffect, useState, useRef, useMemo } from 'react';
 import { TypeCustomTable } from '../components/custom-table/custom-table-types';
 import { currentURLSearchParams, getEntriesRequest } from '../manager';
+import { useDispatch, useSelector } from 'react-redux';
+import { ReduxStates } from '../../../redux/store';
 
 const monthlyStack: Stack<typeof oldData> = new Stack<typeof oldData>();
 
-function MonthlyTable(props: {redirected: boolean | null}){
+function MonthlyTable(){
   const asyncQueue: RequestQueue = new RequestQueue();
   const todaysDate = useRef<Date>(new Date(Date.now()));
   const [monthlyBST, setMonthlyBST] = useState<CustomBST<TypeCustomTable["customTableEntry"]>>(new CustomBST());
   const [monthlySubcategoriesBST, setMonthlySubcategoriesBST] = useState<CustomBST<TypeCustomTable["customTableEntry"]>>(new CustomBST());
   const currentURL = useRef<URLSearchParams>(new URL(window.location.href).searchParams);
+
+  const dispatch = useDispatch();
+  const redirected = useSelector((state: ReduxStates["defaultState"]) => state.monthlyTableState);
 
   const [successfulRequest, setSuccessfulRequest] = useState<boolean>(false);
 
@@ -53,17 +58,19 @@ function MonthlyTable(props: {redirected: boolean | null}){
   }
 
   useEffect(()=>{
+    console.log("MonthlyTable component mounted");
+    console.log(`Prop Status: ${!redirected ? "NULL" : redirected }`);
     async function retrieveDataFromDB(): Promise<void>{
      try{
         const requestURL: string = returnURLWithSearchParams();
+        console.log("Fetching data from:", requestURL);
         const returnedData: TypeCustomTable["customTableEntry"][] = await getEntriesRequest(requestURL);
+        console.log("Data fetched successfully:", returnedData);
 
         if(returnedData.length === 0){
           setSuccessfulRequest(prev => prev = true);
           return;
         }
-
-        console.log(returnedData);
 
         const newMonthlyBST: CustomBST<TypeCustomTable["customTableEntry"]> = new CustomBST();
         const newMonthlySubCategoryBST: CustomBST<TypeCustomTable["customTableEntry"]> = new CustomBST();
@@ -78,14 +85,6 @@ function MonthlyTable(props: {redirected: boolean | null}){
             newMonthlySubCategoryBST.insert([0, 0, 0], currentItem, Object.entries(returnedData)[i][0], 0); 
           }
         }
-
-        newMonthlyBST.traverse("desc").forEach(node =>{
-          console.log(`Category: ${node.item.linkID}`);
-        })
-
-        newMonthlySubCategoryBST.traverse("desc").forEach(node =>{
-          console.log(`Subcategories: ${node.item.linkID}`);
-        })
 
         setMonthlyBST(prev => prev = newMonthlyBST);
         setMonthlySubcategoriesBST(prev => prev = newMonthlySubCategoryBST);
@@ -103,8 +102,10 @@ function MonthlyTable(props: {redirected: boolean | null}){
       setMonthlyBST(prev => prev = new CustomBST<TypeCustomTable["customTableEntry"]>());
       setMonthlySubcategoriesBST(prev => prev = new CustomBST<TypeCustomTable["customTableEntry"]>());
       setSuccessfulRequest(prev => prev = false);
+      dispatch({type: "RESET_MONTLY_STATE"});
+      console.log("MonthlyTable component unmounted");
     }
-  }, [props.redirected]);
+  }, [redirected]);
 
   return(
     <>
