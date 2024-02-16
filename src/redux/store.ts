@@ -14,19 +14,16 @@ const initialState: StateType["defaultState"] = {
   calendarState: 0
 };
 
-const reducer = (state: StateType["defaultState"] = initialState, action: Action) : {} => {
+const reducer = (state: StateType["defaultState"] = initialState, action: Action) : StateType["defaultState"] => {
   switch(action.type){
     case "UPDATE_MONTHLY_STATE":
-      return {...state, monthlyTableState: 1};
+      return {...state, monthlyTableState: state.monthlyTableState === 1 ? 0 : 1};
 
     case "UPDATE_DAILY_STATE":
-      return {...state, dailyTableState: 2};
+      return {...state, dailyTableState: state.dailyTableState === 2 ? 0 : 2};
 
     case "UPDATE_CALENDAR_STATE":
-      return {...state, calendarState: 3};
-
-    case "RESET_MONTHLY_STATE":
-      return {...state, monthlyTableState: 0};
+      return {...state, calendarState: state.calendarState === 3 ? 0 : 3};
 
     default:
       return state;

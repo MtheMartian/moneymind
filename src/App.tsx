@@ -21,11 +21,11 @@ function Layout(){
   )
 }
 
-function ManagerLayout(props: {setRedirected: Function}){
+function ManagerLayout(props: {forceRerender: Function}){
   return(
     <>
     <MainHeader />
-    <ManagerSideMenu setRedirected={props.setRedirected} />
+    <ManagerSideMenu forceRerender={props.forceRerender} />
     <main id="money-manager">
       <Provider store={store}>
         <Outlet />
@@ -37,28 +37,12 @@ function ManagerLayout(props: {setRedirected: Function}){
 }
 
 function App(){
-  const [redirected, setRedirected] = useState<number | null>(null);
-
-  // Indices -> 0: Monthly Table, 1: Daily Table, 2: Calendar
-  // const pagesToRerender = useRef<boolean[]>(new Array(3).fill(false));
-
-  // function forceRerenderHelper(idx: number): void{
-  //   for(let i: number = 0; i < pagesToRerender.current.length; i++){
-  //     if(i === idx){
-  //       pagesToRerender.current[i] = true;
-  //       continue;
-  //     }
-
-  //     pagesToRerender.current[i] = false;
-  //   }
-  // }
-
-  function forceRerender(event?: PopStateEvent, componentStr?: string): void{
+  function forceRerender(event: PopStateEvent | null, componentStr?: string): void{
 
     let lastPathNameIdx: number = 0;
     let tempStr: string = "";
 
-    if(event !== undefined || event && (!componentStr || componentStr === undefined)){
+    if(event && (!componentStr || componentStr === undefined)){
       const currentDocument: Window = event.currentTarget as Window;
       const historyURL: string = new URL(currentDocument.location.href).pathname;
       
@@ -74,7 +58,6 @@ function App(){
     else if(componentStr || componentStr !== undefined){
       tempStr = componentStr;
     }
-
 
     switch(tempStr){
       case "manager":
@@ -96,7 +79,6 @@ function App(){
 
     return()=>{
       window.removeEventListener("popstate", forceRerender);
-      setRedirected(prev => prev = null);
     }
   },[]);
 
@@ -106,7 +88,7 @@ function App(){
   },
   {
     path: "/manager",
-    element: <ManagerLayout setRedirected={forceRerender} />,
+    element: <ManagerLayout forceRerender={forceRerender} />,
     children: [{
       path: "/manager",
       element: <MonthlyTable />

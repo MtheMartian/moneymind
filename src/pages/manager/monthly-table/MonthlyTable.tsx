@@ -24,6 +24,8 @@ function MonthlyTable(){
 
   const [successfulRequest, setSuccessfulRequest] = useState<boolean>(false);
 
+  let isMounted: boolean = true;
+
   function returnURLWithSearchParams(): string{
     
     if(currentURL.current.has("id")){
@@ -60,6 +62,7 @@ function MonthlyTable(){
   useEffect(()=>{
     console.log("MonthlyTable component mounted");
     console.log(`Prop Status: ${!redirected ? "NULL" : redirected }`);
+
     async function retrieveDataFromDB(): Promise<void>{
      try{
         const requestURL: string = returnURLWithSearchParams();
@@ -102,7 +105,6 @@ function MonthlyTable(){
       setMonthlyBST(prev => prev = new CustomBST<TypeCustomTable["customTableEntry"]>());
       setMonthlySubcategoriesBST(prev => prev = new CustomBST<TypeCustomTable["customTableEntry"]>());
       setSuccessfulRequest(prev => prev = false);
-      dispatch({type: "RESET_MONTLY_STATE"});
       console.log("MonthlyTable component unmounted");
     }
   }, [redirected]);

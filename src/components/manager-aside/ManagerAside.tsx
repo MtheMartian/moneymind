@@ -5,16 +5,17 @@ import table from '../../assets/manager-icons/table-48px.svg';
 import calculator from '../../assets/manager-icons/calculate-48px.svg';
 import { currentURLSearchParams } from "../../pages/manager/manager";
 import {useEffect} from 'react';
+import { Store } from "redux";
 
-export default function ManagerSideMenu(props: {setRedirected: Function}){
-  function forceRerender(page: number): void{
-    const newSearchParams: URLSearchParams = new URL(window.location.href).searchParams;
+export default function ManagerSideMenu(props: {forceRerender: Function}){
+  // function forceRerender(page: number): void{
+  //   const newSearchParams: URLSearchParams = new URL(window.location.href).searchParams;
 
-    console.log(`Search Params: ${newSearchParams.size}`);
+  //   console.log(`Search Params: ${newSearchParams.size}`);
 
-    props.setRedirected(page);
+  //   props.setRedirected(page);
 
-  }
+  // }
 
   return(
     <nav id="manager-side-menu">
@@ -24,10 +25,10 @@ export default function ManagerSideMenu(props: {setRedirected: Function}){
           <h3>Money Manager</h3>
         </div>
         <li>
-          <Link to={"/manager"} onClick={()=> forceRerender(1)}>Monthly Table</Link> 
+          <Link to={"/manager"} onClick={()=> props.forceRerender(null, "manager")}>Monthly Table</Link> 
         </li>
         <li>
-          <Link to={"/manager/daily"} onClick={()=> forceRerender(2)}>Daily Table</Link>
+          <Link to={"/manager/daily"} onClick={()=> props.forceRerender(null, "daily")}>Daily Table</Link>
         </li>
       </ul>
       <ul className="manager-side-menu-sections">
@@ -36,7 +37,7 @@ export default function ManagerSideMenu(props: {setRedirected: Function}){
           <h3>Calendar</h3>
         </div>
         <li>
-          <Link to={"/manager/calendar"} onClick={()=> forceRerender(2)}>Calendar</Link>  
+          <Link to={"/manager/calendar"} onClick={()=> props.forceRerender(null, "calendar")}>Calendar</Link>  
         </li>
       </ul>
       <ul className="manager-side-menu-sections">
