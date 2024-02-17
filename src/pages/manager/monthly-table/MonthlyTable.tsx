@@ -1,31 +1,31 @@
 import '../components/custom-table/custom-table.css';
-import { Stack, CustomBST, BSTNode } from '../../../ts/dsa';
+import { Stack, CustomBST} from '../../../ts/dsa';
 import { RequestQueue } from '../../../ts/general-classes';
 import '../manager.css';
 import CustomTable from '../components/custom-table/CustomTable';
 import { oldData } from '../components/custom-table/custom-table';
-import { useEffect, useState, useRef, useMemo } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { TypeCustomTable } from '../components/custom-table/custom-table-types';
-import { currentURLSearchParams, getEntriesRequest } from '../manager';
-import { useDispatch, useSelector } from 'react-redux';
+import { getEntriesRequest } from '../manager';
+import { useSelector } from 'react-redux';
 import { ReduxStates } from '../../../redux/store';
 
-const monthlyStack: Stack<typeof oldData> = new Stack<typeof oldData>();
-
 function MonthlyTable(){
+  // ******* General ******* //
   const asyncQueue: RequestQueue = new RequestQueue();
-  const todaysDate = useRef<Date>(new Date(Date.now()));
-  const [monthlyBST, setMonthlyBST] = useState<CustomBST<TypeCustomTable["customTableEntry"]>>(new CustomBST());
+  const monthlyStack: Stack<typeof oldData> = new Stack<typeof oldData>();
+  
+  // ******* States ******* //
   const [monthlySubcategoriesBST, setMonthlySubcategoriesBST] = useState<CustomBST<TypeCustomTable["customTableEntry"]>>(new CustomBST());
+  const [monthlyBST, setMonthlyBST] = useState<CustomBST<TypeCustomTable["customTableEntry"]>>(new CustomBST());
+  const [successfulRequest, setSuccessfulRequest] = useState<boolean>(false);
+  const redirected = useSelector((state: ReduxStates["defaultState"]) => state.monthlyTableState);
+  
+  // ******* References ******* //
+  const todaysDate = useRef<Date>(new Date(Date.now()));
   const currentURL = useRef<URLSearchParams>(new URL(window.location.href).searchParams);
 
-  const dispatch = useDispatch();
-  const redirected = useSelector((state: ReduxStates["defaultState"]) => state.monthlyTableState);
-
-  const [successfulRequest, setSuccessfulRequest] = useState<boolean>(false);
-
-  let isMounted: boolean = true;
-
+  // ******* Functions ******* //
   function returnURLWithSearchParams(): string{
     
     if(currentURL.current.has("id")){
@@ -51,7 +51,6 @@ function MonthlyTable(){
       const tempStr = currentURL.current.get("month");
 
       if(tempStr && Number.isInteger(Number(tempStr))){
-        console.log(tempStr);
         currMonth = Number(tempStr);
       }
     }
@@ -59,16 +58,12 @@ function MonthlyTable(){
     return `https://localhost:7158/api/tables/period?year=${currYear}&month=${currMonth}`;
   }
 
+  // ******* UseEffects ******* //
   useEffect(()=>{
-    console.log("MonthlyTable component mounted");
-    console.log(`Prop Status: ${!redirected ? "NULL" : redirected }`);
-
     async function retrieveDataFromDB(): Promise<void>{
      try{
         const requestURL: string = returnURLWithSearchParams();
-        console.log("Fetching data from:", requestURL);
         const returnedData: TypeCustomTable["customTableEntry"][] = await getEntriesRequest(requestURL);
-        console.log("Data fetched successfully:", returnedData);
 
         if(returnedData.length === 0){
           setSuccessfulRequest(prev => prev = true);
@@ -105,7 +100,6 @@ function MonthlyTable(){
       setMonthlyBST(prev => prev = new CustomBST<TypeCustomTable["customTableEntry"]>());
       setMonthlySubcategoriesBST(prev => prev = new CustomBST<TypeCustomTable["customTableEntry"]>());
       setSuccessfulRequest(prev => prev = false);
-      console.log("MonthlyTable component unmounted");
     }
   }, [redirected]);
 
