@@ -1,5 +1,6 @@
 import { ChangeEvent, SyntheticEvent } from "react";
 import { quickSort } from "../../ts/dsa";
+import { TypeCustomTable } from "./components/custom-table/custom-table-types";
 
 // ******* General ******* //
 export function uniqueId(): string{
@@ -8,6 +9,80 @@ export function uniqueId(): string{
   const timeStamp: string = Date.now().toString(36);
   let counter: number = 0;
   return `${prefix}${timeStamp}-${counter++}-${crypto.getRandomValues(new Uint32Array(1))[0].toString(36)}`;
+}
+
+export const prefixURL: string = "https://localhost:7158/api/tables";
+
+// ******* Request URLs ******* //
+export const currentURLSearchParams: URLSearchParams = new URL(window.location.href).searchParams;
+const currentDate: Date = new Date(Date.now());
+
+export function returnRequestURL(requestFor?: string, input?: string): string{
+  const tempStr = currentURLSearchParams.get("year");
+  const tempStr2 = currentURLSearchParams.get("month");
+
+  switch(requestFor){
+    case "search":
+      if(currentURLSearchParams.has("year")|| currentURLSearchParams.has("month")){
+        return `${prefixURL}/search?entry=${input ? input : "<Empty>"}&year=${tempStr ? tempStr : currentDate.getUTCFullYear()}&month=${tempStr2 ? tempStr2 : currentDate.getUTCMonth() + 1}`;
+      }
+
+      break;
+
+    case "save":
+      if(currentURLSearchParams.has("id")){
+        const tempStr: string | null = currentURLSearchParams.get("id");
+    
+        if(tempStr){
+          return `${prefixURL}/entry?id=${tempStr}`;
+        }
+      }
+    
+      if(currentURLSearchParams.has("year") || currentURLSearchParams.has("month")){
+        return `${prefixURL}/period?year=${tempStr ? tempStr : currentDate.getUTCFullYear()}&month=${tempStr2 ? tempStr2 : currentDate.getUTCMonth() + 1}`;
+      }
+
+      break;
+
+    case "all":
+      return `${prefixURL}`;
+  }
+
+  return `${prefixURL}/period?year=${tempStr ? tempStr : currentDate.getUTCFullYear()}&month=${tempStr2 ? tempStr2 : currentDate.getUTCMonth() + 1}`;
+}
+
+/**
+ * Default is the date from search params.
+ * @returns Date
+ */
+export function returnDateSearchParamsOr(input?: number): Date{
+  const year = currentURLSearchParams.get("year");
+  const month = currentURLSearchParams.get("month");
+
+  if(!year || !month){
+    return new Date();
+  }
+
+  const dateString: string = `${year}-${month}-01`;
+  let dateFromParams: Date = input !== undefined ? new Date(input) : new Date(dateString);
+
+  return dateFromParams;
+}
+
+export function checkIfSamePeriod(inputDate: Date): boolean{
+  if(inputDate.getUTCFullYear() !== currentDate.getUTCFullYear() ||
+      inputDate.getUTCMonth() !== currentDate.getUTCMonth()){
+        return false;
+      }
+
+      return true;
+}
+
+export async function getEntriesRequest(requestURL: string):Promise<TypeCustomTable["customTableEntry"][]>{
+  const response: Response = await fetch(requestURL);
+  const returnedData: TypeCustomTable["customTableEntry"][] = await response.json();
+
+  return returnedData;
 }
 
 // ******* Text Inputs ******* //
@@ -204,5 +279,4 @@ export function highlightElementError(element: HTMLInputElement, correct: boolea
 
   element.style.border = "2px solid rgb(111, 252, 195)";
 }
-
 

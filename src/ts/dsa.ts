@@ -76,6 +76,56 @@ export class Stack<T>{
   }
 }
 
+// ******* Queue ******* //
+export class Queue<T>{
+  head: MyNode<T> | null;
+  tail: MyNode<T> | null;
+  length: number;
+
+  constructor(){
+    this.head = this.tail = null;
+    this.length = 0;
+  }
+
+  enqueue(item: T): void{
+    const newNode: MyNode<T> = new MyNode(item);
+
+    this.length++;
+
+    if(!this.head || !this.tail){
+       this.head = this.tail = newNode;
+    }
+    else{
+      const tempNode: MyNode<T> = this.tail;
+
+      tempNode.next = newNode;
+      newNode.prev = tempNode;
+      this.tail = newNode;
+    }
+  }
+
+  dequeue(): MyNode<T> | null{
+    if(!this.head || !this.tail){
+      return null;
+    }
+
+    this.length--;
+
+    const tempNode: MyNode<T> = this.head;
+
+    this.head = this.head.next;
+
+    if(this.head){
+      this.head.prev = null;
+    }
+    else{
+      this.tail = null;
+    }
+
+    return tempNode;
+  }
+}
+
 // ******* QuickSort ******* //
 function partition(low: number, high: number, arr: number[], sort: string): number{
   let idx: number = -1;
@@ -199,6 +249,15 @@ export class CustomBST<T>{
     if(!this.root){
       this.root = newNode;
       return;
+    }
+
+    const allNodes: BSTNode<T>[] = this.traverse("desc");
+
+    for(let i: number = 0; i < allNodes.length; i++){
+      if(allNodes[i].id === id){
+        console.log("ID already exists!");
+        return;
+      }
     }
 
     this.organize(newNode, idx);
@@ -339,6 +398,7 @@ export class CustomBST<T>{
         if(currentNode.id === id){
           currentNode.item = item;
           currentNode.value = value;
+          currentNode.id = id;
           return;
         }
       }

@@ -1,13 +1,15 @@
 import './calendar.css';
 import {useEffect, useRef, useState, useMemo, SyntheticEvent} from 'react';
+import { Link } from 'react-router-dom';
 import { checkIfFullNumber, dateEntries } from './calendarts';
+import { RequestQueue } from '../../../ts/general-classes';
+import { TypeCustomTable } from '../components/custom-table/custom-table-types';
+import { CustomBST, BSTNode, quickSort } from '../../../ts/dsa';
+import { returnRequestURL, getEntriesRequest } from '../manager';
 
-function CalendarContent(){
-  
-}
-
+// ------- Date Selection ------- //
 function CustomDropDown(props: {dateType: string, inputElement: HTMLInputElement | null,
-                                setSelectedDropdown: Function}){
+                                setSelectedDropdown: Function, asyncQueue: RequestQueue}){
   // ******* States ******* //
   const [dateTypeArr, setDateTypeArr] = useState<number[]>([]);
 
@@ -37,21 +39,52 @@ function CustomDropDown(props: {dateType: string, inputElement: HTMLInputElement
     }
   }
 
-  // ******* UseEffects ******* //
-  useEffect(()=>{
-    switch(props.dateType){
-      case "year":
-        setDateTypeArr(prev => prev = [2023]);
-        break;
+  async function getCustomDropDownContent(): Promise<void>{
+    if(props.dateType === "year"){
+      const tempMap: Map<number, number> = new Map();
+      const requestURL: string = returnRequestURL("all");
+      const entries: TypeCustomTable["customTableEntry"][] = await getEntriesRequest(requestURL);
 
+      entries.forEach(entry =>{
+        const tempYear: number = new Date(entry.dateCreated).getUTCFullYear();
+
+        if(!tempMap.has(tempYear)){
+          tempMap.set(tempYear, 0);
+        }
+      });
+
+      setDateTypeArr(prev => prev = quickSort(Array.from(tempMap.keys()), "asc"));
+      return;
+    }
+
+    let counter = 0;
+    const numArr: number[] = [];
+
+    switch(props.dateType){
       case "month":
-        setDateTypeArr(prev => prev = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+        counter = 12;
         break;
 
       case "date":
-        setDateTypeArr(prev => prev = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]);
+        counter = 31;
         break;
     }
+
+    for(let i: number = 1; i <= counter; i++){
+      numArr.push(i);
+    }
+
+    setDateTypeArr(prev => prev = numArr);
+  }
+
+  // ******* UseEffects ******* //
+  useEffect(()=>{
+    props.asyncQueue.enqueueRequest(getCustomDropDownContent);
+
+    return()=>{
+      setDateTypeArr(prev => prev = []);
+    }
+
   }, []);
 
   return(
@@ -65,7 +98,8 @@ function CustomDropDown(props: {dateType: string, inputElement: HTMLInputElement
   )
 }
 
-function CalendarCustomDropdown(props: {setCurrentYear: Function, setCurrentMonth: Function, setCurrentDate: Function}){
+function CalendarCustomDropdown(props: {setCurrentYear: Function, setCurrentMonth: Function, setCurrentDate: Function,
+                                        asyncQueue: RequestQueue}){
   // ******* Reference ******* //
   const yearInput = useRef<HTMLInputElement>(null);
   const monthInput = useRef<HTMLInputElement>(null);
@@ -136,7 +170,7 @@ function CalendarCustomDropdown(props: {setCurrentYear: Function, setCurrentMont
         </div>
         {selectedDropdown === 0 ? 
             <CustomDropDown dateType='year' inputElement={yearInput.current} 
-              setSelectedDropdown={setSelectedDropDown}/> : null
+              setSelectedDropdown={setSelectedDropDown} asyncQueue={props.asyncQueue} /> : null
         }
         
       </div>
@@ -148,7 +182,7 @@ function CalendarCustomDropdown(props: {setCurrentYear: Function, setCurrentMont
         </div>
         {selectedDropdown === 1 ?
           <CustomDropDown dateType='month' inputElement={monthInput.current} 
-            setSelectedDropdown={setSelectedDropDown}/> : null
+            setSelectedDropdown={setSelectedDropDown} asyncQueue={props.asyncQueue} /> : null
         }
       </div>
       <div>
@@ -159,7 +193,7 @@ function CalendarCustomDropdown(props: {setCurrentYear: Function, setCurrentMont
         </div>
         {selectedDropdown === 2 ?
           <CustomDropDown dateType='date' inputElement={dateInput.current} 
-            setSelectedDropdown={setSelectedDropDown}/> : null
+            setSelectedDropdown={setSelectedDropDown} asyncQueue={props.asyncQueue} /> : null
         }
       </div>
       <div onClick={goButtonHandler}>Go</div>
@@ -167,16 +201,46 @@ function CalendarCustomDropdown(props: {setCurrentYear: Function, setCurrentMont
   )
 }
 
+// ------- Calendar Date Box & Date Box content ------- // 
+function CalendarDateBoxContent(props: {currentDateItems: TypeCustomTable["customTableEntry"][]}){
+  return(
+    <div>
+      {props.currentDateItems? props.currentDateItems.map(item =>
+          item.isCategory ?
+          <Link to={item.isMonthly ? `/manager?id=${item.id}` : `/manager/daily?id=${item.id}`}>
+            {item.entryName}
+          </Link> : null
+        ) : null}
+    </div>
+  )
+}
+
+function CalendarDateBox(props:{currDate: Date, dateItemsMap: Map<number, TypeCustomTable["customTableEntry"][]> | null}){
+  return(
+    <div className="calendar-item-wrapper" id={`calendar-item-wrapper-${props.currDate.getDate()}`}>
+      <div className="calendar-item-date">
+        <p>{props.currDate.toDateString()}</p>
+      </div>
+      <div className="calendar-item">
+        {props.dateItemsMap? <CalendarDateBoxContent currentDateItems={props.dateItemsMap.get(props.currDate.getDate())!} 
+          key={`itemsDate${props.currDate.getDate()}`}/> : null}
+      </div>
+    </div>
+  )
+}
+
+// ------- Main Calendar ------- //
 function Calendar(){
-  
   // ******* Reference ******* //
   const calendar = useRef<HTMLDivElement>(null);
   const todayDate = useRef<Date>(new Date(Date.now()));
+  const asyncQueue = useRef<RequestQueue>(new RequestQueue());
 
   // ******* States ******* //
   const [currentYear, setCurrentYear] = useState<number>(todayDate.current.getFullYear());
   const [currentMonth, setCurrentMonth] = useState<number>(todayDate.current.getMonth() + 1);
   const [currentDate, setCurrentDate] = useState<number>(todayDate.current.getDate());
+  const [currentDateItems, setCurrentDateItems] = useState<Map<number, TypeCustomTable["customTableEntry"][]> | null>(null);
 
   const datesArr = useMemo<Date[]>(()=>{
     const tempArr: Date[] = [];
@@ -219,17 +283,55 @@ function Calendar(){
 
   }, [currentYear, currentMonth, currentDate]);
 
+  useEffect(()=>{
+    function setDateItemsMap(items: TypeCustomTable["customTableEntry"][]): void{
+      const newMap: Map<number, TypeCustomTable["customTableEntry"][]> = new Map();
+      const contentBST: CustomBST<TypeCustomTable["customTableEntry"]> = new CustomBST();
+
+      items.forEach(item =>{
+        contentBST.insert([item.dateCreated, 0, 0], item, item.id, 0);
+      })
+
+      const sortedDateItems = contentBST.traverse("asc");
+
+      sortedDateItems.forEach(item =>{
+        const currentItemDate: number = new Date(item.item.dateCreated).getDate();
+        if(newMap.has(currentItemDate)){
+          newMap.get(currentItemDate)?.push(item.item);
+        }
+        else{
+          newMap.set(currentItemDate, []);
+        }
+      });
+
+      setCurrentDateItems(prev => prev = newMap);
+    }
+
+    async function getEntriesBasedOnDate(): Promise<void>{
+      const requestURL: string = `https://localhost:7158/api/tables/period?year=${currentYear}&month=${currentMonth}&date=${currentDate}`;
+      try{
+        const returnedData: TypeCustomTable["customTableEntry"][] = await getEntriesRequest(requestURL);
+        setDateItemsMap(returnedData);
+      }
+      catch(err){
+        console.error(`Woopsies! Couldn't retrieve data for this date. ${err}`);
+      }
+    }
+
+    asyncQueue.current.enqueueRequest(getEntriesBasedOnDate);
+
+    return()=>{
+      setCurrentDateItems(prev => prev = null);
+    }
+  }, [currentYear, currentMonth, currentDate]);
+
   return(
     <div id="calendar" ref={calendar}>
+      <Link to={`/manager?year=${currentYear}&month=${currentMonth}`} />
       <CalendarCustomDropdown setCurrentYear={setCurrentYear} setCurrentMonth={setCurrentMonth}
-                              setCurrentDate={setCurrentDate} />
-      {datesArr.map(date =>
-      <div className="calendar-item-wrapper" id={`calendar-item-wrapper-${date.getDate()}`}>
-        <div className="calendar-item-date">
-          <p>{date.toDateString()}</p>
-        </div>
-        <div className="calendar-item">content</div>
-      </div>
+                              setCurrentDate={setCurrentDate} asyncQueue={asyncQueue.current} />
+      {datesArr.map((date, index) =>
+        <CalendarDateBox currDate={date} dateItemsMap={currentDateItems} key={`date${index}`} />
       )}
     </div>
   )

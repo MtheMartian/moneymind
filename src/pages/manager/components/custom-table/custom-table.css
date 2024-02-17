@@ -71,7 +71,7 @@
   padding-right: 14px;
 }
 
-#custom-table-save-button:disabled{
+button:disabled, input:disabled:placeholder-shown{
   background-color: rgba(150, 150, 150, 0.2);
   cursor: default;
   pointer-events: none;
