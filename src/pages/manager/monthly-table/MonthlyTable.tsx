@@ -6,7 +6,7 @@ import CustomTable from '../components/custom-table/CustomTable';
 import { oldData } from '../components/custom-table/custom-table';
 import { useEffect, useState, useRef } from 'react';
 import { TypeCustomTable } from '../components/custom-table/custom-table-types';
-import { getEntriesRequest } from '../manager';
+import { getEntriesRequest, prefixURLTables } from '../manager';
 import { useSelector } from 'react-redux';
 import { ReduxStates } from '../../../redux/store';
 
@@ -32,7 +32,7 @@ function MonthlyTable(){
       const tempStr = currentURL.current.get("id");
       
       if(tempStr && tempStr !== ""){
-        return `https://localhost:7158/api/tables/entry?id=${tempStr}`;
+        return `${prefixURLTables}/entry?id=${tempStr}`;
       } 
     }
 
@@ -55,7 +55,7 @@ function MonthlyTable(){
       }
     }
 
-    return `https://localhost:7158/api/tables/period?year=${currYear}&month=${currMonth}`;
+    return `${prefixURLTables}/period?year=${currYear}&month=${currMonth}`;
   }
 
   // ******* UseEffects ******* //
@@ -66,7 +66,7 @@ function MonthlyTable(){
         const returnedData: TypeCustomTable["customTableEntry"][] = await getEntriesRequest(requestURL);
 
         if(returnedData.length === 0){
-          setSuccessfulRequest(prev => prev = true);
+          setSuccessfulRequest(true);
           return;
         }
 
@@ -84,9 +84,9 @@ function MonthlyTable(){
           }
         }
 
-        setMonthlyBST(prev => prev = newMonthlyBST);
-        setMonthlySubcategoriesBST(prev => prev = newMonthlySubCategoryBST);
-        setSuccessfulRequest(prev => prev = true);
+        setMonthlyBST(newMonthlyBST);
+        setMonthlySubcategoriesBST(newMonthlySubCategoryBST);
+        setSuccessfulRequest(true);
      }
      catch(err){
       console.error(`Couldn't fetch the data! ${err}`);
@@ -97,9 +97,9 @@ function MonthlyTable(){
 
     return()=>{
       currentURL.current = new URL(window.location.href).searchParams;
-      setMonthlyBST(prev => prev = new CustomBST<TypeCustomTable["customTableEntry"]>());
-      setMonthlySubcategoriesBST(prev => prev = new CustomBST<TypeCustomTable["customTableEntry"]>());
-      setSuccessfulRequest(prev => prev = false);
+      setMonthlyBST(new CustomBST<TypeCustomTable["customTableEntry"]>());
+      setMonthlySubcategoriesBST(new CustomBST<TypeCustomTable["customTableEntry"]>());
+      setSuccessfulRequest(false);
     }
   }, [redirected]);
 

@@ -1,6 +1,5 @@
 import { TypeCustomTable } from './custom-table-types';
-import { convertStringToWeight, prefixURL } from '../../manager';
-import { quickSort, BSTNode } from '../../../../ts/dsa';
+import { BSTNode } from '../../../../ts/dsa';
 
 export let oldData: {oldEntries: BSTNode<TypeCustomTable["customTableEntry"]>[], 
                     oldSubEntries: BSTNode<TypeCustomTable["customTableEntry"]>[], 

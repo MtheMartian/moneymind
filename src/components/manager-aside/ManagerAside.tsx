@@ -1,27 +1,15 @@
 import { Link } from "react-router-dom";
 import './manager-aside.css';
 import '../../pages/manager/manager.css';
-import table from '../../assets/manager-icons/table-48px.svg';
-import calculator from '../../assets/manager-icons/calculate-48px.svg';
-import { currentURLSearchParams } from "../../pages/manager/manager";
-import {useEffect} from 'react';
-import { Store } from "redux";
+
+const iconsPrefixURL: string = "../../../../static/assets/manager-icons/";
 
 export default function ManagerSideMenu(props: {forceRerender: Function}){
-  // function forceRerender(page: number): void{
-  //   const newSearchParams: URLSearchParams = new URL(window.location.href).searchParams;
-
-  //   console.log(`Search Params: ${newSearchParams.size}`);
-
-  //   props.setRedirected(page);
-
-  // }
-
   return(
     <nav id="manager-side-menu">
       <ul className="manager-side-menu-sections">
         <div className="manager-side-menu-header">
-          <img className="manager-icons" src={table} alt="table" />
+          <img className="manager-icons" src={`${iconsPrefixURL}/table-48px.svg`} alt="table" />
           <h3>Money Manager</h3>
         </div>
         <li>
@@ -33,7 +21,7 @@ export default function ManagerSideMenu(props: {forceRerender: Function}){
       </ul>
       <ul className="manager-side-menu-sections">
         <div className="manager-side-menu-header">
-          <img className="manager-icons" src={calculator} alt="calculator" />
+          <img className="manager-icons" src={`${iconsPrefixURL}/calculate-48px.svg`} alt="calculator" />
           <h3>Calendar</h3>
         </div>
         <li>
@@ -42,7 +30,7 @@ export default function ManagerSideMenu(props: {forceRerender: Function}){
       </ul>
       <ul className="manager-side-menu-sections">
         <div className="manager-side-menu-header">
-          <img className="manager-icons" src={calculator} alt="calculator" />
+          <img className="manager-icons" src={`${iconsPrefixURL}/calculate-48px.svg`} alt="calculator" />
           <h3>Calculators</h3>
         </div>
         <li>

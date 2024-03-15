@@ -9,11 +9,9 @@ import { editInputs, uniqueId, checkIfInputEmpty, checkIfInputEmptyCell,
         convertDateToString, getEntriesRequest, returnRequestURL, currentURLSearchParams, checkIfSamePeriod, returnDateSearchParamsOr } from '../../manager';
 import { Stack, CustomBST, BSTNode } from '../../../../ts/dsa';
 import { oldData,  customTableVariables } from './custom-table';
-import exportIcon from '../../../../assets/manager-icons/export-48px.svg';
-import searchIcon from '../../../../assets/manager-icons/search-48px.svg';
-import undoIcon from '../../../../assets/manager-icons/undo-48px.svg';
-import deleteIcon from '../../../../assets/manager-icons/delete-48px.svg';
 import { RequestQueue } from '../../../../ts/general-classes';
+
+const iconsPrefixURL: string = "../../../../static/assets/manager-icons/";
 
 function CustomTableBottom(props: {budget: number, toggleEdit: boolean, setChange: Function, 
                                   categories: BSTNode<TypeCustomTable["customTableEntry"]>[],
@@ -48,24 +46,24 @@ function CustomTableBottom(props: {budget: number, toggleEdit: boolean, setChang
     props.setChange(true);
     const inputs: string = editInputs(e, budgetInputValue, "number");
     oldData.oldBudget = Number(inputs);
-    setBudgetInputValue(prev => prev = inputs);
+    setBudgetInputValue(inputs);
   }
 
   // ******* UseEffects ******* //
   useEffect(()=>{
-    setBudgetInputValue(prev => prev = String(props.budget));
+    setBudgetInputValue(String(props.budget));
 
     return()=>{
-      setBudgetInputValue(prev => prev = "0");
+      setBudgetInputValue("0");
     }
   },[props.budget])
 
   useEffect(()=>{
     const remaining: number = Number(budgetInputValue) - grandTotal;
-    setBalance(prev => prev = remaining);
+    setBalance(remaining);
 
     return()=>{
-      setBalance(prev => prev = 0);
+      setBalance(0);
     }
   }, [budgetInputValue, props.categories, props.subcategories])
 
@@ -114,7 +112,7 @@ function SubCategoryCell(props:{currSubcategory: BSTNode<TypeCustomTable["custom
 
     const inputs: string = editInputs(e, amountValue, "number");
     const currSubcategory = props.currSubcategory;
-    setAmountValue(prev => prev = inputs);
+    setAmountValue(inputs);
 
     if(checkIfInputEmpty(currentElement) || Number(currentElement.value) <= 0){
       return;
@@ -130,7 +128,7 @@ function SubCategoryCell(props:{currSubcategory: BSTNode<TypeCustomTable["custom
 
     const inputs: string = editInputs(e, subcategoryValue, "string");
     const currSubcategory = props.currSubcategory;
-    setSubcategoryValue(prev => prev = inputs);
+    setSubcategoryValue(inputs);
 
     if(checkIfInputEmptyCell(e)){
       return;
@@ -178,7 +176,7 @@ function SubCategoryCell(props:{currSubcategory: BSTNode<TypeCustomTable["custom
       {props.toggleEdit ? 
       <div className="custom-table-body-cell-options">
         <button data-id={props.currSubcategory.id} onClick={deleteButtonHandler} className="custom-table-body-delete-button">
-          <img src={deleteIcon} alt="delete" className="manager-icons" />
+          <img src={`${iconsPrefixURL}/delete-48px.svg`} alt="delete" className="manager-icons" />
         </button>
       </div> : null}
     </div>
@@ -244,7 +242,7 @@ function SubCategory(props: {categoryBST: CustomBST<TypeCustomTable["customTable
   // ******* Input Handlers ******* //
   function updateInput(e: ChangeEvent<HTMLInputElement>): void{
     const inputs: string = editInputs(e, amountInputValue, "number");
-    setAmountInputValue(prev => prev = inputs);
+    setAmountInputValue(inputs);
   }
   
   // ******* Button Handlers ******* //
@@ -279,15 +277,15 @@ function SubCategory(props: {categoryBST: CustomBST<TypeCustomTable["customTable
                                           dateCreated: currDate, id: uId}, uId, 0);                             
 
     props.updateStates(null, props.subcategoryBST.traverse("desc"), null);
-    setAddSubCategoryForm(prev => prev = false);
+    setAddSubCategoryForm(false);
   }
 
   function displayAddSubCategoryForm(): void{
     if(addSubcategoryForm){
-      setAddSubCategoryForm(prev => prev = false);
+      setAddSubCategoryForm(false);
     }
     else{
-      setAddSubCategoryForm(prev => prev = true);
+      setAddSubCategoryForm(true);
     }
   }
 
@@ -400,7 +398,7 @@ function CustomTableBodyCell(props:{currentCategory: BSTNode<TypeCustomTable["cu
 
     props.categoryBST.update(currCategory.id, {...currCategory.item, entryAmount: Number(inputs)}, 
                             entryValues, customTableVariables.customBSTVariable);
-    setAmountValue(prev => prev = inputs);
+    setAmountValue(inputs);
   }
 
   function categoryUpdate(e: ChangeEvent<HTMLInputElement>): void{
@@ -410,7 +408,7 @@ function CustomTableBodyCell(props:{currentCategory: BSTNode<TypeCustomTable["cu
     const currCategory = props.currentCategory;
     const entryValues: number[] = [...currCategory.value];
     entryValues[3] = Date.now();
-    setCategoryValue(prev => prev = inputs);
+    setCategoryValue(inputs);
 
     if(checkIfInputEmpty(currentElement)){
       return;
@@ -433,12 +431,12 @@ function CustomTableBodyCell(props:{currentCategory: BSTNode<TypeCustomTable["cu
   // ******* UseEffects ******* //
   useEffect(()=>{
     const amount: number = totalAmount();
-    setAmountValue(prev => prev = String(amount));
-    setCategoryValue(prev => prev = props.currentCategory.item.entryName);
+    setAmountValue(String(amount));
+    setCategoryValue(props.currentCategory.item.entryName);
 
     return()=>{
-      setAmountValue(prev => prev = "0");
-      setCategoryValue(prev => prev = "");
+      setAmountValue("0");
+      setCategoryValue("");
     }
   }, [props.currentCategory, props.budget, props.subcategories]);
 
@@ -473,7 +471,7 @@ function CustomTableBodyCell(props:{currentCategory: BSTNode<TypeCustomTable["cu
       {props.toggleEdit ? 
         <div className="custom-table-body-cell-options">
           <button data-id={props.currentCategory.id} onClick={deleteButtonHandler} className="custom-table-body-delete-button">
-            <img src={deleteIcon} alt="delete" className="manager-icons" />
+            <img src={`${iconsPrefixURL}/delete-48px-svg`} alt="delete" className="manager-icons" />
           </button>
         </div> : null}
     </div>
@@ -512,7 +510,7 @@ function CustomTableBody(props: {categoryBST: CustomBST<TypeCustomTable["customT
    // ******* Button Handlers ******* //
   function displaySubcategories(e: SyntheticEvent<HTMLDivElement, MouseEvent>){
     const currentSelection: string = e.currentTarget.getAttribute("data-id")!;
-    setCategoryId(prev => prev = currentSelection);
+    setCategoryId(currentSelection);
   }
 
   function sortCategoriesSection(sectionToSort: string): undefined{
@@ -581,11 +579,11 @@ function CustomTableBody(props: {categoryBST: CustomBST<TypeCustomTable["customT
   // ******* UseEffects ******* //
   useEffect(()=>{
     if(props.categoryBST.length === 0){
-      setCategoryId(prev => prev = null);
+      setCategoryId(null);
     }
 
     return()=>{
-      setCategoryId(prev => prev = null);
+      setCategoryId(null);
     }
   }, [props.categoryBST]);
 
@@ -593,12 +591,12 @@ function CustomTableBody(props: {categoryBST: CustomBST<TypeCustomTable["customT
     <div id="custom-table-body">
       <div id="custom-table-body-header">
         <div id="custom-table-body-search-container">
-          <img src={searchIcon} alt="search" className="manager-icons" />
+          <img src={`${iconsPrefixURL}/search-48px.svg`} alt="search" className="manager-icons" />
           <input type="text" placeholder="Search..." ref={searchBar}
             onKeyUp={searchEntries} disabled={currentURLSearchParams.has("id") ? true : undefined}/>
         </div>
         <button id="custom-table-body-export-button">
-          <img src={exportIcon} alt="export" className="manager-icons" />
+          <img src={`${iconsPrefixURL}/export-48svg`} alt="export" className="manager-icons" />
           <p>Export</p>
         </button>
       </div>
@@ -657,15 +655,15 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
                         subEntriesArr: BSTNode<TypeCustomTable["customTableEntry"]>[] | null,
                         currBudget: number | null): void{
     if(entriesArr){
-      setCategories(prev => prev = entriesArr);
+      setCategories(entriesArr);
     }
 
     if(subEntriesArr){
-      setSubcategories(prev => prev = subEntriesArr);
+      setSubcategories(subEntriesArr);
     }
 
     if(currBudget){
-      setBudget(prev => prev = currBudget);
+      setBudget(currBudget);
     } 
   }
 
@@ -764,16 +762,16 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
   // ******* Input Handlers ******* //
   function updateInput(e: ChangeEvent<HTMLInputElement>): void{
     const inputs: string = editInputs(e, amountInputValue, "number");
-    setAmountInputValue(prev => prev = inputs);
+    setAmountInputValue(inputs);
   }
 
   // ******* Button Handlers ******* //
   function displayInsert(): void{
     if(toggleInsert){
-      setToggleInsert(prev => prev = false);
+      setToggleInsert(false);
     }
     else{  
-      setToggleInsert(prev => prev = true);
+      setToggleInsert(true);
     }
   }
 
@@ -782,12 +780,12 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
       const updatedCategories = props.categoryBST.traverse("desc");
       const updatedSubcategories = props.subcategoryBST.traverse("desc");
 
-      setToggleEdit(prev => prev = false);
+      setToggleEdit(false);
       updateStates(updatedCategories, updatedSubcategories, oldData.oldBudget);
     }
     else{
       addToStack();
-      setToggleEdit(prev => prev = true);
+      setToggleEdit(true);
     }
   }
 
@@ -834,8 +832,8 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
     setNodeValues();
     addToStack();
     setCategories(props.categoryBST.traverse("desc"));
-    setChange(prev => prev = true);
-    setAmountInputValue(prev => prev = "");
+    setChange(true);
+    setAmountInputValue("");
     displayInsert();
   }
 
@@ -870,19 +868,19 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
     console.log(JSON.stringify(nodeArrayJson));
 
     asyncQueue.current.enqueueRequest(()=> retrieveDataFromDBAndUpdateTable(returnRequestURL()));
-      setChange(prev => prev = false);
+      setChange(false);
   }
 
   function undoButtonHandler(): void{
     const previousData = props.stack.pop();
 
     if(!previousData){
-      setChange(prev => prev = false);
+      setChange(false);
       return;
     }
 
     if(props.stack.length === 0){
-      setChange(prev => prev = false);
+      setChange(false);
     }
 
     props.categoryBST.reconstruct(previousData.oldEntries, customTableVariables.customBSTVariable);
@@ -892,28 +890,28 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
     const oldSubcategories = props.subcategoryBST.traverse("desc");
 
     updateStates(oldCategories, oldSubcategories, previousData.oldBudget);
-    setToggleEdit(prev => prev = false);
-    setChange(prev => prev = true);
+    setToggleEdit(false);
+    setChange(true);
   }
 
   // ******* UseEffects ******* //
   useEffect(()=>{
-    setCategories(prev => prev = props.categoryBST.traverse("desc"));
-    setSubcategories(prev => prev = props.subcategoryBST.traverse("desc"));
+    setCategories(props.categoryBST.traverse("desc"));
+    setSubcategories(props.subcategoryBST.traverse("desc"));
 
     return()=>{
-      setCategories(prev => prev = []);
-      setSubcategories(prev => prev = []);
+      setCategories([]);
+      setSubcategories([]);
     }
 
   }, [props.categoryBST, props.subcategoryBST]);
 
   useEffect(()=>{
-    setBudget(prev => prev = user.budget);
+    setBudget(user.budget);
     oldData.oldBudget = user.budget;
 
     return()=>{
-      setBudget(prev => prev = 0);
+      setBudget(0);
     }
   }, [])
 
@@ -938,7 +936,7 @@ function CustomTable(props: {title: string, tableUse: string, stack: Stack<typeo
         <div id="custom-table-saving-options">
           {props.stack.length > 0 ? 
           <button onClick={undoButtonHandler}>
-            <img src={undoIcon} alt="Undo" title="Undo" className="manager-icons" />
+            <img src={`${iconsPrefixURL}/undo-48px.svg`} alt="Undo" title="Undo" className="manager-icons" />
           </button> : null}
           <button id="custom-table-save-button" className="manager-buttons" 
                   onClick={saveButtonHandler}

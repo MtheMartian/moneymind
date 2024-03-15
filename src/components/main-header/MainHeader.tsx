@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import './MainHeader.css';
-import logo from '../../assets/mmlogo.webp';
+
+const imagesPrefixURL: string = "../../static/assets/";
 
 export default function MainHeader(){
   return(
@@ -9,7 +10,7 @@ export default function MainHeader(){
         <ul>
           <li>
             <Link to={"/manager"}>
-              <img className="logo" src={logo} alt="MoneyMind" />
+              <img className="logo" src={`${imagesPrefixURL}/mmlogo.webp`} alt="MoneyMind" />
             </Link>
           </li>
         </ul>

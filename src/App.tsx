@@ -7,7 +7,7 @@ import Footer from "./components/footer/Footer";
 import DailyTable from "./pages/manager/daily-table/DailyTable";
 import MonthlyTable from "./pages/manager/monthly-table/MonthlyTable";
 import Calendar from "./pages/manager/calendar/Calendar";
-import {useState, useEffect, useRef} from 'react';
+import {useEffect} from 'react';
 import {store, updateMonthlyState, updateDailyState, updateCalendarState} from './redux/store';
 import { Provider } from "react-redux";
 
