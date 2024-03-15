@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { checkIfFullNumber, dateEntries } from './calendarts';
 import { RequestQueue } from '../../../ts/general-classes';
 import { TypeCustomTable } from '../components/custom-table/custom-table-types';
-import { CustomBST, BSTNode, quickSort } from '../../../ts/dsa';
+import { CustomBST, quickSort } from '../../../ts/dsa';
 import { returnRequestURL, getEntriesRequest } from '../manager';
 
 // ------- Date Selection ------- //
@@ -53,7 +53,7 @@ function CustomDropDown(props: {dateType: string, inputElement: HTMLInputElement
         }
       });
 
-      setDateTypeArr(prev => prev = quickSort(Array.from(tempMap.keys()), "asc"));
+      setDateTypeArr(quickSort(Array.from(tempMap.keys()), "asc"));
       return;
     }
 
@@ -74,7 +74,7 @@ function CustomDropDown(props: {dateType: string, inputElement: HTMLInputElement
       numArr.push(i);
     }
 
-    setDateTypeArr(prev => prev = numArr);
+    setDateTypeArr(numArr);
   }
 
   // ******* UseEffects ******* //
@@ -82,7 +82,7 @@ function CustomDropDown(props: {dateType: string, inputElement: HTMLInputElement
     props.asyncQueue.enqueueRequest(getCustomDropDownContent);
 
     return()=>{
-      setDateTypeArr(prev => prev = []);
+      setDateTypeArr([]);
     }
 
   }, []);
@@ -147,11 +147,11 @@ function CalendarCustomDropdown(props: {setCurrentYear: Function, setCurrentMont
 
   function showDropdownButtonHandler(idx: number): void{
     if(selectedDropdown === idx){
-      setSelectedDropDown(prev => prev = -1);
+      setSelectedDropDown(-1);
       return;
     }
      
-    setSelectedDropDown(prev => prev = idx);
+    setSelectedDropDown(idx);
   }
 
   // ******* UseEffects ******* //
@@ -260,15 +260,15 @@ function Calendar(){
     const currURL: URLSearchParams = new URL(window.location.href).searchParams;
 
     if(currURL.has("year")){
-      setCurrentYear(prev => prev = Number(currURL.get("year")));
+      setCurrentYear(Number(currURL.get("year")));
     }
 
     if(currURL.has("month")){
-      setCurrentMonth(prev => prev = Number(currURL.get("month")));
+      setCurrentMonth(Number(currURL.get("month")));
     }
 
     if(currURL.has("date")){
-      setCurrentDate(prev => prev = Number(currURL.get("date")));
+      setCurrentDate(Number(currURL.get("date")));
     }
 
     if(!currURL.has("year") && !currURL.has("month") && calendar.current){
@@ -304,7 +304,7 @@ function Calendar(){
         }
       });
 
-      setCurrentDateItems(prev => prev = newMap);
+      setCurrentDateItems(newMap);
     }
 
     async function getEntriesBasedOnDate(): Promise<void>{
@@ -321,7 +321,7 @@ function Calendar(){
     asyncQueue.current.enqueueRequest(getEntriesBasedOnDate);
 
     return()=>{
-      setCurrentDateItems(prev => prev = null);
+      setCurrentDateItems(null);
     }
   }, [currentYear, currentMonth, currentDate]);
 
