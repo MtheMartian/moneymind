@@ -1,9 +1,9 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate, NavigateFunction } from "react-router-dom";
 import { useRef } from "react";
 import { prefixUserURL } from "../user";
 
 function SignUp(): JSX.Element{
-
+  const navigator: NavigateFunction = useNavigate();
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const confPasswordRef = useRef<HTMLInputElement>(null);
@@ -12,7 +12,7 @@ function SignUp(): JSX.Element{
     if(emailRef.current && passwordRef.current && confPasswordRef.current){
       try{
         const response: Response = await fetch(`${prefixUserURL}/signup`, {
-          method: "post",
+          method: "POST",
           headers: {"Content-Type": "application/json"},
           body: JSON.stringify({
             email: emailRef.current.value,
@@ -21,6 +21,9 @@ function SignUp(): JSX.Element{
           })
         });
         console.log(response.status);
+        if(response.redirected && response.status == 200){
+          navigator("/signin");
+        }
       }
       catch(err){
         console.log("Sign in failed.", err);
@@ -31,7 +34,7 @@ function SignUp(): JSX.Element{
   return(
     <main>
       <form>
-        <h1>Si gn Up</h1>
+        <h1>Sign Up</h1>
         <div>  
           <input placeholder="Email" ref={emailRef}/>
           <input placeholder="Password" ref={passwordRef}/>
@@ -40,7 +43,7 @@ function SignUp(): JSX.Element{
         </div>
         <div>
           <p>Already have an account?</p>
-          <Link to="/signin">Sign In</Link>
+          <Link to="/signin">Sign Up</Link>
         </div> 
       </form>
     </main>

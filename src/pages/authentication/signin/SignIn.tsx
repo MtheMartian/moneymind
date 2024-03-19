@@ -1,9 +1,9 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate, NavigateFunction } from "react-router-dom";
 import { useRef } from "react";
 import { prefixUserURL } from "../user";
 
 function SignIn(): JSX.Element{
-
+  const navigator: NavigateFunction = useNavigate();
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
@@ -11,7 +11,7 @@ function SignIn(): JSX.Element{
     if(emailRef.current && passwordRef.current){
       try{
         const response: Response = await fetch(`${prefixUserURL}/signin`, {
-          method: "post",
+          method: "POST",
           headers: {"Content-Type": "application/json"},
           body: JSON.stringify({
             email: emailRef.current.value,
@@ -20,6 +20,9 @@ function SignIn(): JSX.Element{
         });
 
         console.log(response.status);
+        if(response.redirected && response.status == 200){
+          navigator("/manager");
+        }
       }
       catch(err){
         console.log("Sign in failed.", err);
