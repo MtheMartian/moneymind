@@ -10,6 +10,8 @@ import Calendar from "./pages/manager/calendar/Calendar";
 import {useEffect} from 'react';
 import {store, updateMonthlyState, updateDailyState, updateCalendarState} from './redux/store';
 import { Provider } from "react-redux";
+import SignIn from "./pages/authentication/signin/SignIn";
+import SignUp from "./pages/authentication/signup/SignUp";
 
 function Layout(){
   return(
@@ -85,6 +87,14 @@ function App(){
   const router = createBrowserRouter([{
     path: "/",
     element: <Layout />,
+  },
+  {
+    path: "/signin",
+    element: <SignIn />
+  },
+  {
+    path: "/signup",
+    element: <SignUp />
   },
   {
     path: "/manager",

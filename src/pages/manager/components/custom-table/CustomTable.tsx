@@ -596,7 +596,7 @@ function CustomTableBody(props: {categoryBST: CustomBST<TypeCustomTable["customT
             onKeyUp={searchEntries} disabled={currentURLSearchParams.has("id") ? true : undefined}/>
         </div>
         <button id="custom-table-body-export-button">
-          <img src={`${iconsPrefixURL}/export-48svg`} alt="export" className="manager-icons" />
+          <img src={`${iconsPrefixURL}/export-48px.svg`} alt="export" className="manager-icons" />
           <p>Export</p>
         </button>
       </div>
