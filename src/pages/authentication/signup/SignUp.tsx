@@ -1,5 +1,5 @@
 import { Link, useNavigate, NavigateFunction } from "react-router-dom";
-import { useRef } from "react";
+import { useRef, MouseEvent } from "react";
 import { prefixUserURL } from "../user";
 
 function SignUp(): JSX.Element{
@@ -8,8 +8,10 @@ function SignUp(): JSX.Element{
   const passwordRef = useRef<HTMLInputElement>(null);
   const confPasswordRef = useRef<HTMLInputElement>(null);
 
-  async function signUp(): Promise<void>{
+  async function signUp(e: MouseEvent<HTMLButtonElement>): Promise<void>{
+    e.preventDefault();
     if(emailRef.current && passwordRef.current && confPasswordRef.current){
+      console.log([emailRef.current.value, passwordRef.current.value, confPasswordRef.current.value]);
       try{
         const response: Response = await fetch(`${prefixUserURL}/signup`, {
           method: "POST",
@@ -20,7 +22,7 @@ function SignUp(): JSX.Element{
             confirmation: confPasswordRef.current.value
           })
         });
-        console.log(response.status);
+
         if(response.redirected && response.status == 200){
           navigator("/signin");
         }
@@ -36,9 +38,9 @@ function SignUp(): JSX.Element{
       <form>
         <h1>Sign Up</h1>
         <div>  
-          <input placeholder="Email" ref={emailRef}/>
-          <input placeholder="Password" ref={passwordRef}/>
-          <input placeholder="Confirm Password" ref={confPasswordRef} />
+          <input placeholder="Email" type="text" ref={emailRef}/>
+          <input placeholder="Password" type="password" ref={passwordRef}/>
+          <input placeholder="Confirm Password" type="password" ref={confPasswordRef} />
           <button onClick={signUp}>Sign In</button>
         </div>
         <div>

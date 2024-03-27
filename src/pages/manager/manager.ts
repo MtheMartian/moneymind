@@ -10,7 +10,7 @@ export function uniqueId(): string{
   return `${prefix}${timeStamp}-${counter++}-${crypto.getRandomValues(new Uint32Array(1))[0].toString(36)}`;
 }
 
-export const prefixURLTables: string = "/manager/table";
+export const prefixURLTables: string = "/budget/table";
 
 // ******* Request URLs ******* //
 export const currentURLSearchParams: URLSearchParams = new URL(window.location.href).searchParams;

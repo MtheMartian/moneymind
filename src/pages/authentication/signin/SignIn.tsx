@@ -1,5 +1,5 @@
 import { Link, useNavigate, NavigateFunction } from "react-router-dom";
-import { useRef } from "react";
+import { useRef, MouseEvent } from "react";
 import { prefixUserURL } from "../user";
 
 function SignIn(): JSX.Element{
@@ -7,9 +7,11 @@ function SignIn(): JSX.Element{
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
-  async function signIn(): Promise<void>{
+  async function signIn(e: MouseEvent<HTMLButtonElement>): Promise<void>{
+    e.preventDefault();
     if(emailRef.current && passwordRef.current){
       try{
+        console.log([emailRef.current.value, passwordRef.current.value]);
         const response: Response = await fetch(`${prefixUserURL}/signin`, {
           method: "POST",
           headers: {"Content-Type": "application/json"},
@@ -19,7 +21,6 @@ function SignIn(): JSX.Element{
           })
         });
 
-        console.log(response.status);
         if(response.redirected && response.status == 200){
           navigator("/manager");
         }
@@ -35,8 +36,8 @@ function SignIn(): JSX.Element{
       <form>
         <h1>SIgn In</h1>
         <div>  
-          <input placeholder="Email" ref={emailRef}/>
-          <input placeholder="Password" ref={passwordRef}/>
+          <input placeholder="Email" type="text" ref={emailRef}/>
+          <input placeholder="Password" type="password" ref={passwordRef}/>
           <button onClick={signIn}>Sign In</button>
         </div>
         <div>
