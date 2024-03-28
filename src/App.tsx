@@ -1,5 +1,4 @@
 import { RouterProvider, Outlet, createBrowserRouter } from "react-router-dom";
-import MoneyManager from "./pages/manager/MoneyManager";
 import Header from "./components/navbar/Header";
 import MainHeader from "./components/main-header/MainHeader";
 import ManagerSideMenu from "./components/manager-aside/ManagerAside";
@@ -10,8 +9,9 @@ import Calendar from "./pages/manager/calendar/Calendar";
 import {useEffect} from 'react';
 import {store, updateMonthlyState, updateDailyState, updateCalendarState} from './redux/store';
 import { Provider } from "react-redux";
-import SignIn from "./pages/authentication/signin/SignIn";
-import SignUp from "./pages/authentication/signup/SignUp";
+import SignIn from "./pages/user/signin/SignIn";
+import SignUp from "./pages/user/signup/SignUp";
+import Calculators from "./pages/calculators/Calculators.tsx";
 
 function Layout(){
   return(
@@ -110,12 +110,12 @@ function App(){
     {
       path: "/manager/calendar",
       element: <Calendar />
+    },
+    {
+      path: "/manager/calculators",
+      element: <Calculators />
     }
   ]
-  },
-  {
-    path: "/login",
-    element: <MoneyManager />
   }
 ]);
 

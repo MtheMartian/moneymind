@@ -1,15 +1,15 @@
 import { useRef, useState, useEffect, useMemo, 
         SyntheticEvent, ChangeEvent, MouseEventHandler} from 'react';
 import './custom-table.css';
-import '../../manager.css';
+import "../../pages/manager/manager.css";
 import { TypeCustomTable } from './custom-table-types';
-import { user } from '../../../../data/user';
+import { user } from '../../data/user';
 import { editInputs, uniqueId, checkIfInputEmpty, checkIfInputEmptyCell,
         getCaretPosition, caretPosition, findLongestString, convertStringToWeight,
-        convertDateToString, getEntriesRequest, returnRequestURL, currentURLSearchParams, checkIfSamePeriod, returnDateSearchParamsOr } from '../../manager';
-import { Stack, CustomBST, BSTNode } from '../../../../ts/dsa';
+        convertDateToString, getEntriesRequest, returnRequestURL, currentURLSearchParams, checkIfSamePeriod, returnDateSearchParamsOr } from '../../pages/manager/manager.ts';
+import { Stack, CustomBST, BSTNode } from '../../ts/dsa';
 import { oldData,  customTableVariables } from './custom-table';
-import { RequestQueue } from '../../../../ts/general-classes';
+import { RequestQueue } from '../../ts/general-classes';
 
 const iconsPrefixURL: string = "../../../../static/assets/manager-icons/";
 

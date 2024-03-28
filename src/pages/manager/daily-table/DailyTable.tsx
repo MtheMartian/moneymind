@@ -1,10 +1,10 @@
-import '../components/custom-table/custom-table.css';
+import '../../../components/custom-table/custom-table.css';
 import { Stack } from '../../../ts/dsa';
 import '../manager.css';
-import CustomTable from '../components/custom-table/CustomTable';
-import { oldData } from '../components/custom-table/custom-table';
+import CustomTable from '../../../components/custom-table/CustomTable';
+import { oldData } from '../../../components/custom-table/custom-table';
 import { useState, useEffect } from 'react';
-import { TypeCustomTable } from '../components/custom-table/custom-table-types';
+import { TypeCustomTable } from '../../../components/custom-table/custom-table-types';
 import { CustomBST } from '../../../ts/dsa';
 
 const dailyStack: Stack<typeof oldData> = new Stack<typeof oldData>();

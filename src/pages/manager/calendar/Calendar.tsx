@@ -3,7 +3,7 @@ import {useEffect, useRef, useState, useMemo, SyntheticEvent} from 'react';
 import { Link } from 'react-router-dom';
 import { checkIfFullNumber, dateEntries } from './calendarts';
 import { RequestQueue } from '../../../ts/general-classes';
-import { TypeCustomTable } from '../components/custom-table/custom-table-types';
+import { TypeCustomTable } from '../../../components/custom-table/custom-table-types';
 import { CustomBST, quickSort } from '../../../ts/dsa';
 import { returnRequestURL, getEntriesRequest } from '../manager';
 

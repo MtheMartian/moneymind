@@ -1,0 +1,28 @@
+#calculators-wrapper{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(30em, 1fr));
+  place-items: center;
+  width: 90%;
+  padding-left: 5em;
+  padding-top: 1em;
+  gap: 7px;
+  border: 1px solid red;
+  min-height: 100%;
+}
+
+.calculators{
+  min-width: 25%;
+  min-height: 25%;
+  border-radius: 5px;
+  border: 1px solid rgba(150, 150, 150, 0.5);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: box-shadow 150ms;
+}
+
+.calculators:hover{
+  cursor: pointer;
+  box-shadow: 1px 3px 10px rgba(111, 252, 195, 0.5);
+}

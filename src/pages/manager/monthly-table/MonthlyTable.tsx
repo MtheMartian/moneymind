@@ -1,11 +1,11 @@
-import '../components/custom-table/custom-table.css';
+import '../../../components/custom-table/custom-table.css';
 import { Stack, CustomBST} from '../../../ts/dsa';
 import { RequestQueue } from '../../../ts/general-classes';
 import '../manager.css';
-import CustomTable from '../components/custom-table/CustomTable';
-import { oldData } from '../components/custom-table/custom-table';
+import CustomTable from '../../../components/custom-table/CustomTable';
+import { oldData } from '../../../components/custom-table/custom-table';
 import { useEffect, useState, useRef } from 'react';
-import { TypeCustomTable } from '../components/custom-table/custom-table-types';
+import { TypeCustomTable } from '../../../components/custom-table/custom-table-types';
 import { getEntriesRequest, prefixURLTables } from '../manager';
 import { useSelector } from 'react-redux';
 import { ReduxStates } from '../../../redux/store';

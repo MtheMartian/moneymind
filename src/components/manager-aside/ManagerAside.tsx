@@ -34,7 +34,7 @@ export default function ManagerSideMenu(props: {forceRerender: Function}){
           <h3>Calculators</h3>
         </div>
         <li>
-          <Link to={"/manager"}>Mortgage</Link>  
+          <Link to={"/manager/calculators"}>View Calculators</Link>  
         </li>
         <li>
           <Link to={"/manager"}>Car Loan</Link>

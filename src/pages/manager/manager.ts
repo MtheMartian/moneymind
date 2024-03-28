@@ -1,5 +1,5 @@
 import { ChangeEvent, SyntheticEvent } from "react";
-import { TypeCustomTable } from "./components/custom-table/custom-table-types";
+import { TypeCustomTable } from "../../components/custom-table/custom-table-types";
 
 // ******* General ******* //
 export function uniqueId(): string{
