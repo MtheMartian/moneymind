@@ -12,6 +12,8 @@ import { Provider } from "react-redux";
 import SignIn from "./pages/user/signin/SignIn";
 import SignUp from "./pages/user/signup/SignUp";
 import Calculators from "./pages/calculators/Calculators.tsx";
+import MortgageCalculator from "./pages/calculators/mortgage/Mortgage.tsx";
+import CarLoanCalculator from "./pages/calculators/car-loan/CarLoan.tsx";
 
 function Layout(){
   return(
@@ -114,7 +116,16 @@ function App(){
     {
       path: "/manager/calculators",
       element: <Calculators />
+    },
+    {
+      path: "/manager/mortgage",
+      element: <MortgageCalculator />
+    },
+    {
+      path: "/manager/car-loan",
+      element: <CarLoanCalculator />
     }
+    
   ]
   }
 ]);

@@ -88,7 +88,7 @@ export async function getEntriesRequest(requestURL: string):Promise<TypeCustomTa
 export let caretPosition: number = 0;
 let caretPositionEnd: number | null = null;
 
-function checkIfNumber(input: string): boolean{
+export function checkIfNumber(input: string): boolean{
   let dotCount: number = 0;
 
   for(let i : number = 0; i < input.length; i++){
