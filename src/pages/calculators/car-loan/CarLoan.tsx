@@ -1,5 +1,5 @@
 import {useRef, useState, useEffect, ChangeEvent} from 'react';
-import { checkIfNumber, editInputs, caretPosition, getCaretPosition } from '../../manager/manager';
+import { checkIfNumber, editInputs, caretPosition, getCaretPosition, uniqueId } from '../../manager/manager';
 
 
 function CarLoanInput(props: {calculateMortgage: Function, idx: number}): JSX.Element{
@@ -38,66 +38,11 @@ function CarLoanCalculator(): JSX.Element{
     // Index 0: Loan Amount, Index 1: Deductions, Index 2: Trade-in, Index 3: Taxes,
     // Index 4: Interest Rate, Index 5: Term
 
-    switch(idx){
-      case 0:
-        if(checkIfNumber(value)){
-          carLoanFormulaArr.current[0] = Number(value);
-        }
-        else{
-          carLoanFormulaArr.current[0] = 0;
-        }
-
-        break;
-
-      case 1:
-        if(checkIfNumber(value)){
-          carLoanFormulaArr.current[1] = Number(value);
-        }
-        else{
-          carLoanFormulaArr.current[1] = 0;
-        }
-        
-        break;
-
-      case 2:
-        if(checkIfNumber(value)){
-          carLoanFormulaArr.current[2] = Number(value);
-        }
-        else{
-          carLoanFormulaArr.current[2] = 0;
-        }
-        
-        break;
-      
-      case 3:
-        if(checkIfNumber(value)){
-          carLoanFormulaArr.current[3] = Number(value);
-        }
-        else{
-          carLoanFormulaArr.current[3] = 0;
-        }
-          
-        break;
-
-      case 4:
-      if(checkIfNumber(value)){
-        carLoanFormulaArr.current[4] = Number(value);
-      }
-      else{
-        carLoanFormulaArr.current[4] = 0;
-      }
-        
-      break;
-
-      case 5:
-      if(checkIfNumber(value)){
-        carLoanFormulaArr.current[5] = Number(value);
-      }
-      else{
-        carLoanFormulaArr.current[5] = 0;
-      }
-        
-      break;
+    if(checkIfNumber(value)){
+      carLoanFormulaArr.current[idx] = Number(value);
+    }
+    else{
+      carLoanFormulaArr.current[idx] = 0;
     }
 
     // Principal Loan Amount
@@ -122,6 +67,19 @@ function CarLoanCalculator(): JSX.Element{
     setMonthlyPayments(montlhyPayments)
   }
 
+  function returnMCarLoanInputsJSX(): JSX.Element[]{
+    const jsxElementArr: JSX.Element[] = [];
+
+    for(let i: number = 0; i < 3; i++){
+      jsxElementArr.push(
+      <CarLoanInput calculateMortgage={calculateCarLoan} idx={i} 
+        key={uniqueId()} />
+      );
+    }
+
+    return jsxElementArr;
+  }
+
   
   useEffect(()=>{
     // Implement local storage, in case the user desires to save his inputs.
@@ -135,12 +93,7 @@ function CarLoanCalculator(): JSX.Element{
   return(
     <div>
       <form>
-        <CarLoanInput calculateMortgage={calculateCarLoan} idx={0} />
-        <CarLoanInput calculateMortgage={calculateCarLoan} idx={1} />
-        <CarLoanInput calculateMortgage={calculateCarLoan} idx={2} />
-        <CarLoanInput calculateMortgage={calculateCarLoan} idx={3} />
-        <CarLoanInput calculateMortgage={calculateCarLoan} idx={4} />
-        <CarLoanInput calculateMortgage={calculateCarLoan} idx={5} />
+        {returnMCarLoanInputsJSX()}
         <p>{monthlyPayments}</p>
       </form>
     </div>
