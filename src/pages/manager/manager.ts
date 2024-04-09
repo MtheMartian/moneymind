@@ -86,7 +86,7 @@ export async function getEntriesRequest(requestURL: string):Promise<TypeCustomTa
 
 // ******* Text Inputs ******* //
 export let caretPosition: number = 0;
-let caretPositionEnd: number | null = null;
+let caretPositionEnd: number | null = 0;
 
 export function checkIfNumber(input: string): boolean{
   let dotCount: number = 0;
@@ -109,23 +109,31 @@ export function checkIfNumber(input: string): boolean{
   return false;
 }
 
-function updateCaretPosition(newString: string, strToAdd: string | null): void{
-  if(strToAdd === null && caretPositionEnd === null){
-    caretPosition = caretPosition - 1;
+function updateCaretPosition(currentInputValue: string, addedStr: string | null): void{
+  if(addedStr !== null && caretPositionEnd === null){
+    console.log(caretPosition);
+    caretPosition += 1;
+    return;
+  } 
+
+  if(addedStr === null && caretPositionEnd === null){
+    caretPosition -= 1;
     return;
   }
 
-  if(caretPositionEnd){
+  if(addedStr === null && caretPositionEnd !== null){
     caretPositionEnd = null;
-
-    if(strToAdd){
-      caretPosition = newString.length;
-    }
-
     return;
   }
 
-  caretPosition = caretPosition + 1;
+  if(addedStr !== null && caretPositionEnd !== null){
+    caretPosition = caretPositionEnd;
+    caretPositionEnd = null;
+    return;
+  }
+
+    caretPosition = currentInputValue.length;
+    caretPositionEnd = null;
 }
 
 function stringReconstructor(str: string, toAdd: string | null): string{
@@ -140,7 +148,7 @@ function stringReconstructor(str: string, toAdd: string | null): string{
   }
 
   if(caretPositionEnd && toAdd){
-    newString = str.replace(str.substring(caretPosition, caretPositionEnd), toAdd);
+    newString = str.replace(str.substring(caretPosition - 1 , caretPositionEnd - 1), toAdd);
     return newString;
   }
   else if(caretPositionEnd && !toAdd){
@@ -168,7 +176,7 @@ export function editInputs(e: ChangeEvent<HTMLInputElement>, currentValue: strin
     }
     else{
       e.currentTarget.style.border = "2px solid red";
-      return inputValue;
+      newString = inputValue;
     }
   }
 
@@ -198,11 +206,15 @@ export function getCaretPosition(e: SyntheticEvent<HTMLInputElement, MouseEvent>
   const currentElement: HTMLInputElement = e.currentTarget;
   const selection = currentElement.value.substring(currentElement.selectionStart!, currentElement.selectionEnd!);
   caretPosition = currentElement.selectionStart!;
-  caretPositionEnd = null;
+
+  console.log("Selection:", selection);
+  console.log("Start:", caretPosition);
 
   if(selection !== ""){
     caretPositionEnd = currentElement.selectionEnd!;
   }
+
+  console.log("End:", caretPositionEnd);
 }
 
 export function checkIfInputEmpty(element: HTMLInputElement): boolean{

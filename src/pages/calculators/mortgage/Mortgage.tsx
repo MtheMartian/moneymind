@@ -1,15 +1,34 @@
-import {useRef, useState, useEffect, ChangeEvent} from 'react';
+import {useRef, useState, useEffect, ChangeEvent, useCallback, useMemo} from 'react';
 import { checkIfNumber, editInputs, caretPosition, getCaretPosition, uniqueId } from '../../manager/manager';
 import "../../manager/manager.css";
 import "./mortgage.css";
 
 function MortgageInput(props: {calculateMortgage: Function, idx: number}): JSX.Element{
-  const [mortgageInputState, setMortgageInputState] = useState<string>("0");
+  const [mortgageInputState, setMortgageInputState] = useState<string>("");
 
   const mortgageInputRef = useRef<HTMLInputElement>(null);
 
+  const mortgageInputLabel = useMemo<string>((): string =>{
+    // Index 0: Loan Amount, Index 1: Interest Rate, Index 2: Term
+    switch(props.idx){
+      case 0:
+        return "Loan Amount";
+
+      case 1: 
+        return "Interest Rate";
+
+      case 2: 
+        return "Term";
+
+      default:
+        return "";
+    }
+  }, []);
+
   function updateInputValue(e: ChangeEvent<HTMLInputElement>): void{
     const userInput: string = editInputs(e, mortgageInputState, "number");
+
+    console.log(mortgageInputState);
 
     setMortgageInputState(userInput);
 
@@ -25,8 +44,14 @@ function MortgageInput(props: {calculateMortgage: Function, idx: number}): JSX.E
   }, [mortgageInputState]);
 
   return(
-    <input type="text" ref={mortgageInputRef} value={mortgageInputState} 
-          onChange={updateInputValue} onSelect={getCaretPosition} className="mortgage-input"/>
+    <div className="mortgage-input-wrapper">
+      <label htmlFor={`mortgate-input${props.idx}`}>
+          {mortgageInputLabel}
+      </label>
+      <input type="text" ref={mortgageInputRef} value={mortgageInputState} placeholder='0'
+          onChange={updateInputValue} onSelect={getCaretPosition} className="mortgage-input"
+            id={`mortgate-input${props.idx}`}/>
+    </div>
   )
 }
 
@@ -34,11 +59,13 @@ function MortgageCalculator(): JSX.Element{
   const mortgageFormulaArr = useRef<number[]>([]);
   const [monthlyMortgage, setMonthlyMortgage] = useState<string>("0");
 
-  function calculateMortgage(value: string, idx: number): void{
+  const calculateMortgage = useCallback((value: string, idx: number): void =>{
     // Index 0: Loan Amount, Index 1: Interest Rate, Index 2: Term
 
     if(checkIfNumber(value)){
+      console.log(value);
       mortgageFormulaArr.current[idx] = Number(value);
+
     }
     else{
       mortgageFormulaArr.current[idx] = 0;
@@ -51,12 +78,22 @@ function MortgageCalculator(): JSX.Element{
     // Number of payments
     const n: number = mortgageFormulaArr.current[2];
 
-    const montlhyPayments: number = p * r*Math.pow((1 + r), n) / Math.pow((1 + r), n) - 1;
+    const firstPart: number = p * r*Math.pow((1 + r), n);
+    const secondPart: number = Math.pow((1 + r), n) - 1;
 
-    setMonthlyMortgage(String(montlhyPayments));
-  }
+    const montlhyPayments: number =  firstPart /  secondPart;
 
-  function returnMortgageInputsJSX(): JSX.Element[]{
+    if(checkIfNumber(String(montlhyPayments))){
+      console.log("It is a number.", String(montlhyPayments));
+      setMonthlyMortgage(String(montlhyPayments));
+    }
+    else{
+      console.log("Wasn't a number.", String(montlhyPayments));
+      return;
+    }
+  }, []);
+
+  const mortgageInputsArr = useMemo<JSX.Element[]>(()=>{
     const jsxElementArr: JSX.Element[] = [];
 
     for(let i: number = 0; i < 3; i++){
@@ -67,8 +104,7 @@ function MortgageCalculator(): JSX.Element{
     }
 
     return jsxElementArr;
-  }
-
+  }, []);
   
   useEffect(()=>{
     // Implement local storage, in case the user desires to save his inputs.
@@ -82,7 +118,7 @@ function MortgageCalculator(): JSX.Element{
   return(
     <div id="mortgage-wrapper">
       <form id="mortgage-form">
-        {returnMortgageInputsJSX()}
+        {mortgageInputsArr}
         <p>{monthlyMortgage}</p>
       </form>
     </div>
