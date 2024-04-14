@@ -28,7 +28,7 @@ function MortgageInput(props: {calculateMortgage: Function, idx: number}): JSX.E
   function updateInputValue(e: ChangeEvent<HTMLInputElement>): void{
     const userInput: string = editInputs(e, mortgageInputState, "number");
 
-    console.log(mortgageInputState);
+    console.log("Current mortgage state:",mortgageInputState);
 
     setMortgageInputState(userInput);
 
@@ -55,17 +55,43 @@ function MortgageInput(props: {calculateMortgage: Function, idx: number}): JSX.E
   )
 }
 
+type mortgageOptionsType = {
+  paymentLabel: string,
+  amountStr: string,
+  amountInterestStr: string
+}
+
+function MortgageOptions(props: {mortgageOptionsArr: mortgageOptionsType[]}): JSX.Element{
+  return(
+    <div>
+      {props.mortgageOptionsArr.map(options =>
+        <div>
+          <div>
+            <label>{options.paymentLabel}</label>
+            <p>{options.amountStr}</p>
+          </div>
+          <div>
+            <p>{options.amountInterestStr}</p>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function MortgageCalculator(): JSX.Element{
   const mortgageFormulaArr = useRef<number[]>([]);
-  const [monthlyMortgage, setMonthlyMortgage] = useState<string>("0");
+
+  // Index -> 0: Total left, 1: Monthly Payments, 2: Total Interest (Monthly),
+  // 3: Bi-Weekly Payments, 4: Total Interest (Bi-Weekly), 5: Weekly Payments, 6: Total Interest (Weekly)
+  const [mortgagePaymentOptions, setMortgagePaymentOptions] = useState<mortgageOptionsType[]>([]);
 
   const calculateMortgage = useCallback((value: string, idx: number): void =>{
+    const mortgagePaymentOptionsArr: mortgageOptionsType[] = mortgagePaymentOptions;
+
     // Index 0: Loan Amount, Index 1: Interest Rate, Index 2: Term
-
     if(checkIfNumber(value)){
-      console.log(value);
       mortgageFormulaArr.current[idx] = Number(value);
-
     }
     else{
       mortgageFormulaArr.current[idx] = 0;
@@ -85,7 +111,16 @@ function MortgageCalculator(): JSX.Element{
 
     if(checkIfNumber(String(montlhyPayments))){
       console.log("It is a number.", String(montlhyPayments));
-      setMonthlyMortgage(String(montlhyPayments));
+      const monthlyInterest: number = (montlhyPayments * n) / r;
+
+      const biWeekly: number = (montlhyPayments / 4) * 2;
+      const biWeeklyInterest: number = biWeekly / r;
+
+      const weekly: number = montlhyPayments / 4;
+      const weeklyInterest: number = weekly / r;
+      
+      mortgagePaymentOptionsArr[1] = {paymentLabel: "Monthly:", amountStr: String(montlhyPayments),
+                                      amountInterestStr: String(monthlyInterest)};
     }
     else{
       console.log("Wasn't a number.", String(montlhyPayments));
@@ -110,17 +145,22 @@ function MortgageCalculator(): JSX.Element{
     // Implement local storage, in case the user desires to save his inputs.
 
     return()=>{
-      setMonthlyMortgage("0");
+      setMortgagePaymentOptions([]);
     }
 
   }, []);
    
   return(
     <div id="mortgage-wrapper">
+      <h1>Mortgage Payments</h1>
       <form id="mortgage-form">
         {mortgageInputsArr}
-        <p>{monthlyMortgage}</p>
+        <div>
+          <label>{mortgagePaymentOptions[0].paymentLabel}</label>
+          <p>{mortgagePaymentOptions[0].amountStr}</p>
+        </div>
       </form>
+      <MortgageOptions mortgageOptionsArr={mortgagePaymentOptions} />
     </div>
   )
 }

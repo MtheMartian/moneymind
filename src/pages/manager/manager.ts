@@ -86,7 +86,7 @@ export async function getEntriesRequest(requestURL: string):Promise<TypeCustomTa
 
 // ******* Text Inputs ******* //
 export let caretPosition: number = 0;
-let caretPositionEnd: number | null = 0;
+let caretPositionEnd: number | null = null;
 
 export function checkIfNumber(input: string): boolean{
   let dotCount: number = 0;
@@ -111,7 +111,7 @@ export function checkIfNumber(input: string): boolean{
 
 function updateCaretPosition(currentInputValue: string, addedStr: string | null): void{
   if(addedStr !== null && caretPositionEnd === null){
-    console.log(caretPosition);
+    console.log("New start position:", caretPosition);
     caretPosition += 1;
     return;
   } 
@@ -147,12 +147,19 @@ function stringReconstructor(str: string, toAdd: string | null): string{
     return newString + ending;
   }
 
-  if(caretPositionEnd && toAdd){
-    newString = str.replace(str.substring(caretPosition - 1 , caretPositionEnd - 1), toAdd);
+  if(caretPositionEnd !== null && toAdd !== null){
+    const beginningStr: string = newString;
+
+    newString = beginningStr + ending;
+    console.log("New String:", newString);
     return newString;
   }
-  else if(caretPositionEnd && !toAdd){
-    newString = str.replace(str.substring(caretPosition, caretPositionEnd), "");
+
+  if(caretPositionEnd !== null && toAdd === null){
+    const beginningStr: string = str.slice(0, caretPosition);
+
+    newString =  beginningStr + ending;
+    console.log("New String:", newString);
     return newString;
   }
 
@@ -181,6 +188,8 @@ export function editInputs(e: ChangeEvent<HTMLInputElement>, currentValue: strin
   }
 
   updateCaretPosition(newString, input.data);
+
+  console.log("Input:",input.data);
 
   return newString;
 }
