@@ -99,25 +99,27 @@ function MortgageCalculator(): JSX.Element{
 
     // Principal Loan Amount
     const p: number = mortgageFormulaArr.current[0];
-    // Interest Rate
-    const r: number = mortgageFormulaArr.current[1];
-    // Number of payments
+    // Annual Interest Rate
+    const r: number = (mortgageFormulaArr.current[1] / 100) / 12;
+    // Term in years
     const n: number = mortgageFormulaArr.current[2];
 
-    const firstPart: number = p * r*Math.pow((1 + r), n);
-    const secondPart: number = Math.pow((1 + r), n) - 1;
+    const montlhyPayments: number =  p * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
 
-    const montlhyPayments: number =  firstPart /  secondPart;
+    const totalMonthInterest: number = (montlhyPayments * n) - p;
+
+    const biWeeklyRate: number = r / 26;
+    const biWeeklyTerm: number = 26 * n;
+    const biWeeklyPayments: number =  p * (biWeeklyRate * Math.pow(1 + biWeeklyRate, biWeeklyTerm)) / (Math.pow(1 + biWeeklyRate, biWeeklyTerm) - 1);
+    const totalBiWeeklyInterest: number = (biWeeklyPayments * biWeeklyTerm) - p;
+
+    const weeklyRate: number = r / 52;
+    const weeklyTerm: number = 52 * n;
+    const weeklyPayments: number =  p * (weeklyRate * Math.pow(1 + weeklyRate, weeklyTerm)) / (Math.pow(1 + weeklyRate, weeklyTerm) - 1);
+    const totalWeeklyInterest: number = (weeklyPayments * weeklyTerm) - p;
 
     if(checkIfNumber(String(montlhyPayments))){
       console.log("It is a number.", String(montlhyPayments));
-      const monthlyInterest: number = (montlhyPayments * n) / r;
-
-      const biWeekly: number = (montlhyPayments / 4) * 2;
-      const biWeeklyInterest: number = biWeekly / r;
-
-      const weekly: number = montlhyPayments / 4;
-      const weeklyInterest: number = weekly / r;
       
       mortgagePaymentOptionsArr[1] = {paymentLabel: "Monthly:", amountStr: String(montlhyPayments),
                                       amountInterestStr: String(monthlyInterest)};
