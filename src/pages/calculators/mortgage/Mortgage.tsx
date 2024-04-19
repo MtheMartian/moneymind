@@ -86,6 +86,48 @@ function MortgageCalculator(): JSX.Element{
   // 3: Bi-Weekly Payments, 4: Total Interest (Bi-Weekly), 5: Weekly Payments, 6: Total Interest (Weekly)
   const [mortgagePaymentOptions, setMortgagePaymentOptions] = useState<mortgageOptionsType[]>([]);
 
+  const calculateMortgageHelper = useCallback((idx: number): mortgageOptionsType =>{
+    // Principal Loan Amount
+    const p: number = mortgageFormulaArr.current[0];
+    // Annual Interest Rate
+    const r: number = (mortgageFormulaArr.current[1] / 100) / 12;
+    // Term in years
+    const n: number = mortgageFormulaArr.current[2];
+
+    let xType: number = 0;
+    let xString: string = "";
+
+    switch(idx){
+      case 0:
+        xType = 1;
+        xString = "Total";
+        break;
+
+      case 1:
+        xType = 12;
+        xString = "Monthly";
+        break;
+
+      case 2:
+        xType = 26;
+        xString = "Bi-Weekly";
+        break;
+
+      case 3:
+        xType = 52;
+        xString = "Weekly";
+        break;
+    }
+
+    const currRate: number = r / xType;
+    const currTerm: number = n * xType;
+    const currPayments: number =  p * (currRate * Math.pow(1 + currRate, currTerm)) / (Math.pow(1 + currRate, currTerm) - 1);
+    const totalcurrInterest: number = (currPayments * currTerm) - p;
+
+    return {paymentLabel: `${xString}:`, amountStr: String(currPayments),
+    amountInterestStr: String(totalcurrInterest)};
+  }, []);
+
   const calculateMortgage = useCallback((value: string, idx: number): void =>{
     const mortgagePaymentOptionsArr: mortgageOptionsType[] = mortgagePaymentOptions;
 
@@ -97,37 +139,20 @@ function MortgageCalculator(): JSX.Element{
       mortgageFormulaArr.current[idx] = 0;
     }
 
-    // Principal Loan Amount
-    const p: number = mortgageFormulaArr.current[0];
-    // Annual Interest Rate
-    const r: number = (mortgageFormulaArr.current[1] / 100) / 12;
-    // Term in years
-    const n: number = mortgageFormulaArr.current[2];
-
-    const montlhyPayments: number =  p * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
-
-    const totalMonthInterest: number = (montlhyPayments * n) - p;
-
-    const biWeeklyRate: number = r / 26;
-    const biWeeklyTerm: number = 26 * n;
-    const biWeeklyPayments: number =  p * (biWeeklyRate * Math.pow(1 + biWeeklyRate, biWeeklyTerm)) / (Math.pow(1 + biWeeklyRate, biWeeklyTerm) - 1);
-    const totalBiWeeklyInterest: number = (biWeeklyPayments * biWeeklyTerm) - p;
-
-    const weeklyRate: number = r / 52;
-    const weeklyTerm: number = 52 * n;
-    const weeklyPayments: number =  p * (weeklyRate * Math.pow(1 + weeklyRate, weeklyTerm)) / (Math.pow(1 + weeklyRate, weeklyTerm) - 1);
-    const totalWeeklyInterest: number = (weeklyPayments * weeklyTerm) - p;
-
-    if(checkIfNumber(String(montlhyPayments))){
-      console.log("It is a number.", String(montlhyPayments));
-      
-      mortgagePaymentOptionsArr[1] = {paymentLabel: "Monthly:", amountStr: String(montlhyPayments),
-                                      amountInterestStr: String(monthlyInterest)};
+    for(let i: number = 0; i < 4; i++){
+      const tempObj: mortgageOptionsType = calculateMortgageHelper(i);
+      if(checkIfNumber(String(tempObj.amountStr) && String(tempObj.amountInterestStr))){
+        console.log("It is a number.", String(tempObj.amountStr));
+        mortgagePaymentOptionsArr.push(tempObj); 
+      }
+      else{
+        console.log("Wasn't a number.", String(tempObj.amountStr));
+        return;
+      }
     }
-    else{
-      console.log("Wasn't a number.", String(montlhyPayments));
-      return;
-    }
+
+    setMortgagePaymentOptions(mortgagePaymentOptionsArr);
+    
   }, []);
 
   const mortgageInputsArr = useMemo<JSX.Element[]>(()=>{
