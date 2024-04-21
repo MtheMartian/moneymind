@@ -139,7 +139,7 @@ function updateCaretPosition(currentInputValue: string, addedStr: string | null)
 function stringReconstructor(str: string, toAdd: string | null): string{
 
   let newString: string = str.slice(0, caretPosition) + toAdd;
-  const ending: string = str.slice(caretPosition);
+  const ending: string = caretPositionEnd ? str.slice(caretPositionEnd) : str.slice(caretPosition);
 
   if(toAdd === null && caretPositionEnd === null){
     newString = str.slice(0, caretPosition - 1);
@@ -157,6 +157,10 @@ function stringReconstructor(str: string, toAdd: string | null): string{
 
   if(caretPositionEnd !== null && toAdd === null){
     const beginningStr: string = str.slice(0, caretPosition);
+
+    if(caretPositionEnd >= str.length){
+      return beginningStr;
+    }
 
     newString =  beginningStr + ending;
     console.log("New String:", newString);

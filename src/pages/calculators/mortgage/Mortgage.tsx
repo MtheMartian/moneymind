@@ -2,6 +2,7 @@ import {useRef, useState, useEffect, ChangeEvent, useCallback, useMemo} from 're
 import { checkIfNumber, editInputs, caretPosition, getCaretPosition, uniqueId } from '../../manager/manager';
 import "../../manager/manager.css";
 import "./mortgage.css";
+import "../calculators.css";
 
 function MortgageInput(props: {calculateMortgage: Function, idx: number}): JSX.Element{
   const [mortgageInputState, setMortgageInputState] = useState<string>("");
@@ -61,20 +62,56 @@ type mortgageOptionsType = {
   amountInterestStr: string
 }
 
-function MortgageOptions(props: {mortgageOptionsArr: mortgageOptionsType[]}): JSX.Element{
-  return(
-    <div>
-      {props.mortgageOptionsArr.map(options =>
+function MortgageOptionsPhantom(props: {numElements: number}): JSX.Element{
+  const phantomElements = useMemo((): JSX.Element[] =>{
+
+    const tempElementArr: JSX.Element[] = [];
+    for(let i: number = 0; i < props.numElements; i ++){
+      tempElementArr.push(
         <div>
           <div>
-            <label>{options.paymentLabel}</label>
-            <p>{options.amountStr}</p>
+            <label></label>
+            <p></p>
           </div>
           <div>
-            <p>{options.amountInterestStr}</p>
+            <p></p>
           </div>
         </div>
-      )}
+      );
+    }
+
+    return tempElementArr;
+  }, []);
+
+  return(
+    <div className="phantom-element">
+      {phantomElements}
+    </div>
+  )
+}
+
+function MortgageOptions(props: {mortgageOptionsArr: mortgageOptionsType[]}): JSX.Element{
+  return(
+    <div id="mortgage-calculations-wrapper">
+      <div id="mortgage-labels">
+        {props.mortgageOptionsArr.map((options, index) =>
+          index !== 0 ? 
+          <p key={`label-key${index}`}>{options.paymentLabel}</p> : null
+        )}
+      </div>
+      <div id="mortgage-payments-options">
+        {props.mortgageOptionsArr.map((options, index) =>
+          index !== 0 ? 
+          <p key={`options-key${index}`}>{options.amountStr}</p> : null
+        )}
+      </div>
+      <div id="mortgage-total-interest">
+        <p>Total Interest</p>
+        {props.mortgageOptionsArr.map((options, index) =>
+          index !== 0 ? 
+          <p key={`interest-key${index}`}>{options.amountInterestStr}</p> : null
+        )}
+      </div>
     </div>
   )
 }
@@ -121,15 +158,19 @@ function MortgageCalculator(): JSX.Element{
 
     const currRate: number = r / xType;
     const currTerm: number = n * xType;
-    const currPayments: number =  p * (currRate * Math.pow(1 + currRate, currTerm)) / (Math.pow(1 + currRate, currTerm) - 1);
+    let currPayments: number =  p * (currRate * Math.pow(1 + currRate, currTerm)) / (Math.pow(1 + currRate, currTerm) - 1);
     const totalcurrInterest: number = (currPayments * currTerm) - p;
 
-    return {paymentLabel: `${xString}:`, amountStr: String(currPayments),
+    if(idx === 0){
+      currPayments = currPayments * n;
+    }
+
+    return {paymentLabel: `${xString}`, amountStr: String(currPayments),
     amountInterestStr: String(totalcurrInterest)};
   }, []);
 
   const calculateMortgage = useCallback((value: string, idx: number): void =>{
-    const mortgagePaymentOptionsArr: mortgageOptionsType[] = mortgagePaymentOptions;
+    const mortgagePaymentOptionsArr: mortgageOptionsType[] = [];
 
     // Index 0: Loan Amount, Index 1: Interest Rate, Index 2: Term
     if(checkIfNumber(value)){
@@ -182,12 +223,19 @@ function MortgageCalculator(): JSX.Element{
       <h1>Mortgage Payments</h1>
       <form id="mortgage-form">
         {mortgageInputsArr}
-        <div>
-          <label>{mortgagePaymentOptions[0].paymentLabel}</label>
-          <p>{mortgagePaymentOptions[0].amountStr}</p>
-        </div>
       </form>
-      <MortgageOptions mortgageOptionsArr={mortgagePaymentOptions} />
+      {mortgagePaymentOptions.length > 0 ? 
+      <div>
+        <label>{mortgagePaymentOptions[0].paymentLabel}</label>
+        <p>{mortgagePaymentOptions[0].amountStr}</p>
+      </div> : 
+      <div>
+        <label>Total:</label>
+        <p></p>
+      </div>}
+      {mortgagePaymentOptions.length > 0 ? 
+      <MortgageOptions mortgageOptionsArr={mortgagePaymentOptions} /> : 
+      <MortgageOptionsPhantom numElements={3} />}
     </div>
   )
 }

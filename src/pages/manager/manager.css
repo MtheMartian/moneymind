@@ -1,7 +1,17 @@
+/* ------- Variables ------- */
+:root{
+  --primary-color: rgb(111, 252, 195);
+  --secondary-color: rgb(151, 247, 209);
+  --custom-table-border: 2px solid rgb(102, 102, 102);
+  --custom-table-radius: 10px;
+}
+
+
 button{
   cursor: pointer;
 }
 
+/* ------- Titles/Headers ------- */
 h1{
   font-size: calc(1vw + 1em);
   font-weight: 800;
@@ -21,6 +31,7 @@ h3{
   cursor: pointer;
 }
 
+/* ------- Inputs ------- */
 input[type=number]{
   appearance: textfield;
 }
@@ -32,7 +43,7 @@ input:not(.cell-inputs, #budget-input){
 }
 
 input:focus:not(.cell-inputs, #budget-input){
-  border: 2px solid rgb(111, 252, 195);
+  border: 2px solid var(--primary-color);
 }
 
 .overlay{

@@ -18,3 +18,11 @@
   align-items: center;
   gap: 1em;
 }
+
+#mortgage-calculations-wrapper{
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  border: var(--custom-table-border);
+  border-radius: var(--custom-table-radius);
+  min-width: 70em;
+}
