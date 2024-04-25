@@ -22,7 +22,52 @@
 #mortgage-calculations-wrapper{
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
+  min-width: 50em;
+  gap: 3px;
+}
+
+#mortgage-labels h3{
+  background: var(--primary-color);
+  width: 100%;
+  min-height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
   border: var(--custom-table-border);
-  border-radius: var(--custom-table-radius);
-  min-width: 70em;
+  border-top-left-radius: var(--custom-table-radius);
+  border-bottom-left-radius: var(--custom-table-radius);
+  padding-left: 3rem;
+}
+
+#mortgage-payments-options, #mortgage-labels, #mortgage-total-interest{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: end;
+  gap: 3px;
+}
+
+#mortgage-total-interest{
+  width: 100%;
+}
+
+#mortgage-total-interest p, #mortgage-payments-options p{
+  border: var(--custom-table-border);
+  min-height: 3rem;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#mortgage-total-interest-title{
+  background: var(--primary-color);
+  border: var(--custom-table-border);
+  border-top-left-radius: var(--custom-table-radius);
+  border-top-right-radius: var(--custom-table-radius);
+  min-height: 3em;
+  width: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

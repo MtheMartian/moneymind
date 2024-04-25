@@ -304,3 +304,28 @@ export function highlightElementError(element: HTMLInputElement, correct: boolea
   element.style.border = "2px solid rgb(111, 252, 195)";
 }
 
+// ******* String Manipulation ******* //
+export function charFinderAndReconstruct(inputStr: string, char: string, numOfCharDesired: number): string{
+let newString: string = "";
+
+  for(let i: number = 0; i < inputStr.length; i ++){
+    let decimalCounter: number = 0;
+
+    newString += inputStr[i];
+
+    if(inputStr[i] === char){
+      while(decimalCounter < numOfCharDesired){
+        decimalCounter++;
+        try{
+          newString += inputStr[i + 1];
+        }
+        catch(err){
+          console.log("womp womp");
+        }
+      }
+      break;
+    }
+  }
+
+  return newString;
+}

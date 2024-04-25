@@ -1,5 +1,6 @@
 import {useRef, useState, useEffect, ChangeEvent, useCallback, useMemo} from 'react';
-import { checkIfNumber, editInputs, caretPosition, getCaretPosition, uniqueId } from '../../manager/manager';
+import { checkIfNumber, editInputs, caretPosition, getCaretPosition, uniqueId,
+          charFinderAndReconstruct } from '../../manager/manager';
 import "../../manager/manager.css";
 import "./mortgage.css";
 import "../calculators.css";
@@ -96,17 +97,18 @@ function MortgageOptions(props: {mortgageOptionsArr: mortgageOptionsType[]}): JS
       <div id="mortgage-labels">
         {props.mortgageOptionsArr.map((options, index) =>
           index !== 0 ? 
-          <p key={`label-key${index}`}>{options.paymentLabel}</p> : null
+          <h3 key={`label-key${index}`}>{options.paymentLabel}</h3> : null
         )}
       </div>
       <div id="mortgage-payments-options">
+      <div></div>
         {props.mortgageOptionsArr.map((options, index) =>
           index !== 0 ? 
           <p key={`options-key${index}`}>{options.amountStr}</p> : null
         )}
       </div>
       <div id="mortgage-total-interest">
-        <p>Total Interest</p>
+        <h3 id="mortgage-total-interest-title">Total Interest</h3>
         {props.mortgageOptionsArr.map((options, index) =>
           index !== 0 ? 
           <p key={`interest-key${index}`}>{options.amountInterestStr}</p> : null
@@ -165,8 +167,8 @@ function MortgageCalculator(): JSX.Element{
       currPayments = currPayments * n;
     }
 
-    return {paymentLabel: `${xString}`, amountStr: String(currPayments),
-    amountInterestStr: String(totalcurrInterest)};
+    return {paymentLabel: `${xString}`, amountStr: charFinderAndReconstruct(String(currPayments), '.', 2),
+    amountInterestStr: charFinderAndReconstruct(String(totalcurrInterest), '.', 2)};
   }, []);
 
   const calculateMortgage = useCallback((value: string, idx: number): void =>{
