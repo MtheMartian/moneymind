@@ -22,7 +22,7 @@ h2{
   font-weight: 800;
 }
 
-h3{
+h3, .input-label{
   font-size: calc(0.5vw + 0.5em);
   font-weight: 700;
 }

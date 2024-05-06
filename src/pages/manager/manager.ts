@@ -309,15 +309,15 @@ export function charFinderAndReconstruct(inputStr: string, char: string, numOfCh
 let newString: string = "";
 
   for(let i: number = 0; i < inputStr.length; i ++){
-    let decimalCounter: number = 0;
+    let counter: number = 0;
 
     newString += inputStr[i];
 
     if(inputStr[i] === char){
-      while(decimalCounter < numOfCharDesired){
-        decimalCounter++;
+      while(counter < numOfCharDesired){
+        counter++;
         try{
-          newString += inputStr[i + 1];
+          newString += inputStr[i + counter];
         }
         catch(err){
           console.log("womp womp");

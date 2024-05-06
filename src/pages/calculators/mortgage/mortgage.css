@@ -71,3 +71,10 @@
   align-items: center;
   justify-content: center;
 }
+
+.mortgage-input-wrapper{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 11px;
+}

@@ -31,9 +31,7 @@
 
 /* ------- General ------- */
 .phantom-element{
-  border: 2px solid rgba(150, 150, 150, 0.5);
-  border-radius: 5px;
   background-color: rgba(95, 95, 95, 0.9);
-  min-width: 20em;
-  min-height: 21em;
+  text-indent: -2ch;
 }
+

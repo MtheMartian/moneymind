@@ -5,11 +5,16 @@ import "../../manager/manager.css";
 import "./mortgage.css";
 import "../calculators.css";
 
-function MortgageInput(props: {calculateMortgage: Function, idx: number}): JSX.Element{
-  const [mortgageInputState, setMortgageInputState] = useState<string>("");
+type mortgageOptionsType = {
+  amountStr: string,
+  amountInterestStr: string
+}
 
+function MortgageInput(props: {calculateMortgage: Function, idx: number}): JSX.Element{
+  // ******* References ******* //
   const mortgageInputRef = useRef<HTMLInputElement>(null);
 
+  // ******* Memos ******* //
   const mortgageInputLabel = useMemo<string>((): string =>{
     // Index 0: Loan Amount, Index 1: Interest Rate, Index 2: Term
     switch(props.idx){
@@ -27,6 +32,10 @@ function MortgageInput(props: {calculateMortgage: Function, idx: number}): JSX.E
     }
   }, []);
 
+  // ******* States ******* //
+  const [mortgageInputState, setMortgageInputState] = useState<string>("");
+
+  // ******* Input Handlers ******* //
   function updateInputValue(e: ChangeEvent<HTMLInputElement>): void{
     const userInput: string = editInputs(e, mortgageInputState, "number");
 
@@ -37,6 +46,7 @@ function MortgageInput(props: {calculateMortgage: Function, idx: number}): JSX.E
     props.calculateMortgage(userInput, props.idx);
   }
 
+  // ******* Use Effects ******* //
   useEffect(()=>{
     if(mortgageInputRef.current){
       mortgageInputRef.current.selectionStart = caretPosition;
@@ -47,7 +57,7 @@ function MortgageInput(props: {calculateMortgage: Function, idx: number}): JSX.E
 
   return(
     <div className="mortgage-input-wrapper">
-      <label htmlFor={`mortgate-input${props.idx}`}>
+      <label htmlFor={`mortgate-input${props.idx}`} className="input-label">
           {mortgageInputLabel}
       </label>
       <input type="text" ref={mortgageInputRef} value={mortgageInputState} placeholder='0'
@@ -57,47 +67,39 @@ function MortgageInput(props: {calculateMortgage: Function, idx: number}): JSX.E
   )
 }
 
-type mortgageOptionsType = {
-  paymentLabel: string,
-  amountStr: string,
-  amountInterestStr: string
-}
-
-function MortgageOptionsPhantom(props: {numElements: number}): JSX.Element{
-  const phantomElements = useMemo((): JSX.Element[] =>{
-
-    const tempElementArr: JSX.Element[] = [];
-    for(let i: number = 0; i < props.numElements; i ++){
-      tempElementArr.push(
-        <div>
-          <div>
-            <label></label>
-            <p></p>
-          </div>
-          <div>
-            <p></p>
-          </div>
-        </div>
-      );
-    }
-
-    return tempElementArr;
-  }, []);
-
+function MortgageOptionsPhantom(props: {mortgageLabels: string[]}): JSX.Element{
   return(
-    <div className="phantom-element">
-      {phantomElements}
+    <div id="mortgage-calculations-wrapper">
+      <div id="mortgage-labels">
+        {props.mortgageLabels.map((labels, index) =>
+          index !== 0 ? 
+          <h3 key={`label-key${index}`}>{labels}</h3> : null
+        )}
+      </div>
+      <div id="mortgage-payments-options">
+        {props.mortgageLabels.map((options, index) =>
+          index !== 0 ? 
+          <p key={`options-key${index}`} className="phantom-element"></p> : null
+        )}
+      </div>
+      <div id="mortgage-total-interest">
+        <h3 id="mortgage-total-interest-title">Total Interest</h3>
+        {props.mortgageLabels.map((options, index) =>
+          index !== 0 ? 
+          <p key={`interest-key${index}`} className="phantom-element"></p> : null
+        )}
+      </div>
     </div>
   )
 }
 
-function MortgageOptions(props: {mortgageOptionsArr: mortgageOptionsType[]}): JSX.Element{
+function MortgageOptions(props: {mortgageOptionsArr: mortgageOptionsType[], mortgageLabels: string[]}): JSX.Element{
   return(
     <div id="mortgage-calculations-wrapper">
       <div id="mortgage-labels">
-        {props.mortgageOptionsArr.map((options, index) =>
+        {props.mortgageLabels.map((labels, index) =>
           index !== 0 ? 
-          <h3 key={`label-key${index}`}>{options.paymentLabel}</h3> : null
+          <h3 key={`label-key${index}`}>{labels}</h3> : null
         )}
       </div>
       <div id="mortgage-payments-options">
@@ -119,12 +121,31 @@ function MortgageOptions(props: {mortgageOptionsArr: mortgageOptionsType[]}): JS
 }
 
 function MortgageCalculator(): JSX.Element{
+  // ******* References ******* //
   const mortgageFormulaArr = useRef<number[]>([]);
+  const mortgageLabels = useRef<string[]>(["Total", "Monthly", "Bi-Weekly", "Weekly"]);
 
+  // ******* Memos ******* //
+  const mortgageInputsArr = useMemo<JSX.Element[]>(()=>{
+    const jsxElementArr: JSX.Element[] = [];
+
+    for(let i: number = 0; i < 3; i++){
+      jsxElementArr.push(
+      <MortgageInput calculateMortgage={calculateMortgage} idx={i} 
+        key={uniqueId()}/>
+      );
+    }
+
+    return jsxElementArr;
+  }, []);
+
+  // ******* States ******* //
   // Index -> 0: Total left, 1: Monthly Payments, 2: Total Interest (Monthly),
   // 3: Bi-Weekly Payments, 4: Total Interest (Bi-Weekly), 5: Weekly Payments, 6: Total Interest (Weekly)
   const [mortgagePaymentOptions, setMortgagePaymentOptions] = useState<mortgageOptionsType[]>([]);
 
+  // ******* Functions *******// 
+  // Create and return MortgageOptionsType objects.
   const calculateMortgageHelper = useCallback((idx: number): mortgageOptionsType =>{
     // Principal Loan Amount
     const p: number = mortgageFormulaArr.current[0];
@@ -133,28 +154,24 @@ function MortgageCalculator(): JSX.Element{
     // Term in years
     const n: number = mortgageFormulaArr.current[2];
 
-    let xType: number = 0;
-    let xString: string = "";
+    // xTypes: 1 -> Yearly, 12 -> Monthly, 26 -> Bi-weekly, 52 -> Weekly
+    let xType: number = 0; 
 
     switch(idx){
       case 0:
         xType = 1;
-        xString = "Total";
         break;
 
       case 1:
         xType = 12;
-        xString = "Monthly";
         break;
 
       case 2:
         xType = 26;
-        xString = "Bi-Weekly";
         break;
 
       case 3:
         xType = 52;
-        xString = "Weekly";
         break;
     }
 
@@ -167,10 +184,11 @@ function MortgageCalculator(): JSX.Element{
       currPayments = currPayments * n;
     }
 
-    return {paymentLabel: `${xString}`, amountStr: charFinderAndReconstruct(String(currPayments), '.', 2),
+    return {amountStr: charFinderAndReconstruct(String(currPayments), '.', 2),
     amountInterestStr: charFinderAndReconstruct(String(totalcurrInterest), '.', 2)};
   }, []);
 
+  // Display results of inputs for the mortgage (state change).
   const calculateMortgage = useCallback((value: string, idx: number): void =>{
     const mortgagePaymentOptionsArr: mortgageOptionsType[] = [];
 
@@ -197,20 +215,8 @@ function MortgageCalculator(): JSX.Element{
     setMortgagePaymentOptions(mortgagePaymentOptionsArr);
     
   }, []);
-
-  const mortgageInputsArr = useMemo<JSX.Element[]>(()=>{
-    const jsxElementArr: JSX.Element[] = [];
-
-    for(let i: number = 0; i < 3; i++){
-      jsxElementArr.push(
-      <MortgageInput calculateMortgage={calculateMortgage} idx={i} 
-        key={uniqueId()}/>
-      );
-    }
-
-    return jsxElementArr;
-  }, []);
   
+  // ******* Use Effects ******* //
   useEffect(()=>{
     // Implement local storage, in case the user desires to save his inputs.
 
@@ -228,16 +234,17 @@ function MortgageCalculator(): JSX.Element{
       </form>
       {mortgagePaymentOptions.length > 0 ? 
       <div>
-        <label>{mortgagePaymentOptions[0].paymentLabel}</label>
+        <label>{mortgageLabels.current[0]}</label>
         <p>{mortgagePaymentOptions[0].amountStr}</p>
       </div> : 
       <div>
-        <label>Total:</label>
+        <label>{mortgageLabels.current[0]}</label>
         <p></p>
       </div>}
       {mortgagePaymentOptions.length > 0 ? 
-      <MortgageOptions mortgageOptionsArr={mortgagePaymentOptions} /> : 
-      <MortgageOptionsPhantom numElements={3} />}
+      <MortgageOptions mortgageOptionsArr={mortgagePaymentOptions} 
+        mortgageLabels={mortgageLabels.current} /> : 
+      <MortgageOptionsPhantom mortgageLabels={mortgageLabels.current} />}
     </div>
   )
 }
