@@ -5,7 +5,7 @@ import { checkIfNumber, editInputs, caretPosition, getCaretPosition, uniqueId,
 
 // The order of "calculatorLabels" string array matters! 
 // Calculations are made based on that order.
-function CalculatorInputs(props: {calculatorLabels: string[], idx: number}): JSX.Element{
+function CalculatorInput(props: {calculatorLabel: string, idx: number, calculate: Function}): JSX.Element{
   // ******* References ******* //
   const calculatorInputRef = useRef<HTMLInputElement>(null);
 
@@ -22,7 +22,7 @@ function CalculatorInputs(props: {calculatorLabels: string[], idx: number}): JSX
 
     setMortgageInputState(userInput);
 
-    props.calculateMortgage(userInput, props.idx);
+    props.calculate(userInput, props.idx);
   }
 
   // ******* Use Effects ******* //
@@ -35,17 +35,23 @@ function CalculatorInputs(props: {calculatorLabels: string[], idx: number}): JSX
   }, [mortgageInputState]);
 
   return(
+    <div className="mortgage-input-wrapper">
+      <label htmlFor={`calculator-input${props.idx}`} className="input-label">
+          {props.calculatorLabel}
+      </label>
+      <input type="text" ref={calculatorInputRef} value={mortgageInputState} placeholder='0'
+          onChange={updateInputValue} onSelect={getCaretPosition} className="mortgage-input"
+            id={`calculator-input${props.idx}`}/>
+    </div>
+  )
+}
+
+function CalculatorInputs(props: {calculatorLabels: string[], calculatorFunction: Function}): JSX.Element{
+  return(
     <>
-    {props.calculatorLabels.map(label =>
-      <div className="mortgage-input-wrapper">
-        <label htmlFor={`mortgate-input${props.idx}`} className="input-label">
-            {mortgageInputLabel}
-        </label>
-        <input type="text" ref={mortgageInputRef} value={mortgageInputState} placeholder='0'
-            onChange={updateInputValue} onSelect={getCaretPosition} className="mortgage-input"
-              id={`mortgate-input${props.idx}`}/>
-      </div>
-    )}
+      {props.calculatorLabels.map((label, idx) =>
+        <CalculatorInput calculatorLabel={label} idx={idx} calculate={props.calculatorFunction} />
+      )}
     </>
   )
 }
