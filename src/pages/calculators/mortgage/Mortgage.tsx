@@ -4,6 +4,7 @@ import { checkIfNumber, editInputs, caretPosition, getCaretPosition, uniqueId,
 import "../../manager/manager.css";
 import "./mortgage.css";
 import "../calculators.css";
+import CalculatorComponent, {calculatorOptionObj} from '../CalculatorsComponents';
 
 type mortgageOptionsType = {
   amountStr: string,
@@ -189,22 +190,14 @@ function MortgageCalculator(): JSX.Element{
   }, []);
 
   // Display results of inputs for the mortgage (state change).
-  const calculateMortgage = useCallback((value: string, idx: number): void =>{
-    const mortgagePaymentOptionsArr: mortgageOptionsType[] = [];
+  const calculateMortgage = useCallback((mortgagePaymentOptionLabels: string[]): void =>{
 
-    // Index 0: Loan Amount, Index 1: Interest Rate, Index 2: Term
-    if(checkIfNumber(value)){
-      mortgageFormulaArr.current[idx] = Number(value);
-    }
-    else{
-      mortgageFormulaArr.current[idx] = 0;
-    }
-
-    for(let i: number = 0; i < 4; i++){
+    const calculatedPaymentOptionsObj: calculatorOptionObj[] = [];
+    for(let i: number = 0; i < mortgagePaymentOptionLabels.length; i++){
       const tempObj: mortgageOptionsType = calculateMortgageHelper(i);
       if(checkIfNumber(String(tempObj.amountStr) && String(tempObj.amountInterestStr))){
         console.log("It is a number.", String(tempObj.amountStr));
-        mortgagePaymentOptionsArr.push(tempObj); 
+        calculatedPaymentOptionsObj.push(tempObj); 
       }
       else{
         console.log("Wasn't a number.", String(tempObj.amountStr));
@@ -212,7 +205,7 @@ function MortgageCalculator(): JSX.Element{
       }
     }
 
-    setMortgagePaymentOptions(mortgagePaymentOptionsArr);
+    setMortgagePaymentOptions(calculatedPaymentOptionsObj);
     
   }, []);
   
@@ -227,25 +220,7 @@ function MortgageCalculator(): JSX.Element{
   }, []);
    
   return(
-    <div id="mortgage-wrapper">
-      <h1>Mortgage Payments</h1>
-      <form id="mortgage-form">
-        {mortgageInputsArr}
-      </form>
-      {mortgagePaymentOptions.length > 0 ? 
-      <div>
-        <label>{mortgageLabels.current[0]}</label>
-        <p>{mortgagePaymentOptions[0].amountStr}</p>
-      </div> : 
-      <div>
-        <label>{mortgageLabels.current[0]}</label>
-        <p></p>
-      </div>}
-      {mortgagePaymentOptions.length > 0 ? 
-      <MortgageOptions mortgageOptionsArr={mortgagePaymentOptions} 
-        mortgageLabels={mortgageLabels.current} /> : 
-      <MortgageOptionsPhantom mortgageLabels={mortgageLabels.current} />}
-    </div>
+    <CalculatorComponent componentTitle='Mortgage Calculator' calculationAlgo={}
   )
 }
 
