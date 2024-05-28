@@ -123,22 +123,6 @@ function CalculatorComponent(props: {calculatorInputLabels: string[], calculatio
   const inputValuesStore = useRef<number[]>(new Array(props.calculatorInputLabels.length).fill(-1));
   const [calculatedValues, setCalculatedValues] = useState<calculatorOptionObj[] | null>(null);
 
-  function checkIfAllcalculatedPaymentOptionsValid(calculatedPaymentOptions: calculatorOptionObj[]): void{
-    if(calculatedPaymentOptions.length === 0){
-      setCalculatedValues(null);
-      return;
-    }
-
-    for(let i: number = 0; i < calculatedPaymentOptions.length; i++){
-      if(!checkIfNumber(calculatedPaymentOptions[i].amountStr) && !checkIfNumber(calculatedPaymentOptions[i].amountInterestStr)){
-        setCalculatedValues(null);
-        return;
-      }
-    }
-
-    setCalculatedValues(calculatedPaymentOptions);
-  }
-
   function checkIfAllInputsValid(): calculatorOptionObj[]{
     for(let i: number = 0; i < inputValuesStore.current.length; i++){
       if(inputValuesStore.current[i] === -1) {

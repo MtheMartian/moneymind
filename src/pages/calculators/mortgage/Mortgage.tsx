@@ -125,102 +125,80 @@ function MortgageCalculator(): JSX.Element{
   // ******* References ******* //
   const mortgageFormulaArr = useRef<number[]>([]);
   const mortgageLabels = useRef<string[]>(["Total", "Monthly", "Bi-Weekly", "Weekly"]);
+  const mortgageInputLabels = useRef<string[]>(["Loan Amount", "Interest Rate", "Term"]);
 
   // ******* Memos ******* //
-  const mortgageInputsArr = useMemo<JSX.Element[]>(()=>{
-    const jsxElementArr: JSX.Element[] = [];
-
-    for(let i: number = 0; i < 3; i++){
-      jsxElementArr.push(
-      <MortgageInput calculateMortgage={calculateMortgage} idx={i} 
-        key={uniqueId()}/>
-      );
-    }
-
-    return jsxElementArr;
-  }, []);
 
   // ******* States ******* //
   // Index -> 0: Total left, 1: Monthly Payments, 2: Total Interest (Monthly),
   // 3: Bi-Weekly Payments, 4: Total Interest (Bi-Weekly), 5: Weekly Payments, 6: Total Interest (Weekly)
-  const [mortgagePaymentOptions, setMortgagePaymentOptions] = useState<mortgageOptionsType[]>([]);
 
   // ******* Functions *******// 
   // Create and return MortgageOptionsType objects.
-  const calculateMortgageHelper = useCallback((idx: number): mortgageOptionsType =>{
+  const calculateMortgageHelper = useCallback((inputValues: number[]): calculatorOptionObj[] =>{
+    const calculatedPaymentOptionsObj: calculatorOptionObj[] = [];
     // Principal Loan Amount
-    const p: number = mortgageFormulaArr.current[0];
+    const p: number = inputValues[0];
     // Annual Interest Rate
-    const r: number = (mortgageFormulaArr.current[1] / 100) / 12;
+    const r: number = (inputValues[1] / 100) / 12;
     // Term in years
-    const n: number = mortgageFormulaArr.current[2];
+    const n: number = inputValues[2];
 
     // xTypes: 1 -> Yearly, 12 -> Monthly, 26 -> Bi-weekly, 52 -> Weekly
-    let xType: number = 0; 
 
-    switch(idx){
-      case 0:
+    inputValues.forEach((value, idx) =>{
+      let xType: number = 0; 
+      const currRate: number = r / xType;
+      const currTerm: number = n * xType;
+      let currPayments: number =  p * (currRate * Math.pow(1 + currRate, currTerm)) / (Math.pow(1 + currRate, currTerm) - 1);
+      const totalcurrInterest: number = (currPayments * currTerm) - p;
+
+      if(idx === 0){
+        currPayments = currPayments * n;
+      }
+
+      if(idx === 0){
         xType = 1;
-        break;
+      }
 
-      case 1:
+      if(idx === 1){
         xType = 12;
-        break;
+      }
 
-      case 2:
+      if(idx === 2){
         xType = 26;
-        break;
+      }
 
-      case 3:
+      if(idx === 3){
         xType = 52;
-        break;
-    }
+      }
 
-    const currRate: number = r / xType;
-    const currTerm: number = n * xType;
-    let currPayments: number =  p * (currRate * Math.pow(1 + currRate, currTerm)) / (Math.pow(1 + currRate, currTerm) - 1);
-    const totalcurrInterest: number = (currPayments * currTerm) - p;
+      const currPaymentsStr: string = String(currPayments);
+      const totalCurrInterestStr: string = String(totalcurrInterest);
 
-    if(idx === 0){
-      currPayments = currPayments * n;
-    }
+      if(checkIfNumber(currPaymentsStr) && checkIfNumber(totalCurrInterestStr)){
+        console.log("I am indeed a number!");
+        calculatedPaymentOptionsObj.push({amountStr: charFinderAndReconstruct(String(currPayments), '.', 2),
+        amountInterestStr: charFinderAndReconstruct(String(totalcurrInterest), '.', 2)});
+      }
+      else{
+        console.log("I am not a number!");
+      }     
+    })
 
-    return {amountStr: charFinderAndReconstruct(String(currPayments), '.', 2),
-    amountInterestStr: charFinderAndReconstruct(String(totalcurrInterest), '.', 2)};
+    return calculatedPaymentOptionsObj;
   }, []);
 
   // Display results of inputs for the mortgage (state change).
-  const calculateMortgage = useCallback((mortgagePaymentOptionLabels: string[]): void =>{
-
-    const calculatedPaymentOptionsObj: calculatorOptionObj[] = [];
-    for(let i: number = 0; i < mortgagePaymentOptionLabels.length; i++){
-      const tempObj: mortgageOptionsType = calculateMortgageHelper(i);
-      if(checkIfNumber(String(tempObj.amountStr) && String(tempObj.amountInterestStr))){
-        console.log("It is a number.", String(tempObj.amountStr));
-        calculatedPaymentOptionsObj.push(tempObj); 
-      }
-      else{
-        console.log("Wasn't a number.", String(tempObj.amountStr));
-        return;
-      }
-    }
-
-    setMortgagePaymentOptions(calculatedPaymentOptionsObj);
-    
+  const calculateMortgage = useCallback((inputValues: number[]): calculatorOptionObj[] =>{
+    return calculateMortgageHelper(inputValues);  
   }, []);
   
   // ******* Use Effects ******* //
-  useEffect(()=>{
-    // Implement local storage, in case the user desires to save his inputs.
-
-    return()=>{
-      setMortgagePaymentOptions([]);
-    }
-
-  }, []);
    
   return(
-    <CalculatorComponent componentTitle='Mortgage Calculator' calculationAlgo={}
+    <CalculatorComponent componentTitle='Mortgage Calculator' calculationAlgo={calculateMortgage}
+          calculatorInputLabels={mortgageInputLabels.current} paymentOptionLabels={mortgageLabels.current} />
   )
 }
 
