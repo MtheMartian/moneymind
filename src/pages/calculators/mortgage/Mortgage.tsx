@@ -145,31 +145,30 @@ function MortgageCalculator(): JSX.Element{
     const n: number = inputValues[2];
 
     // xTypes: 1 -> Yearly, 12 -> Monthly, 26 -> Bi-weekly, 52 -> Weekly
-
-    inputValues.forEach((value, idx) =>{
+    for(let i: number = 0; i < 4; i ++){
       let xType: number = 0; 
       const currRate: number = r / xType;
       const currTerm: number = n * xType;
       let currPayments: number =  p * (currRate * Math.pow(1 + currRate, currTerm)) / (Math.pow(1 + currRate, currTerm) - 1);
       const totalcurrInterest: number = (currPayments * currTerm) - p;
 
-      if(idx === 0){
+      if(i === 0){
         currPayments = currPayments * n;
       }
 
-      if(idx === 0){
+      if(i === 0){
         xType = 1;
       }
 
-      if(idx === 1){
+      if(i === 1){
         xType = 12;
       }
 
-      if(idx === 2){
+      if(i === 2){
         xType = 26;
       }
 
-      if(idx === 3){
+      if(i === 3){
         xType = 52;
       }
 
@@ -182,9 +181,11 @@ function MortgageCalculator(): JSX.Element{
         amountInterestStr: charFinderAndReconstruct(String(totalcurrInterest), '.', 2)});
       }
       else{
-        console.log("I am not a number!");
+        console.log("I am not a number!", String(currPayments), String(totalcurrInterest));
+        continue;
       }     
-    })
+
+    }
 
     return calculatedPaymentOptionsObj;
   }, []);

@@ -21,12 +21,31 @@ function CalculatorInput(props: {calculatorInputLabel: string, idx: number, stor
   const [calculatorInputValue, setCalculatorInputValue] = useState<string>("");
 
   // ******* Input Handlers ******* //
+
+  function updateInputValueHelper(): boolean{
+    if(calculatorInputRef.current){
+      if(calculatorInputRef.current.value === ""){
+        calculatorInputRef.current.style.border = "2px solid red";
+        return false;
+      }
+
+      return true;
+    }
+
+    return false;
+  }
+  
   function updateInputValue(e: ChangeEvent<HTMLInputElement>): void{
     const userInput: string = editInputs(e, calculatorInputValue, "number");
 
     console.log("Current mortgage state:",calculatorInputValue);
 
     setCalculatorInputValue(userInput);
+
+    if(!updateInputValueHelper()){
+      props.storeInputValue("-1", props.idx);
+      return;
+    }
 
     props.storeInputValue(userInput, props.idx);
   }
@@ -52,11 +71,11 @@ function CalculatorInput(props: {calculatorInputLabel: string, idx: number, stor
   )
 }
 
-export function CalculatorInputs(props: {calculatorInputLabels: string[], calculatorFunction: Function}): JSX.Element{
+export function CalculatorInputs(props: {calculatorInputLabels: string[], storeInputFunc: Function}): JSX.Element{
   return(
     <>
       {props.calculatorInputLabels.map((label, idx) =>
-        <CalculatorInput calculatorInputLabel={label} idx={idx} storeInputValue={props.calculatorFunction} 
+        <CalculatorInput calculatorInputLabel={label} idx={idx} storeInputValue={props.storeInputFunc} 
           key={`calculatorInput-key${idx}`} />
       )}
     </>
@@ -123,30 +142,32 @@ function CalculatorComponent(props: {calculatorInputLabels: string[], calculatio
   const inputValuesStore = useRef<number[]>(new Array(props.calculatorInputLabels.length).fill(-1));
   const [calculatedValues, setCalculatedValues] = useState<calculatorOptionObj[] | null>(null);
 
-  function checkIfAllInputsValid(): calculatorOptionObj[]{
+  function storeInputInArray(inputValue: string, idx: number): void{
+    inputValuesStore.current[idx] = Number(inputValue);
+
+    console.log(inputValuesStore.current);
+
+    if(inputValue === "-1"){
+      setCalculatedValues(null);
+      return;
+    }
+
     for(let i: number = 0; i < inputValuesStore.current.length; i++){
-      if(inputValuesStore.current[i] === -1) {
-        return [];
+      if(inputValuesStore.current[i] === -1){
+        return;
       }
     }
 
-    return props.calculationAlgo(inputValuesStore.current);
+    const tempCalculationValues: calculatorOptionObj[] = props.calculationAlgo(inputValuesStore.current);
+    
+    setCalculatedValues(tempCalculationValues);
   }
-
-  function storeInputValue(inputValue: string, idx: number): void{
-    if(!checkIfNumber(inputValue)){
-      return;
-    } 
-
-    inputValuesStore.current[idx] = Number(inputValue);
-    checkIfAllcalculatedPaymentOptionsValid(checkIfAllInputsValid());
-  }
-
+  
   return(
     <div id="mortgage-wrapper">
       <h1>{props.componentTitle}</h1>
       <form id="mortgage-form">
-        <CalculatorInputs calculatorInputLabels={props.calculatorInputLabels} calculatorFunction={storeInputValue} />
+        <CalculatorInputs calculatorInputLabels={props.calculatorInputLabels} storeInputFunc={storeInputInArray} />
       </form>
       <div>
         <label>{props.paymentOptionLabels[0]}</label>
