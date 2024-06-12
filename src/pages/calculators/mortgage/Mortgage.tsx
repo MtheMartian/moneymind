@@ -135,8 +135,7 @@ function MortgageCalculator(): JSX.Element{
 
   // ******* Functions *******// 
   // Create and return MortgageOptionsType objects.
-  const calculateMortgageHelper = useCallback((inputValues: number[]): calculatorOptionObj[] =>{
-    const calculatedPaymentOptionsObj: calculatorOptionObj[] = [];
+  const calculateMortgageHelper = useCallback((inputValues: number[], idx: number): calculatorOptionObj | null =>{
     // Principal Loan Amount
     const p: number = inputValues[0];
     // Annual Interest Rate
@@ -145,54 +144,57 @@ function MortgageCalculator(): JSX.Element{
     const n: number = inputValues[2];
 
     // xTypes: 1 -> Yearly, 12 -> Monthly, 26 -> Bi-weekly, 52 -> Weekly
-    for(let i: number = 0; i < 4; i ++){
-      let xType: number = 0; 
-      const currRate: number = r / xType;
-      const currTerm: number = n * xType;
-      let currPayments: number =  p * (currRate * Math.pow(1 + currRate, currTerm)) / (Math.pow(1 + currRate, currTerm) - 1);
-      const totalcurrInterest: number = (currPayments * currTerm) - p;
+    let xType: number = 0; 
+    const currRate: number = r / xType;
+    const currTerm: number = n * xType;
+    let currPayments: number =  p * (currRate * Math.pow(1 + currRate, currTerm)) / (Math.pow(1 + currRate, currTerm) - 1);
+    const totalcurrInterest: number = (currPayments * currTerm) - p;
 
-      if(i === 0){
+    switch(idx){
+      case 0:
         currPayments = currPayments * n;
-      }
-
-      if(i === 0){
         xType = 1;
-      }
+        break;
 
-      if(i === 1){
+      case 1:
         xType = 12;
-      }
+        break;
 
-      if(i === 2){
+      case 2: 
         xType = 26;
-      }
+        break;
 
-      if(i === 3){
+      case 3:
         xType = 52;
-      }
-
-      const currPaymentsStr: string = String(currPayments);
-      const totalCurrInterestStr: string = String(totalcurrInterest);
-
-      if(checkIfNumber(currPaymentsStr) && checkIfNumber(totalCurrInterestStr)){
-        console.log("I am indeed a number!");
-        calculatedPaymentOptionsObj.push({amountStr: charFinderAndReconstruct(String(currPayments), '.', 2),
-        amountInterestStr: charFinderAndReconstruct(String(totalcurrInterest), '.', 2)});
-      }
-      else{
-        console.log("I am not a number!", String(currPayments), String(totalcurrInterest));
-        continue;
-      }     
-
+        break;
     }
+    
+    const currPaymentsStr: string = String(currPayments);
+    const totalCurrInterestStr: string = String(totalcurrInterest);
 
-    return calculatedPaymentOptionsObj;
+    if(checkIfNumber(currPaymentsStr) && checkIfNumber(totalCurrInterestStr)){
+      console.log("I am indeed a number!");
+      return {amountStr: charFinderAndReconstruct(String(currPayments), '.', 2),
+      amountInterestStr: charFinderAndReconstruct(String(totalcurrInterest), '.', 2)};
+    }
+  
+    console.log("I am not a number!", String(currPayments), String(totalcurrInterest));
+
+    return null;
   }, []);
 
   // Display results of inputs for the mortgage (state change).
   const calculateMortgage = useCallback((inputValues: number[]): calculatorOptionObj[] =>{
-    return calculateMortgageHelper(inputValues);  
+    const calculatedPaymentOptionsObj: calculatorOptionObj[] = [];
+
+    inputValues.forEach((value, idx) =>{
+      const tempObj: calculatorOptionObj | null = calculateMortgageHelper(inputValues, idx);
+      if(tempObj){
+        calculatedPaymentOptionsObj.push(tempObj)
+      }
+    });
+
+    return calculatedPaymentOptionsObj;  
   }, []);
   
   // ******* Use Effects ******* //
