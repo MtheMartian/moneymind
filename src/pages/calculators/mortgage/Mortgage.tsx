@@ -145,14 +145,9 @@ function MortgageCalculator(): JSX.Element{
 
     // xTypes: 1 -> Yearly, 12 -> Monthly, 26 -> Bi-weekly, 52 -> Weekly
     let xType: number = 0; 
-    const currRate: number = r / xType;
-    const currTerm: number = n * xType;
-    let currPayments: number =  p * (currRate * Math.pow(1 + currRate, currTerm)) / (Math.pow(1 + currRate, currTerm) - 1);
-    const totalcurrInterest: number = (currPayments * currTerm) - p;
 
     switch(idx){
       case 0:
-        currPayments = currPayments * n;
         xType = 1;
         break;
 
@@ -168,12 +163,22 @@ function MortgageCalculator(): JSX.Element{
         xType = 52;
         break;
     }
+
+    const currRate: number = r / xType;
+    const currTerm: number = n * xType;
+    let currPayments: number =  p * (currRate * Math.pow(1 + currRate, currTerm)) / (Math.pow(1 + currRate, currTerm) - 1);
+    const totalcurrInterest: number = (currPayments * currTerm) - p;
+
+    if(idx === 0){
+      currPayments = currPayments * n;
+    }
     
     const currPaymentsStr: string = String(currPayments);
     const totalCurrInterestStr: string = String(totalcurrInterest);
 
     if(checkIfNumber(currPaymentsStr) && checkIfNumber(totalCurrInterestStr)){
       console.log("I am indeed a number!");
+      console.log("I am not a number!", String(currPayments), String(totalcurrInterest));
       return {amountStr: charFinderAndReconstruct(String(currPayments), '.', 2),
       amountInterestStr: charFinderAndReconstruct(String(totalcurrInterest), '.', 2)};
     }
@@ -187,7 +192,7 @@ function MortgageCalculator(): JSX.Element{
   const calculateMortgage = useCallback((inputValues: number[]): calculatorOptionObj[] =>{
     const calculatedPaymentOptionsObj: calculatorOptionObj[] = [];
 
-    inputValues.forEach((value, idx) =>{
+    mortgageLabels.current.forEach((label, idx) =>{
       const tempObj: calculatorOptionObj | null = calculateMortgageHelper(inputValues, idx);
       if(tempObj){
         calculatedPaymentOptionsObj.push(tempObj)
