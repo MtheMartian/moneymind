@@ -1,5 +1,6 @@
 import {useRef, useState, useEffect, ChangeEvent} from 'react';
 import { checkIfNumber, editInputs, caretPosition, getCaretPosition, uniqueId } from '../../manager/manager';
+import CalculatorComponent, {calculatorOptionObj} from '../CalculatorsComponents';
 
 
 function CarLoanInput(props: {calculateMortgage: Function, idx: number}): JSX.Element{
@@ -34,37 +35,52 @@ function CarLoanCalculator(): JSX.Element{
   const [monthlyPayments, setMonthlyPayments] = useState<number>(0);
 
 
-  function calculateCarLoan(value: string, idx: number): void{
+  function calculateCarLoan(inputValues: number[], idx: number): calculatorOptionObj{
+    // 0 -> Total, 1 -> Monthly, 2 -> Bi-weekly, 3 -> Weekly
+    let xType: number = 0; 
+    switch(idx){
+      case 0:
+        xType = 1;
+        break;
+
+      case 1:
+        xType = 12;
+        break;
+
+      case 2: 
+        xType = 26;
+        break;
+
+      case 3:
+        xType = 52;
+        break;
+    }
+
     // Index 0: Loan Amount, Index 1: Deductions, Index 2: Trade-in, Index 3: Taxes,
     // Index 4: Interest Rate, Index 5: Term
 
-    if(checkIfNumber(value)){
-      carLoanFormulaArr.current[idx] = Number(value);
-    }
-    else{
-      carLoanFormulaArr.current[idx] = 0;
-    }
-
     // Principal Loan Amount
-    const p: number = carLoanFormulaArr.current[0];
+    const p: number = inputValues[0];
     // Deductions
-    const d: number = carLoanFormulaArr.current[1];
+    const d: number = inputValues[1];
     // Trade-in
-    const ti: number = carLoanFormulaArr.current[2];
+    const ti: number = inputValues[2];
     // Taxes
-    const t: number = carLoanFormulaArr.current[3];
+    const t: number = inputValues[3];
     // Interest Rate
-    const r: number = carLoanFormulaArr.current[4] / 12 / 100;
-    // Term
-    const n: number = carLoanFormulaArr.current[5];
+    const r: number = (inputValues[4] / 100) / xType;
+    // Term (months to year)
+    const n: number = (inputValues[5] / 12) * xType;
 
     const loanAmount: number = p - d - ti; // Before taxes
 
     const totalLoanAmount: number = loanAmount * (1 + t); // After taxes
 
-    const montlhyPayments: number =  totalLoanAmount * r / (1 - Math.pow(1 + r, -n));
+    const currPayments: number =  totalLoanAmount * r / (1 - Math.pow(1 + r, -n));
 
-    setMonthlyPayments(montlhyPayments)
+    const totalInterest: number = (currPayments * n) - totalLoanAmount;
+
+    return {amountStr: String(currPayments), amountInterestStr: String(totalInterest)};  
   }
 
   function returnMCarLoanInputsJSX(): JSX.Element[]{
