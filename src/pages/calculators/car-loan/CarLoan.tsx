@@ -1,41 +1,14 @@
-import {useRef, useState, useEffect, ChangeEvent} from 'react';
-import { checkIfNumber, editInputs, caretPosition, getCaretPosition, uniqueId } from '../../manager/manager';
+import {useRef} from 'react';
+import { checkIfNumber} from '../../manager/manager';
 import CalculatorComponent, {calculatorOptionObj} from '../CalculatorsComponents';
 
-
-function CarLoanInput(props: {calculateMortgage: Function, idx: number}): JSX.Element{
-  const [carLoanInputState, setCarLoanInputState] = useState<number>(0);
-
-  const carLoanInputRef = useRef<HTMLInputElement>(null);
-
-  function updateInputValue(e: ChangeEvent<HTMLInputElement>): void{
-    const userInput: string = editInputs(e, e.currentTarget.value, "number");
-
-    setCarLoanInputState(Number(userInput));
-
-    props.calculateMortgage(userInput, props.idx);
-  }
-
-  useEffect(()=>{
-    if(carLoanInputRef.current){
-      carLoanInputRef.current.selectionStart = caretPosition;
-      carLoanInputRef.current.selectionEnd = caretPosition;
-    }
-
-  }, [carLoanInputState]);
-
-  return(
-    <input type="text" ref={carLoanInputRef} value={carLoanInputState} 
-          onChange={updateInputValue} onSelect={getCaretPosition}/>
-  )
-}
-
 function CarLoanCalculator(): JSX.Element{
-  const carLoanFormulaArr = useRef<number[]>([]);
-  const [monthlyPayments, setMonthlyPayments] = useState<number>(0);
+  const carLoanPaymentFrequencies = useRef<string[]>(["Total", "Monthly", "Bi-weekly", "Weekly"]);
+  const carLoanInputLables = useRef<string[]>(["Loan Amount", "Deductions", "Trade-in",
+                                                "Taxes", "Interest Rate", "Term (months)"
+  ]);
 
-
-  function calculateCarLoan(inputValues: number[], idx: number): calculatorOptionObj{
+  function calculateCarLoanHelper(inputValues: number[], idx: number): calculatorOptionObj | null{
     // 0 -> Total, 1 -> Monthly, 2 -> Bi-weekly, 3 -> Weekly
     let xType: number = 0; 
     switch(idx){
@@ -80,39 +53,30 @@ function CarLoanCalculator(): JSX.Element{
 
     const totalInterest: number = (currPayments * n) - totalLoanAmount;
 
+    if(!checkIfNumber(String(currPayments))){
+      return null;
+    }
+
     return {amountStr: String(currPayments), amountInterestStr: String(totalInterest)};  
   }
 
-  function returnMCarLoanInputsJSX(): JSX.Element[]{
-    const jsxElementArr: JSX.Element[] = [];
+  function calculateCarLoan(inputValues: number[]): calculatorOptionObj[]{
+    const calculatedPaymentFrequencies: calculatorOptionObj[] = [];
 
-    for(let i: number = 0; i < 3; i++){
-      jsxElementArr.push(
-      <CarLoanInput calculateMortgage={calculateCarLoan} idx={i} 
-        key={uniqueId()} />
-      );
-    }
+    inputValues.forEach((value, idx) =>{
+      const tempObj: calculatorOptionObj | null = calculateCarLoanHelper(inputValues, idx);
 
-    return jsxElementArr;
+      if(tempObj){
+        calculatedPaymentFrequencies.push(tempObj);
+      }
+    });
+
+    return calculatedPaymentFrequencies;
   }
-
-  
-  useEffect(()=>{
-    // Implement local storage, in case the user desires to save his inputs.
-
-    return()=>{
-      setMonthlyPayments(0);
-    }
-
-  }, []);
    
   return(
-    <div>
-      <form>
-        {returnMCarLoanInputsJSX()}
-        <p>{monthlyPayments}</p>
-      </form>
-    </div>
+    <CalculatorComponent calculatorInputLabels={carLoanInputLables.current} calculationAlgo={calculateCarLoan}
+      componentTitle='Car Note' paymentOptionLabels={carLoanPaymentFrequencies.current} />
   )
 }
 
