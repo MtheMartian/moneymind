@@ -1,10 +1,10 @@
 import {useRef} from 'react';
-import { checkIfNumber} from '../../manager/manager';
+import { checkIfNumber, charFinderAndReconstruct} from '../../manager/manager';
 import CalculatorComponent, {calculatorOptionObj} from '../CalculatorsComponents';
 
 function CarLoanCalculator(): JSX.Element{
   const carLoanPaymentFrequencies = useRef<string[]>(["Total", "Monthly", "Bi-weekly", "Weekly"]);
-  const carLoanInputLables = useRef<string[]>(["Loan Amount", "Deductions", "Trade-in",
+  const carLoanInputLables = useRef<string[]>(["Loan Amount", "Deductions", "Down Payment", "Trade-in",
                                                 "Taxes", "Interest Rate", "Term (months)"
   ]);
 
@@ -29,23 +29,25 @@ function CarLoanCalculator(): JSX.Element{
         break;
     }
 
-    // Index 0: Loan Amount, Index 1: Deductions, Index 2: Trade-in, Index 3: Taxes,
+    // Index 0: Loan Amount, Index 1: Deductions, Index 2: Down Payment, Index 3: Trade-in, Index 3: Taxes,
     // Index 4: Interest Rate, Index 5: Term
 
     // Principal Loan Amount
     const p: number = inputValues[0];
     // Deductions
     const d: number = inputValues[1];
+    // Down Payment
+    const downPayment: number = inputValues[2]
     // Trade-in
-    const ti: number = inputValues[2];
+    const ti: number = inputValues[3];
     // Taxes
-    const t: number = inputValues[3];
+    const t: number = inputValues[4] / 100;
     // Interest Rate
-    const r: number = (inputValues[4] / 100) / xType;
+    const r: number = (inputValues[5] / 100) / xType;
     // Term (months to year)
-    const n: number = (inputValues[5] / 12) * xType;
+    const n: number = (inputValues[6] / 12) * xType;
 
-    const loanAmount: number = p - d - ti; // Before taxes
+    const loanAmount: number = p - downPayment - d - ti; // Before taxes
 
     const totalLoanAmount: number = loanAmount * (1 + t); // After taxes
 
@@ -53,15 +55,25 @@ function CarLoanCalculator(): JSX.Element{
 
     const totalInterest: number = (currPayments * n) - totalLoanAmount;
 
+    const totalPerPaymentFreq: number = currPayments * n;
+
     if(!checkIfNumber(String(currPayments))){
       return null;
     }
 
-    return {amountStr: String(currPayments), amountInterestStr: String(totalInterest)};  
+    return {amountStr: charFinderAndReconstruct(String(currPayments), '.', 2), 
+            amountInterestStr: charFinderAndReconstruct(String(totalInterest), '.', 2),
+            totalAmountPaymentFreq: charFinderAndReconstruct(String(totalPerPaymentFreq), '.', 2)};  
   }
 
-  function calculateCarLoan(inputValues: number[]): calculatorOptionObj[]{
+  function calculateCarLoan(inputValues: number[]): calculatorOptionObj[] | null{
     const calculatedPaymentFrequencies: calculatorOptionObj[] = [];
+
+    if(inputValues[1] >= inputValues[0] || inputValues[2] >= inputValues[0] ||
+        inputValues[3] >= inputValues[0])
+    {
+      return null;
+    }
 
     inputValues.forEach((value, idx) =>{
       const tempObj: calculatorOptionObj | null = calculateCarLoanHelper(inputValues, idx);

@@ -4,10 +4,11 @@ import { checkIfNumber, editInputs, caretPosition, getCaretPosition, uniqueId,
 
 export type calculatorOptionObj = {
   amountStr: string,
-  amountInterestStr: string
+  amountInterestStr: string,
+  totalAmountPaymentFreq: string
 }
 
-type calculatorFunction = (inputValues: number[]) => calculatorOptionObj[];
+type calculatorFunction = (inputValues: number[]) => calculatorOptionObj[] | null;
 
 // The order of "calculatorLabels" string array matters! 
 // Calculations are made based on that order.
@@ -108,7 +109,7 @@ function CalculatorOptionsPhantom(props: {paymentOptionLabels: string[]}): JSX.E
   )
 }
 
-function CalculatorPaymentOptions(props: {paymentOptionLabels: string[], 
+function CalculatorPaymentFreqDisplay(props: {paymentOptionLabels: string[], 
                                   paymentOptionObjs: calculatorOptionObj[]}): JSX.Element
 {
   return(
@@ -132,6 +133,13 @@ function CalculatorPaymentOptions(props: {paymentOptionLabels: string[],
           index !== 0 ? 
           <p key={`interest-key${index}`}>{options.amountInterestStr}</p> : null
         )}
+      </div>
+      <div id="calculator-payment-freq-total">
+         <h3 id="calculator-payment-freq-total-title">Total</h3>
+         {props.paymentOptionObjs.map((paymentFreqTotal, idx) => 
+          idx !== 0 ? 
+          <p key={`paymentFreqTotal-key${idx}`}>{paymentFreqTotal.totalAmountPaymentFreq}</p> : null
+         )}
       </div>
     </div>
   ) 
@@ -158,7 +166,7 @@ function CalculatorComponent(props: {calculatorInputLabels: string[], calculatio
       }
     }
 
-    const tempCalculationValues: calculatorOptionObj[] = props.calculationAlgo(inputValuesStore.current);
+    const tempCalculationValues: calculatorOptionObj[] | null = props.calculationAlgo(inputValuesStore.current);
     
     setCalculatedValues(tempCalculationValues);
   }
@@ -174,7 +182,7 @@ function CalculatorComponent(props: {calculatorInputLabels: string[], calculatio
         <p>{calculatedValues ? calculatedValues[0].amountStr : 0}</p>
       </div>
       {calculatedValues ? 
-      <CalculatorPaymentOptions paymentOptionLabels={props.paymentOptionLabels} 
+      <CalculatorPaymentFreqDisplay paymentOptionLabels={props.paymentOptionLabels} 
             paymentOptionObjs={calculatedValues} /> : 
       <CalculatorOptionsPhantom paymentOptionLabels={props.paymentOptionLabels} />}
     </div>

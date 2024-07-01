@@ -169,6 +169,8 @@ function MortgageCalculator(): JSX.Element{
     let currPayments: number =  p * (currRate * Math.pow(1 + currRate, currTerm)) / (Math.pow(1 + currRate, currTerm) - 1);
     const totalcurrInterest: number = (currPayments * currTerm) - p;
 
+    const totalPerPaymentFreq: number = currPayments * n;
+
     if(idx === 0){
       currPayments = currPayments * n;
     }
@@ -180,7 +182,8 @@ function MortgageCalculator(): JSX.Element{
       console.log("I am indeed a number!");
       console.log("I am not a number!", String(currPayments), String(totalcurrInterest));
       return {amountStr: charFinderAndReconstruct(String(currPayments), '.', 2),
-      amountInterestStr: charFinderAndReconstruct(String(totalcurrInterest), '.', 2)};
+      amountInterestStr: charFinderAndReconstruct(String(totalcurrInterest), '.', 2),
+      totalAmountPaymentFreq: charFinderAndReconstruct(String(totalPerPaymentFreq), '.', 2)};
     }
   
     console.log("I am not a number!", String(currPayments), String(totalcurrInterest));
