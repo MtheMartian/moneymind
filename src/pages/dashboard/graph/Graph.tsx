@@ -1,4 +1,4 @@
-function Bands(): JSX.Element{
+function Band(props: {currTable: {}}): JSX.Element{
   return(
     <div>
       <div>Current</div>
