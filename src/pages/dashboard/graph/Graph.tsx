@@ -1,8 +1,34 @@
-function Band(props: {currTable: {}}): JSX.Element{
+import { useRef, useEffect } from "react";
+
+type TableMetada = {
+  totalAmount: number,
+  budget: number,
+  userId: string,
+  date: number
+}
+
+function Band(props: {currTable: TableMetada}): JSX.Element{
+  const bandTotal = useRef<HTMLDivElement>(null);
+  const bandGoal = useRef<HTMLDivElement>(null);
+
+  function growBand(): void{
+    if(props.currTable.totalAmount >= props.currTable.budget){
+      
+    }
+  }
+
+  useEffect(()=>{
+
+  }, []);
+
   return(
     <div>
-      <div>Current</div>
-      <div>Goal</div>
+      <div ref={bandTotal}>
+        <p>Total</p>
+      </div>
+      <div ref={bandGoal}>
+        <p>Goal</p>
+      </div>
     </div>
   )
 }
