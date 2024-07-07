@@ -7,13 +7,23 @@ type TableMetada = {
   date: number
 }
 
-function Band(props: {currTable: TableMetada}): JSX.Element{
+function Band(props: {currTable: TableMetada, maxNum: number}): JSX.Element{
   const bandTotal = useRef<HTMLDivElement>(null);
   const bandGoal = useRef<HTMLDivElement>(null);
+  const actualBand = useRef<HTMLDivElement>(null);
 
   function growBand(): void{
     if(props.currTable.totalAmount >= props.currTable.budget){
-      
+      const tempNum: number = props.currTable.totalAmount - props.currTable.budget;
+
+      if(bandTotal.current && bandGoal.current){
+        bandTotal.current.style.height = `${(tempNum / props.maxNum) * 100}%`;
+
+        bandGoal.current.style.height = `${(props.currTable.budget / props.maxNum) * 100}%`;
+      }
+    }
+    else{
+      const tempNum: number = props.currTable.budget - props.currTable.totalAmount;
     }
   }
 
@@ -22,7 +32,7 @@ function Band(props: {currTable: TableMetada}): JSX.Element{
   }, []);
 
   return(
-    <div>
+    <div ref={actualBand}>
       <div ref={bandTotal}>
         <p>Total</p>
       </div>
