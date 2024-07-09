@@ -1,10 +1,12 @@
 import { useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 type TableMetada = {
   totalAmount: number,
   budget: number,
   userId: string,
-  date: number
+  month: number,
+  year: number
 }
 
 function Band(props: {currTable: TableMetada, maxNum: number}): JSX.Element{
@@ -12,23 +14,22 @@ function Band(props: {currTable: TableMetada, maxNum: number}): JSX.Element{
   const bandGoal = useRef<HTMLDivElement>(null);
   const actualBand = useRef<HTMLDivElement>(null);
 
-  function growBand(): void{
-    if(props.currTable.totalAmount >= props.currTable.budget){
-      const tempNum: number = props.currTable.totalAmount - props.currTable.budget;
+  useEffect(()=>{
+    if(bandTotal.current && bandGoal.current){
+      if(props.currTable.totalAmount >= props.currTable.budget){
+        const tempNum: number = props.currTable.totalAmount - props.currTable.budget;
 
-      if(bandTotal.current && bandGoal.current){
         bandTotal.current.style.height = `${(tempNum / props.maxNum) * 100}%`;
-
+  
         bandGoal.current.style.height = `${(props.currTable.budget / props.maxNum) * 100}%`;
       }
+      else{
+        const tempNum: number = props.currTable.budget - props.currTable.totalAmount;
+        
+        bandTotal.current.style.height = `${(props.currTable.totalAmount / props.maxNum) * 100}%`;
+        bandGoal.current.style.height = `${(tempNum / props.maxNum) * 100}%`;
+      }
     }
-    else{
-      const tempNum: number = props.currTable.budget - props.currTable.totalAmount;
-    }
-  }
-
-  useEffect(()=>{
-
   }, []);
 
   return(
@@ -43,18 +44,26 @@ function Band(props: {currTable: TableMetada, maxNum: number}): JSX.Element{
   )
 }
 
-function XAxis(): JSX.Element{
+function XAxis(props: {currYearTables: TableMetada[]}): JSX.Element{
   return(
     <div>
-      <p></p>
+      {props.currYearTables.map((table, idx) =>
+        <Link to=''>
+          {table.month}
+        </Link>
+      )}
     </div>
   )
 }
 
-function YAxis(): JSX.Element{
+function YAxis(props: {currYearTables: TableMetada[]}): JSX.Element{
   return(
     <div>
-      <p></p>
+      {props.currYearTables.map((table, idx) =>
+        <p>
+          {table.totalAmount}
+        </p>
+      )}
     </div>
   )
 }
