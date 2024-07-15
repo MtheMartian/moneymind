@@ -36,9 +36,11 @@ function Band(props: {currTable: TableMetada, maxNum: number}): JSX.Element{
     <div ref={actualBand}>
       <div ref={bandTotal}>
         <p>Total</p>
+        <p>{props.currTable.totalAmount}</p>
       </div>
       <div ref={bandGoal}>
         <p>Goal</p>
+        <p>{props.currTable.budget}</p>
       </div>
     </div>
   )
@@ -68,7 +70,7 @@ function YAxis(props: {currYearTables: TableMetada[]}): JSX.Element{
   )
 }
 
-function Dashboard(): JSX.Element{
+function Graph(): JSX.Element{
   return(
     <div>
       

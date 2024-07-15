@@ -16,4 +16,13 @@ type CustomTableTypes = {
   }
 }
 
+export type TableMetadata = {
+  totalAmount: number,
+  budget: number,
+  userId: string,
+  month: number,
+  year: number,
+  tableId: string
+}
+
 export type TypeCustomTable = CustomTableTypes;
