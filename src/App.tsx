@@ -14,6 +14,7 @@ import SignUp from "./pages/user/signup/SignUp";
 import Calculators from "./pages/calculators/Calculators.tsx";
 import MortgageCalculator from "./pages/calculators/mortgage/Mortgage.tsx";
 import CarLoanCalculator from "./pages/calculators/car-loan/CarLoan.tsx";
+import Dashboard from "./pages/dashboard/Dashboard.tsx";
 
 function Layout(){
   return(
@@ -101,8 +102,13 @@ function App(){
   {
     path: "/manager",
     element: <ManagerLayout forceRerender={forceRerender} />,
-    children: [{
+    children: [
+    {
       path: "/manager",
+      element: <Dashboard />
+    },
+    {
+      path: "/manager/monthly",
       element: <MonthlyTable />
     },
     {

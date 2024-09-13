@@ -22,7 +22,8 @@ export type TableMetadata = {
   userId: string,
   month: number,
   year: number,
-  tableId: string
+  tableId: string,
+  entries: number
 }
 
 export type TypeCustomTable = CustomTableTypes;

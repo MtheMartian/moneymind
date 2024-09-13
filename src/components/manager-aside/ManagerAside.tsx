@@ -13,7 +13,7 @@ export default function ManagerSideMenu(props: {forceRerender: Function}){
           <h3>Money Manager</h3>
         </div>
         <li>
-          <Link to={"/manager"} onClick={()=> props.forceRerender(null, "manager")}>Monthly Table</Link> 
+          <Link to={"/manager/monthly"} onClick={()=> props.forceRerender(null, "manager")}>Monthly Table</Link> 
         </li>
         <li>
           <Link to={"/manager/daily"} onClick={()=> props.forceRerender(null, "daily")}>Daily Table</Link>
